@@ -1,0 +1,74 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    environment: CI
+
+    steps:
+      # Checkout repository
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # Enable Corepack and pin Yarn version (matching repo)
+      - name: Set up Corepack + yarn
+        run: |
+          npm install -g corepack
+          yarn set version 4.9.2
+
+      # Install root dependencies (workspace install)
+      - name: Install root dependencies
+        run: yarn
+
+      # Install Foundry (anvil/forge/cast)
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      # Create the .env file required by Playwright tests
+      - name: Set E2E env variables
+        working-directory: example/frontend
+        run: |
+          echo "E2E_TEST_SEED_PHRASE=${{ secrets.E2E_TEST_SEED_PHRASE }}" > .env
+
+      # Install frontend workspace dependencies (Ensures its own deps are available)
+      - name: Install frontend dependencies
+        working-directory: example/frontend
+        run: yarn
+
+      # Prepare the MetaMask extension for Playwright
+      - name: Prepare MetaMask extension
+        working-directory: example/frontend
+        run: yarn prepare-metamask
+
+      # Prepare the Coinbase extension for Playwright  
+      - name: Prepare Coinbase extension
+        working-directory: example/frontend
+        run: yarn prepare-coinbase
+
+      # Install browsers & system deps for Playwright
+      - name: Install Playwright browsers
+        working-directory: example/frontend
+        run: yarn playwright install --with-deps
+
+      # Build the frontend
+      - name: Yarn build
+        working-directory: example/frontend
+        run: yarn build
+
+      # Install X virtual framebuffer for headful browser tests
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      # Run the end-to-end test suite under virtual display
+      - name: Run E2E tests
+        working-directory: example/frontend
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" yarn test:e2e --workers=2
