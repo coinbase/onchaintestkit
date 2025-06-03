@@ -1,5 +1,5 @@
+import { popupConfigs, closePopup } from "./handlePopups"
 import type { Page } from "@playwright/test"
-import { closePopup, popupConfigs } from "./handlePopups"
 
 async function openTestnetSection(page: Page) {
   const toggleButtonLocator = page.locator("label.toggle-button")
@@ -32,8 +32,7 @@ export async function switchNetwork(
   )
 
   const seekedNetworkNameIndex = networkNames.findIndex(
-    name =>
-      name && name.toLocaleLowerCase() === networkName.toLocaleLowerCase(),
+    name => name.toLocaleLowerCase() === networkName.toLocaleLowerCase(),
   )
 
   const seekedNetworkLocator =

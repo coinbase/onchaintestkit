@@ -1,16 +1,16 @@
 import { chromium } from "@playwright/test"
-import type { BrowserContext, Page } from "@playwright/test"
-import { getExtensionId } from "../../utils/extensionManager"
 import {
-  ActionApprovalType,
-  ActionOptions,
-  BaseActionType,
   BaseWallet,
+  BaseActionType,
+  ActionOptions,
+  ActionApprovalType,
 } from "../BaseWallet"
-import { MetaMaskConfig, NetworkConfig } from "../types"
-import { HomePage, NotificationPage, OnboardingPage } from "./pages"
-import { setupMetaMask } from "./utils/prepareExtension"
+import { NetworkConfig, MetaMaskConfig } from "../types"
 import { syncStorage } from "./utils/syncStorage"
+import { getExtensionId } from "../../utils/extensionManager"
+import { setupMetaMask } from "./utils/prepareExtension"
+import { HomePage, OnboardingPage, NotificationPage } from "./pages"
+import type { BrowserContext, Page } from "@playwright/test"
 
 // Extend BaseActionType with MetaMask-specific actions
 export enum MetaMaskSpecificActionType {
@@ -64,7 +64,7 @@ export class MetaMask extends BaseWallet {
     walletConfig: MetaMaskConfig,
   ): Promise<{ metamaskPage: Page; metamaskContext: BrowserContext }> {
     // Create browser context with MetaMask extension
-    const context = await MetaMask.createContext(contextPath)
+    const context = await this.createContext(contextPath)
 
     // Handle cookie and storage transfer if currentContext exists
     if (currentContext) {
@@ -85,7 +85,7 @@ export class MetaMask extends BaseWallet {
     const extensionId = await getExtensionId(context, "MetaMask")
 
     // create metamask instance without running setup yet
-    const _metamask = new MetaMask(
+    const metamask = new MetaMask(
       walletConfig,
       context,
       metamaskPage,

@@ -1,5 +1,5 @@
-import type { BrowserContext, Page } from "@playwright/test"
 import { waitForMetaMaskLoad, waitUntilStable } from "./waitFor"
+import type { BrowserContext, Page } from "@playwright/test"
 
 export async function getNotificationPageAndWaitForLoad(
   context: BrowserContext,

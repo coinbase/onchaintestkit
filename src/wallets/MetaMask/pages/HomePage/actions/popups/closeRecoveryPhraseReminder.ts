@@ -1,5 +1,5 @@
-import type { Page } from "@playwright/test"
 import { clickLocatorIfCondition } from "../../../../utils/tryClickElement"
+import type { Page } from "@playwright/test"
 
 export async function closeRecoveryPhraseReminder(page: Page) {
   const closeButtonLocator = page.locator(

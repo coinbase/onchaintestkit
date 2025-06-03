@@ -20,7 +20,7 @@ export async function tryClickElement(
         await locator.click()
         return true
       }
-    } catch (_error) {
+    } catch (error) {
       // Ignore errors, just retry
     }
 

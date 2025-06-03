@@ -1,5 +1,5 @@
-import type { Page } from "@playwright/test"
 import { tryClickElement } from "../../../utils/tryClickElement"
+import type { Page } from "@playwright/test"
 
 type PopupConfigMap = {
   networkAdded: PopupConfig

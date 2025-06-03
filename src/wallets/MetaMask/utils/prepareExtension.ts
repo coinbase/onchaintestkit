@@ -33,6 +33,8 @@ export async function setupMetaMask(): Promise<string> {
 
   // If extraction doesn't exist or is invalid, throw an error providing instructions
   throw new Error(
-    `MetaMask extension not found at ${extractionPath}. Please run the extraction command before running tests:\nyarn e2e:metamask:prepare`,
+    `MetaMask extension not found at ${extractionPath}. ` +
+      "Please run the extraction command before running tests:\n" +
+      "yarn e2e:metamask:prepare",
   )
 }

@@ -1,5 +1,5 @@
-import type { Locator } from "@playwright/test"
 import { waitFor } from "./waitFor"
+import type { Locator } from "@playwright/test"
 
 export async function toggle(toggleLocator: Locator) {
   const classes = await toggleLocator.getAttribute("class", { timeout: 3_000 })

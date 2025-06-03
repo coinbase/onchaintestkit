@@ -6,12 +6,12 @@ type StorageData = {
 }
 
 export async function syncStorage(
-  storageData: StorageData[],
+  data: StorageData[],
   context: BrowserContext,
 ): Promise<void> {
   const page = await context.newPage()
 
-  for (const { origin, data } of storageData) {
+  for (const { origin, data } of data) {
     await page.goto(origin)
 
     await page.evaluate(items => {

@@ -1,5 +1,5 @@
-import type { CoinbaseWallet } from "./Coinbase"
 import type { MetaMask } from "./MetaMask"
+import type { CoinbaseWallet } from "./Coinbase"
 
 export type NetworkConfig = {
   name: string
@@ -23,7 +23,6 @@ export type MetaMaskConfig = {
 } & BaseWalletConfig
 
 export type CoinbaseConfig = {
-  password: string
   walletSetup: (
     wallet: CoinbaseWallet,
     context: { localNodePort: number },

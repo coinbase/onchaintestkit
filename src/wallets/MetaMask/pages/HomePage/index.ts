@@ -1,8 +1,8 @@
 import { Page } from "@playwright/test"
-import { Network } from "../../type/Network"
 import { addNetwork } from "./actions/addNetwork"
 import { addNewAccount } from "./actions/addNewAccount"
 import { importWalletFromPrivateKey } from "./actions/importWalletFromPrivateKey"
+import { Network } from "../../type/Network"
 
 export class HomePage {
   private readonly page: Page

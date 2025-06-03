@@ -1,7 +1,7 @@
-import os from "node:os"
 import path from "node:path"
-import extract from "extract-zip"
 import fs from "fs-extra"
+import extract from "extract-zip"
+import os from "node:os"
 import { EXTENSION_FILENAME, EXTENSION_URL } from "./constants"
 /**
  * MetaMask Extension Manager
@@ -92,7 +92,7 @@ async function unpackZipArchive({
  * Creates a cache directory for the test kit
  */
 export async function createCacheDir(name: string): Promise<string> {
-  const dirPath = path.join(os.tmpdir(), "onchaintestkit", name)
+  const dirPath = path.join(os.tmpdir(), "onchain-test-kit", name)
   await fs.mkdir(dirPath, { recursive: true })
   return dirPath
 }

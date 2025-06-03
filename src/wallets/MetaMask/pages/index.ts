@@ -1,5 +1,5 @@
 import { HomePage } from "./HomePage"
-import { NotificationPage, NotificationPageType } from "./NotificationPage"
 import { OnboardingPage } from "./OnboardingPage"
+import { NotificationPage, NotificationPageType } from "./NotificationPage"
 
 export { HomePage, OnboardingPage, NotificationPage, NotificationPageType }
