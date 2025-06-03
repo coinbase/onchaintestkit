@@ -1,8 +1,8 @@
-# Contributing to Base Web
+# Contributing to Onchain Test Kit
 
-👍🎉 First off, thank you for considering contributing to Base Web! 🎉👍
+👍🎉 First off, thank you for considering contributing to Onchain Test Kit! 🎉👍
 
-The following is a set of guidelines for contributing to Base Web. These are just guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
+The following is a set of guidelines for contributing to Onchain Test Kit. These are just guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
 ## Table of Contents
 
@@ -27,15 +27,15 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 ### Reporting Bugs
 
-1. **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.cbhq.net/c3/onchain-test-kit/issues).
+1. **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/coinbase/onchaintestkit/issues).
 
-2. If you're unable to find an open issue addressing the problem, [open a new one](https://github.cbhq.net/c3/onchain-test-kit/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
+2. If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/coinbase/onchaintestkit/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
 
 ### Suggesting Enhancements
 
-1. **Check the [Issues](https://github.cbhq.net/c3/onchain-test-kit/issues)** to see if there's someone who has already suggested the same enhancement.
+1. **Check the [Issues](https://github.com/coinbase/onchaintestkit/issues)** to see if there's someone who has already suggested the same enhancement.
 
-2. If it doesn't exist, [create a new issue](https://github.cbhq.net/c3/onchain-test-kit/issues/new). Provide a clear and detailed explanation of the feature you want and why it's important to add.
+2. If it doesn't exist, [create a new issue](https://github.com/coinbase/onchaintestkit/issues/new). Provide a clear and detailed explanation of the feature you want and why it's important to add.
 
 ### Pull Requests
 
@@ -117,8 +117,8 @@ The release process for this project is typically managed by maintainers with wr
 
 If you have questions, encounter issues, or need help with your contribution:
 
-1.  **Check Existing Issues**: Someone might have already reported a similar problem or asked a similar question on [GitHub Issues](https://github.cbhq.net/c3/onchain-test-kit/issues).
-2.  **Open a New Issue**: If you can't find an existing issue, feel free to [open a new one](https://github.cbhq.net/c3/onchain-test-kit/issues/new). Provide as much detail as possible.
+1.  **Check Existing Issues**: Someone might have already reported a similar problem or asked a similar question on [GitHub Issues](https://github.com/coinbase/onchaintestkit/issues).
+2.  **Open a New Issue**: If you can't find an existing issue, feel free to [open a new one](https://github.com/coinbase/onchaintestkit/issues/new). Provide as much detail as possible.
 3.  **Community Channels**: (User: Please provide a link to your Discord server or other community channels here if applicable.)
 
 ---
