@@ -66,10 +66,8 @@
     "example/frontend"
   ],
   "exports": {
-    ".": "./dist/src/index.js",
-    "./*": "./dist/src/*",
-    "./src/*": "./src/*",
-    "./package.json": "./package.json"
+    ".": "./src/index.ts",
+    "./src/*": "./src/*"
   },
   "packageManager": "yarn@4.9.2",
   "resolutions": {
