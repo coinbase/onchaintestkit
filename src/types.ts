@@ -4,6 +4,7 @@ import { NodeConfig } from "e2e/onchainTestKit/node/types"
 import { CoinbaseWallet } from "./wallets/Coinbase"
 import { MetaMask } from "./wallets/MetaMask"
 import { LocalNodeManager } from "./node/LocalNodeManager"
+import { SmartContractManager } from "./contracts/SmartContractManager"
 
 export type SupportedWallet = "metamask" | "coinbase"
 
@@ -21,4 +22,5 @@ export type OnchainFixtures = {
   metamask?: MetaMask
   coinbase?: CoinbaseWallet
   node?: LocalNodeManager
+  smartContractManager?: SmartContractManager
 }
