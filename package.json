@@ -65,5 +65,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./src/*": "./src/*"
-  }
+  },
+  "private": true
 }
