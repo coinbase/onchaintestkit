@@ -11,9 +11,9 @@ This toolkit provides a robust framework for testing blockchain applications, wi
 1. Install dependencies:
 
 ```bash
-npm install --save-dev @playwright/test @cbhq/onchain-test-kit
+npm install --save-dev @playwright/test @coinbase/onchaintestkit
 # or
-yarn add -D @playwright/test @cbhq/onchain-test-kit
+yarn add -D @playwright/test @coinbase/onchaintestkit
 ```
 
 2. Set up environment variables:

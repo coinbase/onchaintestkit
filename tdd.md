@@ -20,7 +20,7 @@ Testing DApps presents unique challenges not found in traditional web applicatio
 
 **Unified Testing Framework**
 
-* Create a standardized approach for testing onchain applications at Coinbase  
+* Create a standardized approach for testing onchain applications
 * Enable testing across multiple EVM-compatible chains.  
 * Provide consistent testing patterns across teams and projects.  
 * Reduce duplicate testing code across product groups  
@@ -34,12 +34,6 @@ Testing DApps presents unique challenges not found in traditional web applicatio
   * Consistent contract addresses across test runs  
   * Reproducible initial states  
   * Configurable token balances and permissions
-
-  **Coinbase CI/CD Integration**
-
-* Integration with internal CI/CD pipelines  
-* Support for Coinbase's deployment environments  
-* Enable automated testing in staging environments
 
 # Terminology
 
@@ -876,14 +870,14 @@ Ensure you have the following installed on your system:
 
 **2\. Install Dependencies**
 
-Install Playwright and the **@coinbase/onchain-test-kit** package:
+Install Playwright and the **@coinbase/onchaintestkit** package:
 
 ```javascript
-yarn add -D playwright @coinbase/onchain-test-kit
+yarn add -D playwright/test @coinbase/onchaintestkit
 ```
 
 * playwright: Automates browser interactions.  
-* @coinbase/onchain-test-kit: Provides all the tools needed for E2E browser testing of on-chain apps.
+* @coinbase/onchaintestkit: Provides all the tools needed for E2E browser testing of on-chain apps.
 
 ---
 
@@ -912,7 +906,7 @@ This configuration sets a base URL for all tests, which can be overridden using 
 
 **6\. Set Up Environment Variables**
 
-Create a .env.e2e file in the root directory to configure settings for **@coinbase/onchain-test-kit**:
+Create a .env.e2e file in the root directory to configure settings for **@coinbase/onchaintestkit**:
 
 ```javascript
 E2E_CONTRACT_PROJECT_ROOT=../nftMarketplaceSmartContracts
@@ -1001,11 +995,11 @@ contract Setup is Script {
 
 #### 
 
-## 4\. Wallet Configuration
+## 3\. Wallet Configuration
 
 ```javascript
 // e2e/walletConfig/metamaskWalletConfig.ts
-import { configure } from '@cbhq/onchain-test-kit';
+import { configure } from '@coinbase/onchaintestkit';
 import { baseSepolia } from 'viem/chains';
 
 export const metamaskWalletConfig = configure()
@@ -1024,7 +1018,7 @@ export const metamaskWalletConfig = configure()
 
 ```
 
-## 5\. E2E Test Example
+## 4\. E2E Test Example
 
 ```javascript
 // e2e/tests/marketplace.spec.ts
@@ -1038,7 +1032,7 @@ import {
 } from '@generated/generated';
 import { getSelector, encodeConstructorArgs } from '../utils/abiUtils';
 import { metamaskWalletConfig } from 'e2e/walletConfig/metamaskWalletConfig';
-import { createOnchainTest } from '@cbhq/onchain-test-kit';
+import { createOnchainTest } from '@coinbase/onchaintestkit';
 
 const test = createOnchainTest(metamaskWalletConfig);
 
@@ -1165,7 +1159,7 @@ await expect(firstNftCard.getByTestId('status')).toHaveText('Owned');
 
 ---
 
-## 6\. Running Tests
+## 5\. Running Tests
 
 Execute the tests using the following command:
 
@@ -1179,7 +1173,7 @@ By following this structure and referring to the Playwright documentation, you c
 
 ---
 
-## 8\. Continuous Integration (CI) Setup
+## 6\. Continuous Integration (CI) Setup
 
 Set up GitHub Actions for CI:
 
@@ -1239,15 +1233,3 @@ jobs:
 ```
 
 This workflow installs dependencies and runs Playwright tests on pushes to the main branch and on pull requests.
-
----
-
-# 
-
-# Timeline
-
-| Timeline              | Milestone                  | Deliverables                                                                                                                                                                                               |
-| :-------------------- | :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Q4 2024 (Oct-Nov)** | Initial Design & PoC       | \- Complete framework architecture design \- Build proof of concept                                                                                                                                        |
-| **Q4 2024 (Dec)**     | Verified Pools Integration | \- Implement E2E tests for core user journeys \- Add support for complex DeFi testing scenarios \- Integrate with CI/CD pipeline \- Develop test patterns and best practices \- Create example test suites |
-| **Q1 2025**           | Internal Package Release   | \- Release as internal npm package \- Provide comprehensive documentation \- Create onboarding guides \- Set up monitoring and maintenance \- Begin rollout to other teams                                 |

@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test"
-import { BaseActionType } from "@coinbase/onchain-test-kit"
-import { MetaMask } from "@coinbase/onchain-test-kit/src/wallets/MetaMask"
+import { BaseActionType } from "@coinbase/onchaintestkit"
+import { MetaMask } from "@coinbase/onchaintestkit/src/wallets/MetaMask"
 
 /**
  * Connects MetaMask wallet to the app and accepts Terms of Service
