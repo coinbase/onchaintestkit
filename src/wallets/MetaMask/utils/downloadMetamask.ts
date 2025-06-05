@@ -92,7 +92,7 @@ async function unpackZipArchive({
  * Creates a cache directory for the test kit
  */
 export async function createCacheDir(name: string): Promise<string> {
-  const dirPath = path.join(os.tmpdir(), "onchain-test-kit", name)
+  const dirPath = path.join(os.tmpdir(), "onchaintestkit", name)
   await fs.mkdir(dirPath, { recursive: true })
   return dirPath
 }
