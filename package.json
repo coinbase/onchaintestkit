@@ -59,7 +59,8 @@
     "access": "public"
   },
   "workspaces": [
-    "."
+    ".",
+    "example/frontend"
   ],
   "exports": {
     ".": "./src/index.ts",
