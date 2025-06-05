@@ -126,9 +126,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@coinbase/onchain-test-kit@workspace:*, @coinbase/onchain-test-kit@workspace:.":
+"@coinbase/onchaintestkit@workspace:*, @coinbase/onchaintestkit@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@coinbase/onchain-test-kit@workspace:."
+  resolution: "@coinbase/onchaintestkit@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.5.3"
     "@coinbase/onchainkit": "npm:^0.36.4"
@@ -3859,7 +3859,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "example-frontend@workspace:example/frontend"
   dependencies:
-    "@coinbase/onchain-test-kit": "workspace:*"
+    "@coinbase/onchaintestkit": "workspace:*"
     "@coinbase/onchainkit": "npm:^0.36.4"
     "@playwright/test": "npm:^1.49.0"
     "@tanstack/react-query": "npm:^5"

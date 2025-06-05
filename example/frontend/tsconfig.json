@@ -19,8 +19,8 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@coinbase/onchain-test-kit": ["../../src/index.ts"],
-      "@coinbase/onchain-test-kit/*": ["../../*"],
+      "@coinbase/onchaintestkit": ["../../src/index.ts"],
+      "@coinbase/onchaintestkit/*": ["../../*"],
       "e2e/*": ["./e2e/*"]
     }
   },

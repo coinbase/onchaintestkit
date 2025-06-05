@@ -1,4 +1,4 @@
-import { createOnchainTest } from "@coinbase/onchain-test-kit"
+import { createOnchainTest } from "@coinbase/onchaintestkit"
 import { metamaskWalletConfig } from "./walletConfig/metamaskWalletConfig"
 import { connectWallet } from "./appSession"
 

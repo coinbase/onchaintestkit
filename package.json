@@ -1,5 +1,5 @@
 {
-  "name": "@coinbase/onchain-test-kit",
+  "name": "@coinbase/onchaintestkit",
   "version": "0.1.0",
   "description": "End-to-end testing toolkit for blockchain applications, powered by Playwright",
   "main": "dist/index.js",

@@ -1,5 +1,5 @@
 import { baseSepolia } from "viem/chains"
-import { configure } from "@coinbase/onchain-test-kit"
+import { configure } from "@coinbase/onchaintestkit"
 
 export const DEFAULT_PASSWORD = "PASSWORD"
 export const DEFAULT_SEED_PHRASE = process.env.E2E_TEST_SEED_PHRASE
