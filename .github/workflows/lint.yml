@@ -1,0 +1,35 @@
+name: Lint
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      YARN_ENABLE_IMMUTABLE_INSTALLS: false
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Corepack
+        run: npm install -g corepack
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Initialize Yarn
+        run: yarn init -2
+
+      - name: Install dependencies
+        continue-on-error: true
+        run: yarn install
+
+      - name: Run linter
+        run: yarn lint
+
+      - name: Check formatting
+        run: yarn format:check 
