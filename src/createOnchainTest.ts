@@ -1,6 +1,6 @@
 import { test as base, Fixtures } from "@playwright/test"
 import { mergeTests } from "@playwright/test"
-import { setupRpcPortInterceptor } from "./node/networkInterceptor"
+import { setupRpcPortInterceptor } from "./node/NetworkInterceptor"
 import { MetaMaskFixturesBuilder } from "./wallets/MetaMask"
 import { CoinbaseFixturesBuilder } from "./wallets/Coinbase"
 import { WalletFixtureOptions, OnchainFixtures } from "./types"

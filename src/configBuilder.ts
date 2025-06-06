@@ -41,7 +41,7 @@
  * );
  * ```
  */
-import { NetworkConfig } from "e2e/onchainTestKit/wallets/types"
+import { NetworkConfig } from "./wallets/types"
 import {
   BaseActionType,
   BaseWalletConfig,
