@@ -74,7 +74,7 @@ export class NotificationPage {
       extensionId,
     )
 
-    await network.approveAddNetwork(notificationPage)
+    await network.approveNewNetwork(notificationPage)
   }
 
   async rejectAddNetwork(extensionId: string) {
@@ -83,7 +83,7 @@ export class NotificationPage {
       extensionId,
     )
 
-    await network.rejectAddNetwork(notificationPage)
+    await network.rejectNewNetwork(notificationPage)
   }
 
   async confirmTransaction(extensionId: string) {

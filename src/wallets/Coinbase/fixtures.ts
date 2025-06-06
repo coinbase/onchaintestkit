@@ -1,5 +1,5 @@
 import { Page, test as base } from "@playwright/test"
-import { CoinbaseConfig } from "e2e/onchainTestKit/wallets/types"
+import { CoinbaseConfig } from "../types"
 import { NodeConfig } from "../../node/types"
 import { CoinbaseWallet } from "."
 type CoinbaseFixturesType = {

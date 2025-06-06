@@ -1,6 +1,5 @@
-import { CoinbaseConfig } from "e2e/onchainTestKit/wallets/types"
-import { MetaMaskConfig } from "e2e/onchainTestKit/wallets/types"
-import { NodeConfig } from "e2e/onchainTestKit/node/types"
+import { MetaMaskConfig, CoinbaseConfig } from "./wallets/types"
+import { NodeConfig }                     from "./node/types"
 import { CoinbaseWallet } from "./wallets/Coinbase"
 import { MetaMask } from "./wallets/MetaMask"
 import { LocalNodeManager } from "./node/LocalNodeManager"

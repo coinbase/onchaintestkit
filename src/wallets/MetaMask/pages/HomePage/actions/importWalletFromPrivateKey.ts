@@ -1,4 +1,4 @@
-import { waitFor } from "../../../utils/waitFor"
+import { waitForCondition } from "../../../utils/waitFor"
 import type { Page } from "@playwright/test"
 
 export async function importWalletFromPrivateKey(
@@ -32,7 +32,7 @@ export async function importWalletFromPrivateKey(
   await importButton.click()
 
   // Wait for import button to disappear, indicating success
-  const isImportButtonHidden = await waitFor(
+  const isImportButtonHidden = await waitForCondition(
     async () => importButton.isHidden(),
     1_000,
     false,
