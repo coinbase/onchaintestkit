@@ -1,9 +1,9 @@
-import { MetaMaskConfig, CoinbaseConfig } from "./wallets/types"
-import { NodeConfig }                     from "./node/types"
+import { SmartContractManager } from "./contracts/SmartContractManager"
+import { LocalNodeManager } from "./node/LocalNodeManager"
+import { NodeConfig } from "./node/types"
 import { CoinbaseWallet } from "./wallets/Coinbase"
 import { MetaMask } from "./wallets/MetaMask"
-import { LocalNodeManager } from "./node/LocalNodeManager"
-import { SmartContractManager } from "./contracts/SmartContractManager"
+import { CoinbaseConfig, MetaMaskConfig } from "./wallets/types"
 
 export type SupportedWallet = "metamask" | "coinbase"
 

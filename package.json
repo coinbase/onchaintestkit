@@ -14,7 +14,7 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rimraf dist",
     "format": "biome format --write .",
-    "format:check": "biome format --check .",
+    "format:check": "biome format .",
     "lint": "biome check .",
     "lint:fix": "biome check --apply .",
     "test": "playwright test",

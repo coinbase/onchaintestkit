@@ -1,4 +1,4 @@
-import { spawn, ChildProcess } from "child_process"
+import { ChildProcess, spawn } from "child_process"
 import * as net from "net"
 import { ethers } from "ethers"
 import { NodeConfig } from "./types"
@@ -67,7 +67,7 @@ export class LocalNodeManager {
    */
   private async isPortAvailable(port: number): Promise<boolean> {
     // Include a reference to `this` for the linter
-    const config = this.config
+    const _config = this.config
 
     // Store the result for logging purposes if needed
     let result = false
@@ -108,11 +108,10 @@ export class LocalNodeManager {
       const isAvailable = await this.isPortAvailable(this.config.port)
       if (isAvailable) {
         return this.config.port
-      } else {
-        console.warn(
-          `Port ${this.config.port} is already in use. Will try to find another port.`,
-        )
       }
+      console.warn(
+        `Port ${this.config.port} is already in use. Will try to find another port.`,
+      )
     }
 
     // Find an available port in the range
@@ -128,11 +127,8 @@ export class LocalNodeManager {
       const isAvailable = await this.isPortAvailable(randomPort)
       if (isAvailable) {
         return randomPort
-      } else {
-        console.log(
-          `Port ${randomPort} is already in use. Trying another port.`,
-        )
       }
+      console.log(`Port ${randomPort} is already in use. Trying another port.`)
     }
 
     throw new Error(

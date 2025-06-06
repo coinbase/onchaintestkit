@@ -1,19 +1,19 @@
 "use client"
 
 import {
+  Address,
+  Avatar,
+  EthBalance,
+  Identity,
+  Name,
+} from "@coinbase/onchainkit/identity"
+import {
   ConnectWallet,
   Wallet,
   WalletDropdown,
-  WalletDropdownLink,
   WalletDropdownDisconnect,
+  WalletDropdownLink,
 } from "@coinbase/onchainkit/wallet"
-import {
-  Address,
-  Avatar,
-  Name,
-  Identity,
-  EthBalance,
-} from "@coinbase/onchainkit/identity"
 import ArrowSvg from "./svg/ArrowSvg"
 import ImageSvg from "./svg/Image"
 import OnchainkitSvg from "./svg/OnchainKit"
@@ -77,7 +77,11 @@ export default function App() {
             <ImageSvg />
           </div>
           <div className="flex justify-center mb-6">
-            <a target="_blank" rel="_template" href="https://onchainkit.xyz">
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://onchainkit.xyz"
+            >
               <OnchainkitSvg className="dark:text-white text-black" />
             </a>
           </div>
@@ -96,8 +100,8 @@ export default function App() {
                     Explore components
                   </p>
                   <ul className="list-disc pl-5 space-y-2 inline-block text-left">
-                    {components.map((component, index) => (
-                      <li key={index}>
+                    {components.map(component => (
+                      <li key={component.name}>
                         <a
                           href={component.url}
                           className="hover:underline inline-flex items-center dark:text-white text-black"
@@ -116,8 +120,8 @@ export default function App() {
                     Explore templates
                   </p>
                   <ul className="list-disc pl-5 space-y-2 inline-block text-left">
-                    {templates.map((template, index) => (
-                      <li key={index}>
+                    {templates.map(template => (
+                      <li key={template.name}>
                         <a
                           href={template.url}
                           className="hover:underline inline-flex items-center dark:text-white text-black"

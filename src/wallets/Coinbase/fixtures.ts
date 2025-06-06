@@ -1,7 +1,7 @@
 import { Page, test as base } from "@playwright/test"
-import { CoinbaseConfig } from "../types"
-import { NodeConfig } from "../../node/types"
 import { CoinbaseWallet } from "."
+import { NodeConfig } from "../../node/types"
+import { CoinbaseConfig } from "../types"
 type CoinbaseFixturesType = {
   _contextPath: string
   coinbase: CoinbaseWallet
@@ -10,12 +10,12 @@ type CoinbaseFixturesType = {
 }
 
 export function CoinbaseFixturesBuilder(
-  config: CoinbaseConfig,
-  nodeConfig: NodeConfig | undefined,
+  _config: CoinbaseConfig,
+  _nodeConfig: NodeConfig | undefined,
 ) {
   // Extend base test with Coinbase wallet fixtures
   return base.extend<CoinbaseFixturesType>({
-    coinbase: async ({}) => {
+    coinbase: async _ => {
       // TODO: Implement Coinbase wallet fixtures
     },
   })
