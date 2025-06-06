@@ -1,3 +1,12 @@
+import { NodeConfig } from "./node/types"
+import { WalletFixtureOptions } from "./types"
+import {
+  BaseActionType,
+  BaseWalletConfig,
+  WalletSetupContext,
+} from "./wallets/BaseWallet"
+import { CoinbaseWallet } from "./wallets/Coinbase"
+import { MetaMask, MetaMaskSpecificActionType } from "./wallets/MetaMask"
 /**
  * Configuration builder for E2E testing with different wallet types.
  * Provides a fluent interface for configuring wallet behavior and setup.
@@ -41,16 +50,7 @@
  * );
  * ```
  */
-import { NetworkConfig } from "e2e/onchainTestKit/wallets/types"
-import {
-  BaseActionType,
-  BaseWalletConfig,
-  WalletSetupContext,
-} from "./wallets/BaseWallet"
-import { MetaMask, MetaMaskSpecificActionType } from "./wallets/MetaMask"
-import { CoinbaseWallet } from "./wallets/Coinbase"
-import { WalletFixtureOptions } from "./types"
-import { NodeConfig } from "./node/types"
+import { NetworkConfig } from "./wallets/types"
 
 type WalletType = MetaMask | CoinbaseWallet
 

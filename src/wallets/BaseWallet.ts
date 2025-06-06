@@ -1,5 +1,5 @@
-import { CoinbaseWallet } from "e2e/onchainTestKit/wallets/Coinbase"
-import { MetaMask } from "e2e/onchainTestKit/wallets/MetaMask"
+import { CoinbaseWallet } from "./Coinbase"
+import { MetaMask } from "./MetaMask"
 
 export enum BaseActionType {
   // basic setup

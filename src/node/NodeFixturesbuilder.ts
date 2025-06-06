@@ -1,4 +1,4 @@
-import { test as base, Fixtures } from "@playwright/test"
+import { Fixtures, test as base } from "@playwright/test"
 import { OnchainFixtures } from "../types"
 import { LocalNodeManager } from "./LocalNodeManager"
 import { NodeConfig } from "./types"

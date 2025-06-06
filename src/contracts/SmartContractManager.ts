@@ -1,22 +1,26 @@
+import * as fs from "fs"
+import * as path from "path"
 import {
-  createWalletClient,
-  createPublicClient,
   http,
   Address,
+  Hex,
+  concat,
+  createPublicClient,
+  createWalletClient,
   encodeDeployData,
   getContractAddress,
-  concat,
-  pad,
-  Hex,
 } from "viem"
-import { localhost } from "viem/chains"
 import { privateKeyToAccount } from "viem/accounts"
-import * as path from "path"
-import * as fs from "fs"
+import { localhost } from "viem/chains"
 
 import type { LocalNodeManager } from "../node/LocalNodeManager"
-import type { ContractDeployment, ContractCall, SetupConfig, ContractArtifact } from "./types"
 import { ProxyDeployer } from "./ProxyDeployer"
+import type {
+  ContractArtifact,
+  ContractCall,
+  ContractDeployment,
+  SetupConfig,
+} from "./types"
 
 /**
  * SmartContractManager handles deploying contracts using CREATE2 and executing contract calls
@@ -46,7 +50,9 @@ export class SmartContractManager {
 
     // Use the first account from Anvil (the default test account)
     // default mnemonic: test test test test test test test test test test test junk
-    const account = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+    const account = privateKeyToAccount(
+      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    )
 
     this.walletClient = createWalletClient({
       account,
@@ -64,18 +70,28 @@ export class SmartContractManager {
    */
   async deployContract(deployment: ContractDeployment): Promise<Address> {
     if (!this.walletClient || !this.publicClient || !this.proxyDeployer) {
-      throw new Error("SmartContractManager not initialized. Call initialize() first.")
+      throw new Error(
+        "SmartContractManager not initialized. Call initialize() first.",
+      )
     }
 
     const artifact = this.loadArtifact(deployment.name)
-    
+
     // Predict the deployment address
-    const predictedAddress = this.predictContractAddress(deployment.salt, artifact.bytecode, deployment.args as any[])
-    
+    const predictedAddress = this.predictContractAddress(
+      deployment.salt,
+      artifact.bytecode,
+      deployment.args as any[],
+    )
+
     // Check if contract is already deployed
-    const existingCode = await this.publicClient.getBytecode({ address: predictedAddress })
+    const existingCode = await this.publicClient.getBytecode({
+      address: predictedAddress,
+    })
     if (existingCode && existingCode !== "0x") {
-      console.log(`Contract ${deployment.name} already deployed at ${predictedAddress}`)
+      console.log(
+        `Contract ${deployment.name} already deployed at ${predictedAddress}`,
+      )
       this.deployedContracts.set(predictedAddress, artifact.abi)
       return predictedAddress
     }
@@ -99,10 +115,10 @@ export class SmartContractManager {
 
     // Wait for deployment
     await this.publicClient.waitForTransactionReceipt({ hash })
-    
+
     // Store the ABI for later use
     this.deployedContracts.set(predictedAddress, artifact.abi)
-    
+
     console.log(`Deployed ${deployment.name} to ${predictedAddress}`)
     return predictedAddress
   }
@@ -112,13 +128,17 @@ export class SmartContractManager {
    */
   async executeCall(call: ContractCall): Promise<Hex> {
     if (!this.walletClient || !this.publicClient) {
-      throw new Error("SmartContractManager not initialized. Call initialize() first.")
+      throw new Error(
+        "SmartContractManager not initialized. Call initialize() first.",
+      )
     }
 
     // Get the ABI for the contract
-    let abi = this.deployedContracts.get(call.target)
+    const abi = this.deployedContracts.get(call.target)
     if (!abi) {
-      throw new Error(`ABI not found for contract at ${call.target}. Deploy the contract first or provide the ABI.`)
+      throw new Error(
+        `ABI not found for contract at ${call.target}. Deploy the contract first or provide the ABI.`,
+      )
     }
 
     // Execute the call
@@ -137,7 +157,10 @@ export class SmartContractManager {
   /**
    * Set the complete contract state (deploy contracts and execute calls)
    */
-  async setContractState(config: SetupConfig, node: LocalNodeManager): Promise<void> {
+  async setContractState(
+    config: SetupConfig,
+    node: LocalNodeManager,
+  ): Promise<void> {
     if (!this.walletClient || !this.publicClient) {
       await this.initialize(node)
     }
@@ -162,7 +185,11 @@ export class SmartContractManager {
   /**
    * Predict the address where a contract will be deployed using CREATE2
    */
-  private predictContractAddress(salt: Hex, bytecode: Hex, args: any[]): Address {
+  private predictContractAddress(
+    salt: Hex,
+    bytecode: Hex,
+    args: any[],
+  ): Address {
     if (!this.proxyDeployer) {
       throw new Error("ProxyDeployer not initialized")
     }
@@ -185,10 +212,17 @@ export class SmartContractManager {
    * Load contract artifact from the compiled contracts
    */
   private loadArtifact(contractName: string): ContractArtifact {
-    const artifactPath = path.join(this.projectRoot, "out", `${contractName}.sol`, `${contractName}.json`)
-    
+    const artifactPath = path.join(
+      this.projectRoot,
+      "out",
+      `${contractName}.sol`,
+      `${contractName}.json`,
+    )
+
     if (!fs.existsSync(artifactPath)) {
-      throw new Error(`Artifact not found: ${artifactPath}. Make sure to compile contracts with 'forge build'.`)
+      throw new Error(
+        `Artifact not found: ${artifactPath}. Make sure to compile contracts with 'forge build'.`,
+      )
     }
 
     const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"))
@@ -217,7 +251,9 @@ export class SmartContractManager {
     if (config.calls) {
       for (const call of config.calls) {
         if (!call.target || !call.functionName || !call.account) {
-          throw new Error("Each call must have target, functionName, and account")
+          throw new Error(
+            "Each call must have target, functionName, and account",
+          )
         }
       }
     }

@@ -1,6 +1,6 @@
 import { createOnchainTest } from "@coinbase/onchaintestkit"
-import { metamaskWalletConfig } from "./walletConfig/metamaskWalletConfig"
 import { connectWallet } from "./appSession"
+import { metamaskWalletConfig } from "./walletConfig/metamaskWalletConfig"
 
 const test = createOnchainTest(metamaskWalletConfig)
 

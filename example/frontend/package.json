@@ -12,8 +12,8 @@
     "test:e2e:ui": "npx dotenv-cli -- yarn playwright test --ui"
   },
   "dependencies": {
-    "@coinbase/onchaintestkit": "workspace:*",
     "@coinbase/onchainkit": "^0.36.4",
+    "@coinbase/onchaintestkit": "workspace:*",
     "@tanstack/react-query": "^5",
     "dotenv": "^16.4.7",
     "next": "14.2.15",

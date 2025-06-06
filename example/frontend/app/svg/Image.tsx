@@ -1,6 +1,12 @@
 export default function ImageSvg() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 100 100"
+      role="img"
+      aria-labelledby="titleId"
+    >
+      <title id="titleId">Animated Sphere</title>
       <defs>
         <radialGradient id="sphereGradient" cx="30%" cy="30%" r="70%">
           <stop offset="0%" stopColor="#4da6ff">

@@ -1,19 +1,19 @@
 "use client"
 
 import {
+  Address,
+  Avatar,
+  EthBalance,
+  Identity,
+  Name,
+} from "@coinbase/onchainkit/identity"
+import {
   ConnectWallet,
   Wallet,
   WalletDropdown,
-  WalletDropdownLink,
   WalletDropdownDisconnect,
+  WalletDropdownLink,
 } from "@coinbase/onchainkit/wallet"
-import {
-  Address,
-  Avatar,
-  Name,
-  Identity,
-  EthBalance,
-} from "@coinbase/onchainkit/identity"
 import ArrowSvg from "./svg/ArrowSvg"
 import ImageSvg from "./svg/Image"
 import OnchainkitSvg from "./svg/OnchainKit"
@@ -77,7 +77,7 @@ export default function App() {
             <ImageSvg />
           </div>
           <div className="flex justify-center mb-6">
-            <a target="_blank" rel="_template" href="https://onchainkit.xyz">
+            <a target="_blank" rel="noreferrer" href="https://onchainkit.xyz">
               <OnchainkitSvg className="dark:text-white text-black" />
             </a>
           </div>

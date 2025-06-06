@@ -106,7 +106,7 @@ export const waitForMetaMaskWindowToBeStable = async (page: Page) => {
 const sleep = async (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms))
 
-const RETRY_INTERVALS = [0, 20, 50, 100, 100, 500] as const
+const _RETRY_INTERVALS = [0, 20, 50, 100, 100, 500] as const
 
 export async function waitForCondition(
   action: () => Promise<boolean>,

@@ -1,5 +1,5 @@
-import { popupConfigs, closePopup } from "./handlePopups"
 import type { Page } from "@playwright/test"
+import { closePopup, popupConfigs } from "./handlePopups"
 
 async function openTestnetSection(page: Page) {
   const toggleButtonLocator = page.locator("label.toggle-button")

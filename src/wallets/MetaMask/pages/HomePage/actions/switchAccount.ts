@@ -1,5 +1,5 @@
-import { allTextContents } from "../../../utils/getTextContents"
 import type { Page } from "@playwright/test"
+import { allTextContents } from "../../../utils/getTextContents"
 
 export async function switchAccount(page: Page, accountName: string) {
   await page.locator('[data-testid="account-menu-icon"]').click()

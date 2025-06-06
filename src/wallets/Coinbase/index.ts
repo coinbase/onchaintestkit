@@ -1,5 +1,5 @@
-import { BaseWallet, BaseActionType, ActionOptions } from "../BaseWallet"
 import type { BrowserContext, Page } from "@playwright/test"
+import { ActionOptions, BaseActionType, BaseWallet } from "../BaseWallet"
 import type { WalletConfig } from "./types"
 
 // Extend BaseActionType with Coinbase-specific actions
@@ -14,7 +14,7 @@ export enum CoinbaseSpecificActionType {
 
 type CoinbaseActionType = BaseActionType | CoinbaseSpecificActionType
 
-const NO_EXTENSION_ID_ERROR = new Error(
+const _NO_EXTENSION_ID_ERROR = new Error(
   "Coinbase Wallet extensionId is not set",
 )
 
@@ -41,9 +41,9 @@ export class CoinbaseWallet extends BaseWallet {
   }
 
   static async initialize(
-    currentContext: BrowserContext,
-    contextPath: string,
-    walletConfig: WalletConfig,
+    _currentContext: BrowserContext,
+    _contextPath: string,
+    _walletConfig: WalletConfig,
   ): Promise<CoinbaseWallet> {
     // TODO: Implement initialization logic similar to MetaMask
     // This should handle:
@@ -55,8 +55,8 @@ export class CoinbaseWallet extends BaseWallet {
   }
 
   async handleAction(
-    actionType: CoinbaseActionType,
-    options?: ActionOptions,
+    _actionType: CoinbaseActionType,
+    _options?: ActionOptions,
   ): Promise<void> {
     // TODO: Implement action handling logic
     throw new Error("Not implemented")

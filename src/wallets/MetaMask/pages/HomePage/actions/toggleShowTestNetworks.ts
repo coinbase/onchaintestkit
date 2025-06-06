@@ -1,5 +1,5 @@
-import { toggle } from "../../../utils/toggle"
 import type { Page } from "@playwright/test"
+import { toggle } from "../../../utils/toggle"
 
 export async function toggleShowTestNetworks(page: Page) {
   // Click the network dropdown button

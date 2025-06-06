@@ -16,11 +16,16 @@
       },
       "correctness": {
         "useExhaustiveDependencies": "off",
+        "noEmptyPattern": "off",
         "noUnusedVariables": "warn"
       },
       "style": {
         "noNegationElse": "warn",
         "useFragmentSyntax": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "warn"
       }
     },
     "ignore": ["**/.next/**"]
