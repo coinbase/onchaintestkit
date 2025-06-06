@@ -1,5 +1,5 @@
-import { BaseWallet, BaseActionType, ActionOptions } from "../BaseWallet"
 import type { BrowserContext, Page } from "@playwright/test"
+import { ActionOptions, BaseActionType, BaseWallet } from "../BaseWallet"
 import type { WalletConfig } from "./types"
 
 // Extend BaseActionType with Coinbase-specific actions

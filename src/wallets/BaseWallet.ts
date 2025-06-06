@@ -1,5 +1,5 @@
 import { CoinbaseWallet } from "./Coinbase"
-import { MetaMask }        from "./MetaMask"
+import { MetaMask } from "./MetaMask"
 
 export enum BaseActionType {
   // basic setup

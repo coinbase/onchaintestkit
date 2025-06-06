@@ -1,7 +1,7 @@
-import path from "node:path"
-import fs from "fs-extra"
-import extract from "extract-zip"
 import os from "node:os"
+import path from "node:path"
+import extract from "extract-zip"
+import fs from "fs-extra"
 import { EXTENSION_FILENAME, EXTENSION_URL } from "./constants"
 /**
  * MetaMask Extension Manager

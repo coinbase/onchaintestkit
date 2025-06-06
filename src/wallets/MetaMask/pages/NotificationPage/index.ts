@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test"
 import { spendingCapRemoval } from "../../pages/NotificationPage/actions/spendingCap"
 import { getNotificationPageAndWaitForLoad } from "../../utils/getNotificationPageAndWaitForLoad"
 import {
@@ -7,7 +8,6 @@ import {
   token,
   transaction,
 } from "./actions"
-import type { Page } from "@playwright/test"
 
 export enum NotificationPageType {
   SpendingCap = "spending-cap",

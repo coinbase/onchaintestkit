@@ -1,4 +1,4 @@
-import { Page, BrowserContext } from "@playwright/test"
+import { BrowserContext, Page } from "@playwright/test"
 
 /**
  * Interface for JSON-RPC request structure

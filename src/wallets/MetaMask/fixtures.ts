@@ -1,13 +1,13 @@
 import { type Page } from "@playwright/test"
 import { test as base } from "@playwright/test"
-import { createTempDir } from "../../utils/createTempDir"
-import { removeTempDir } from "../../utils/removeTempDir"
-import { MetaMaskConfig } from "../types"
-import { LocalNodeManager } from "../../node/LocalNodeManager"
-import { NodeConfig } from "../../node/types"
-import { getExtensionId } from "../../utils/extensionManager"
 import { MetaMask } from "."
 import { SmartContractManager } from "../../contracts/SmartContractManager"
+import { LocalNodeManager } from "../../node/LocalNodeManager"
+import { NodeConfig } from "../../node/types"
+import { createTempDir } from "../../utils/createTempDir"
+import { getExtensionId } from "../../utils/extensionManager"
+import { removeTempDir } from "../../utils/removeTempDir"
+import { MetaMaskConfig } from "../types"
 
 type MetaMaskFixturesType = {
   _contextPath: string
@@ -49,7 +49,9 @@ export const MetaMaskFixturesBuilder = (
         ]
       : undefined,
     smartContractManager: async ({ node }, use) => {
-      const smartContractManager = new SmartContractManager(process.env.E2E_CONTRACT_PROJECT_ROOT || "")
+      const smartContractManager = new SmartContractManager(
+        process.env.E2E_CONTRACT_PROJECT_ROOT || "",
+      )
       await smartContractManager.initialize(node)
       await use(smartContractManager)
     },
