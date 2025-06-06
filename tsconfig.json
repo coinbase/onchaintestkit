@@ -10,7 +10,9 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "e2e/onchainTestKit/*": ["./*"]
+      "e2e/onchainTestKit/*": ["./*"],
+      "@coinbase/onchaintestkit": ["./src/index.ts"],
+      "@coinbase/onchaintestkit/*": ["./*"]
     }
   },
   "include": ["**/*.ts"],

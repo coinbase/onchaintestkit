@@ -1,16 +1,16 @@
 import { chromium } from "@playwright/test"
-import {
-  BaseWallet,
-  BaseActionType,
-  ActionOptions,
-  ActionApprovalType,
-} from "../BaseWallet"
-import { NetworkConfig, MetaMaskConfig } from "../types"
-import { syncStorage } from "./utils/syncStorage"
-import { getExtensionId } from "../../utils/extensionManager"
-import { setupMetaMask } from "./utils/prepareExtension"
-import { HomePage, OnboardingPage, NotificationPage } from "./pages"
 import type { BrowserContext, Page } from "@playwright/test"
+import { getExtensionId } from "../../utils/extensionManager"
+import {
+  ActionApprovalType,
+  ActionOptions,
+  BaseActionType,
+  BaseWallet,
+} from "../BaseWallet"
+import { MetaMaskConfig, NetworkConfig } from "../types"
+import { HomePage, NotificationPage, OnboardingPage } from "./pages"
+import { setupMetaMask } from "./utils/prepareExtension"
+import { syncStorage } from "./utils/syncStorage"
 
 // Extend BaseActionType with MetaMask-specific actions
 export enum MetaMaskSpecificActionType {

@@ -1,7 +1,7 @@
 import { Page, test as base } from "@playwright/test"
-import { CoinbaseConfig } from "../types"
-import { NodeConfig } from "../../node/types"
 import { CoinbaseWallet } from "."
+import { NodeConfig } from "../../node/types"
+import { CoinbaseConfig } from "../types"
 type CoinbaseFixturesType = {
   _contextPath: string
   coinbase: CoinbaseWallet

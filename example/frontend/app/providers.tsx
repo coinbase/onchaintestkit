@@ -1,8 +1,8 @@
 "use client"
 
-import { base } from "wagmi/chains"
 import { OnchainKitProvider } from "@coinbase/onchainkit"
 import type { ReactNode } from "react"
+import { base } from "wagmi/chains"
 
 export function Providers(props: { children: ReactNode }) {
   return (

@@ -1,5 +1,5 @@
-import { waitFor } from "./waitFor"
 import type { Locator } from "@playwright/test"
+import { waitForCondition } from "./waitFor"
 
 export async function toggle(toggleLocator: Locator) {
   const classes = await toggleLocator.getAttribute("class", { timeout: 3_000 })
@@ -28,5 +28,5 @@ export async function toggle(toggleLocator: Locator) {
     return classes.includes("toggle-button--on")
   }
 
-  await waitFor(waitForAction, 3_000, true)
+  await waitForCondition(waitForAction, 3_000, true)
 }

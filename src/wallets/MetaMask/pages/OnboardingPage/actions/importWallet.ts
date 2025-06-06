@@ -1,5 +1,5 @@
-import { popupConfigs, closePopup } from "../../HomePage/actions/handlePopups"
 import type { Page } from "@playwright/test"
+import { closePopup, popupConfigs } from "../../HomePage/actions/handlePopups"
 
 async function confirmSecretRecoveryPhrase(page: Page, seedPhrase: string) {
   const seedPhraseWords = seedPhrase.split(" ")
