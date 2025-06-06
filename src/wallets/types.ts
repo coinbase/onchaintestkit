@@ -1,5 +1,5 @@
-import type { MetaMask } from "./MetaMask"
 import type { CoinbaseWallet } from "./Coinbase"
+import type { MetaMask } from "./MetaMask"
 
 export type NetworkConfig = {
   name: string

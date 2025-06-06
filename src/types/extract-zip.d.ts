@@ -3,7 +3,7 @@ declare module "extract-zip" {
     source: string,
     options: {
       dir: string
-      onEntry?: (entry: any) => void
+      onEntry?: (entry: unknown) => void
     },
   ): Promise<void>
 }

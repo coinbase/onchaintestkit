@@ -1,4 +1,4 @@
-import { test as base, Fixtures } from "@playwright/test"
+import { test as base } from "@playwright/test"
 import { OnchainFixtures } from "../types"
 import { LocalNodeManager } from "./LocalNodeManager"
 import { NodeConfig } from "./types"
@@ -17,7 +17,7 @@ export class NodeFixturesBuilder {
   build() {
     return base.extend<OnchainFixtures>({
       node: [
-        async ({}, use) => {
+        async (_args, use) => {
           console.log("Starting node...")
           const node = new LocalNodeManager(this.config)
           await node.start()

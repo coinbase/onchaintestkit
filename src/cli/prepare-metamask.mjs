@@ -10,9 +10,9 @@
 
 import path from "path"
 import { fileURLToPath } from "url"
+import extract from "extract-zip"
 import fs from "fs-extra"
 import fetch from "node-fetch"
-import extract from "extract-zip"
 
 // Support for ES modules
 const __filename = fileURLToPath(import.meta.url)

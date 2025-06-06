@@ -1,10 +1,10 @@
-import { test as base, Fixtures } from "@playwright/test"
+import { test as base } from "@playwright/test"
 import { mergeTests } from "@playwright/test"
 import { setupRpcPortInterceptor } from "./node/NetworkInterceptor"
-import { MetaMaskFixturesBuilder } from "./wallets/MetaMask"
+import { OnchainFixtures, WalletFixtureOptions } from "./types"
 import { CoinbaseFixturesBuilder } from "./wallets/Coinbase"
-import { WalletFixtureOptions, OnchainFixtures } from "./types"
-import { MetaMaskConfig, CoinbaseConfig } from "./wallets/types"
+import { MetaMaskFixturesBuilder } from "./wallets/MetaMask"
+import { CoinbaseConfig, MetaMaskConfig } from "./wallets/types"
 
 /**
  * Map of wallet names to their corresponding fixture builders.
@@ -28,13 +28,13 @@ const createNetworkInterceptorFixture = () => {
       // Get the dynamic port from the node fixture
       const localNodePort = node?.port
 
-      if (!localNodePort) {
+      if (localNodePort) {
+        // Apply interception at the context level so it works for all pages
+        await setupRpcPortInterceptor(context, localNodePort)
+      } else {
         console.warn(
           "Local node port not available. RPC URL interception not set up.",
         )
-      } else {
-        // Apply interception at the context level so it works for all pages
-        await setupRpcPortInterceptor(context, localNodePort)
       }
 
       await use(context)
@@ -96,7 +96,7 @@ export function createOnchainTest(
 
   // Start with the base test - no node fixture from createOnchainTest
   // Node fixture is now created in the wallet fixtures
-  let baseTest = base
+  const baseTest = base
 
   // Create wallet fixtures array
   const walletFixtures: ReturnType<typeof base.extend<OnchainFixtures>>[] = []

@@ -1,5 +1,5 @@
-import { waitForCondition } from "../../../utils/waitFor"
 import type { Page } from "@playwright/test"
+import { waitForCondition } from "../../../utils/waitFor"
 
 export async function importWalletFromPrivateKey(
   page: Page,

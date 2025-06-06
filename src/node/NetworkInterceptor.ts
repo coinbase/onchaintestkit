@@ -1,9 +1,9 @@
-import { Page, BrowserContext } from "@playwright/test"
+import { BrowserContext, Page } from "@playwright/test"
 
 /**
  * Interface for JSON-RPC request structure
  */
-type JsonRpcRequest = {
+type _JsonRpcRequest = {
   jsonrpc: string
   id: number
   method: string
