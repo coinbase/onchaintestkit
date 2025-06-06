@@ -5,7 +5,7 @@ import {
   BaseWalletConfig,
   WalletSetupContext,
 } from "./wallets/BaseWallet"
-import { CoinbaseSpecificActionType, CoinbaseWallet } from "./wallets/Coinbase"
+import { CoinbaseWallet } from "./wallets/Coinbase"
 import { MetaMask, MetaMaskSpecificActionType } from "./wallets/MetaMask"
 /**
  * Configuration builder for E2E testing with different wallet types.
@@ -181,28 +181,6 @@ class MetaMaskConfigBuilder extends BaseWalletBuilder<MetaMask> {
  */
 class CoinbaseConfigBuilder extends BaseWalletBuilder<CoinbaseWallet> {
   // Add Coinbase-specific methods here
-  withNetwork(network: NetworkConfig) {
-    this.chainSetup(async (wallet, context) => {
-      if (context?.localNodePort) {
-        // if the context has a localNodePort, use it to connect to the local node
-        network.rpcUrl = `http://localhost:${context.localNodePort}`
-      }
-      console.log(`Adding network with RPC URL: ${network.rpcUrl}`)
-
-      // Add the network with the possibly modified URL
-      await wallet.handleAction(CoinbaseSpecificActionType.ADD_NETWORK, {
-        network,
-        isTestnet: isTestNetwork(network),
-      })
-
-      // Switch to the network
-      await wallet.handleAction(BaseActionType.SWITCH_NETWORK, {
-        networkName: network.name,
-        isTestnet: isTestNetwork(network),
-      })
-    })
-    return this
-  }
 }
 
 /**

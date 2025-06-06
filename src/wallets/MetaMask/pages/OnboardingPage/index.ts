@@ -1,5 +1,5 @@
-import { importWallet } from "./actions"
 import type { Page } from "@playwright/test"
+import { importWallet } from "./actions"
 
 export class OnboardingPage {
   readonly page: Page
