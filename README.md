@@ -10,6 +10,13 @@ This toolkit provides a robust framework for testing blockchain applications, wi
 
 1. Install dependencies:
 
+Make sure you have yarn:
+
+```bash
+npm install -g corepack
+yarn set version 4.9.2
+```
+
 ```bash
 npm install --save-dev @playwright/test @coinbase/onchaintestkit
 # or
@@ -208,6 +215,13 @@ enum ActionApprovalType {
    - Use environment variables for sensitive data
    - Never commit seed phrases or private keys
    - Use test accounts with minimal funds
+  
+5. **Development**
+   - Run yarn
+   - Run yarn format
+   - Run yarn format:check
+   - Run yarn lint
+   - If yarn lint produces any errors, fix accordingly through yarn lint:fix or manually fixing the files
 
 ## Contributing
 
