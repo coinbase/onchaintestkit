@@ -23,6 +23,8 @@ npm install --save-dev @playwright/test @coinbase/onchaintestkit
 yarn add -D @playwright/test @coinbase/onchaintestkit
 ```
 
+Make sure you have foundry set up too
+
 2. Set up environment variables:
 
 ```env
