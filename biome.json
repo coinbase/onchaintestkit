@@ -61,7 +61,8 @@
       "src/.cache/**",
       "**/*.min.js",
       "coverage",
-      "build"
+      "build",
+      "**/.next/**"
     ]
   }
 }

@@ -1,4 +1,4 @@
-import { http, Address, createPublicClient } from "viem"
+import { http, Address, PublicClient, createPublicClient } from "viem"
 import { localhost } from "viem/chains"
 import type { LocalNodeManager } from "../node/LocalNodeManager"
 
@@ -14,7 +14,7 @@ const PROXY_ADDRESS: Address = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
  * Utility class to deploy and manage the deterministic deployment proxy
  */
 export class ProxyDeployer {
-  private publicClient: any
+  private publicClient: PublicClient
   private rpcUrl: string
 
   constructor(node: LocalNodeManager) {

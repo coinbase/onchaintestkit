@@ -1,9 +1,16 @@
 declare module "extract-zip" {
-  export default function extract(
+  interface ExtractEntry {
+    fileName: string
+    uncompressedSize: number
+    type?: string
+    lastModifiedDate?: Date
+  }
+
+  export default function extractZip(
     source: string,
     options: {
       dir: string
-      onEntry?: (entry: any) => void
+      onEntry?: (entry: ExtractEntry) => void
     },
   ): Promise<void>
 }
