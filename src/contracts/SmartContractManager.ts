@@ -2,6 +2,7 @@ import * as fs from "fs"
 import * as path from "path"
 import {
   http,
+  Abi,
   Address,
   Hex,
   concat,
@@ -10,6 +11,7 @@ import {
   encodeDeployData,
   getContractAddress,
 } from "viem"
+import type { PublicClient, WalletClient } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { localhost } from "viem/chains"
 
@@ -28,9 +30,9 @@ import type {
  */
 export class SmartContractManager {
   private projectRoot: string
-  private publicClient?: any
-  private walletClient?: any
-  private deployedContracts = new Map<Address, any>() // Store deployed contract ABIs
+  private publicClient?: PublicClient
+  private walletClient?: WalletClient
+  private deployedContracts = new Map<Address, Abi>() // Store deployed contract ABIs
   private proxyDeployer?: ProxyDeployer
 
   constructor(projectRoot: string) {
@@ -81,7 +83,7 @@ export class SmartContractManager {
     const predictedAddress = this.predictContractAddress(
       deployment.salt,
       artifact.bytecode,
-      deployment.args as any[],
+      deployment.args as readonly unknown[],
     )
 
     // Check if contract is already deployed
@@ -92,7 +94,7 @@ export class SmartContractManager {
       console.log(
         `Contract ${deployment.name} already deployed at ${predictedAddress}`,
       )
-      this.deployedContracts.set(predictedAddress, artifact.abi)
+      this.deployedContracts.set(predictedAddress, artifact.abi as Abi)
       return predictedAddress
     }
 
@@ -108,16 +110,22 @@ export class SmartContractManager {
     const create2Data = concat([deployment.salt as Hex, deploymentData])
 
     // Deploy the contract
+    if (!this.walletClient.account) {
+      throw new Error("Wallet client account not configured")
+    }
+
     const hash = await this.walletClient.sendTransaction({
       to: proxyAddress,
       data: create2Data,
+      account: this.walletClient.account,
+      chain: localhost,
     })
 
     // Wait for deployment
     await this.publicClient.waitForTransactionReceipt({ hash })
 
     // Store the ABI for later use
-    this.deployedContracts.set(predictedAddress, artifact.abi)
+    this.deployedContracts.set(predictedAddress, artifact.abi as Abi)
 
     console.log(`Deployed ${deployment.name} to ${predictedAddress}`)
     return predictedAddress
@@ -142,11 +150,17 @@ export class SmartContractManager {
     }
 
     // Execute the call
+    if (!this.walletClient.account) {
+      throw new Error("Wallet client account not configured")
+    }
+
     const hash = await this.walletClient.writeContract({
       address: call.target,
       abi,
       functionName: call.functionName,
       args: call.args,
+      account: this.walletClient.account,
+      chain: localhost,
       ...(call.value !== undefined && { value: call.value }),
     })
 
@@ -188,7 +202,7 @@ export class SmartContractManager {
   private predictContractAddress(
     salt: Hex,
     bytecode: Hex,
-    args: any[],
+    args: readonly unknown[],
   ): Address {
     if (!this.proxyDeployer) {
       throw new Error("ProxyDeployer not initialized")

@@ -10,8 +10,8 @@ type CoinbaseFixturesType = {
 }
 
 export function CoinbaseFixturesBuilder(
-  config: CoinbaseConfig,
-  nodeConfig: NodeConfig | undefined,
+  _config: CoinbaseConfig,
+  _nodeConfig: NodeConfig | undefined,
 ) {
   // Extend base test with Coinbase wallet fixtures
   return base.extend<CoinbaseFixturesType>({

@@ -32,7 +32,8 @@ export async function switchNetwork(
   )
 
   const seekedNetworkNameIndex = networkNames.findIndex(
-    name => name.toLocaleLowerCase() === networkName.toLocaleLowerCase(),
+    name =>
+      name && name.toLocaleLowerCase() === networkName.toLocaleLowerCase(),
   )
 
   const seekedNetworkLocator =

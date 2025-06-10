@@ -14,7 +14,6 @@ import {
   WalletDropdownDisconnect,
   WalletDropdownLink,
 } from "@coinbase/onchainkit/wallet"
-import ArrowSvg from "./svg/ArrowSvg"
 import ImageSvg from "./svg/Image"
 import OnchainkitSvg from "./svg/OnchainKit"
 
@@ -96,16 +95,15 @@ export default function App() {
                     Explore components
                   </p>
                   <ul className="list-disc pl-5 space-y-2 inline-block text-left">
-                    {components.map((component, index) => (
-                      <li key={index}>
+                    {components.map(component => (
+                      <li key={component.url}>
                         <a
                           href={component.url}
-                          className="hover:underline inline-flex items-center dark:text-white text-black"
+                          className="text-blue-600 hover:text-blue-800 underline"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           {component.name}
-                          <ArrowSvg />
                         </a>
                       </li>
                     ))}
@@ -116,16 +114,15 @@ export default function App() {
                     Explore templates
                   </p>
                   <ul className="list-disc pl-5 space-y-2 inline-block text-left">
-                    {templates.map((template, index) => (
-                      <li key={index}>
+                    {templates.map(template => (
+                      <li key={template.url}>
                         <a
                           href={template.url}
-                          className="hover:underline inline-flex items-center dark:text-white text-black"
+                          className="text-blue-600 hover:text-blue-800 underline"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           {template.name}
-                          <ArrowSvg />
                         </a>
                       </li>
                     ))}

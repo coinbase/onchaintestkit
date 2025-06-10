@@ -130,3 +130,8 @@ export async function waitForCondition(
   }
   return false
 }
+
+/**
+ * Wait for a condition to be met
+ */
+export const waitFor = waitForCondition
