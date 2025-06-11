@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test"
 import { createOnchainTest } from "../../../src/createOnchainTest"
-// import { BaseActionType } from "../../../src/wallets/BaseWallet"
+import { BaseActionType } from "../../../src/wallets/BaseWallet"
 import { CoinbaseSpecificActionType } from "../../../src/wallets/Coinbase"
 import { connectCoinbaseWallet } from "./appSession"
 import { coinbaseWalletConfig } from "./walletConfig/coinbaseWalletConfig"
@@ -39,30 +39,30 @@ test.describe("Coinbase Wallet Setup", () => {
     // await expect(page.locator('[data-testid="wallet-address"]')).toBeVisible()
   })
 
-  // test("should import wallet from private key", async ({ coinbase }) => {
-  //   if (!coinbase) {
-  //     throw new Error("Coinbase wallet is not defined")
-  //   }
+  test("should import wallet from private key", async ({ coinbase }) => {
+    if (!coinbase) {
+      throw new Error("Coinbase wallet is not defined")
+    }
 
-  //   const privateKey = process.env.E2E_TEST_PRIVATE_KEY
-  //   if (!privateKey) {
-  //     throw new Error("E2E_TEST_PRIVATE_KEY environment variable is not set")
-  //   }
+    const privateKey = process.env.E2E_TEST_PRIVATE_KEY
+    if (!privateKey) {
+      throw new Error("E2E_TEST_PRIVATE_KEY environment variable is not set")
+    }
 
-  //   // Import wallet from private key
-  //   await coinbase.handleAction(BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY, {
-  //     privateKey,
-  //   })
+    // Import wallet from private key
+    await coinbase.handleAction(BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY, {
+      privateKey,
+    })
 
-  //   // Note: The password is already configured in the wallet config
-  //   // and will be used automatically during the import process
+    // Note: The password is already configured in the wallet config
+    // and will be used automatically during the import process
 
-  //   // Wait a bit to ensure the import process is complete
-  //   await new Promise(resolve => setTimeout(resolve, 2000))
+    // Wait a bit to ensure the import process is complete
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
-  //   // Additional assertions can be added here
-  //   // For example, verify the imported account appears in the account list
-  // })
+    // Additional assertions can be added here
+    // For example, verify the imported account appears in the account list
+  })
 
   test("should add Linea Testnet network", async ({ coinbase }) => {
     if (!coinbase) {
