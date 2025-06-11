@@ -1,7 +1,7 @@
 import { baseSepolia } from "viem/chains"
 import { configure } from "../../../../src/configBuilder"
 
-export const DEFAULT_PASSWORD = "COMPLEXPASSWORD1"
+export const DEFAULT_PASSWORD = "JustinChung1"
 export const DEFAULT_SEED_PHRASE = process.env.E2E_TEST_SEED_PHRASE
 
 // Configure the test with Coinbase setup

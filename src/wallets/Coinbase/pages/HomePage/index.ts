@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test"
 import { NetworkConfig } from "../../../types"
 import { addNetwork } from "./actions/addNetwork"
-import { importWalletFromPrivateKey } from "./actions/importWalletFromPrivateKey"
+// import { importWalletFromPrivateKey } from "./actions/importWalletFromPrivateKey"
 // import { sendTokens } from "./actions/sendTokens"
 
 export class HomePage {
@@ -15,12 +15,12 @@ export class HomePage {
     await addNetwork(this.page, network)
   }
 
-  async importWalletFromPrivateKey(
-    privateKey: string,
-    password: string,
-  ): Promise<void> {
-    await importWalletFromPrivateKey(this.page, privateKey, password)
-  }
+  // async importWalletFromPrivateKey(
+  //   privateKey: string,
+  //   password: string,
+  // ): Promise<void> {
+  //   await importWalletFromPrivateKey(this.page, privateKey, password)
+  // }
 
   // async sendTokens(
   //   recipientAddress: string,

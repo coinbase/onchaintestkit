@@ -166,6 +166,7 @@ __metadata:
   peerDependencies:
     "@playwright/test": ^1.34.0
   bin:
+    prepare-coinbase: ./src/cli/prepare-coinbase.mjs
     prepare-metamask: ./src/cli/prepare-metamask.mjs
   languageName: unknown
   linkType: soft

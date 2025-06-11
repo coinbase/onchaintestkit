@@ -23,6 +23,7 @@ export type MetaMaskConfig = {
 } & BaseWalletConfig
 
 export type CoinbaseConfig = {
+  password: string
   walletSetup: (
     wallet: CoinbaseWallet,
     context: { localNodePort: number },
