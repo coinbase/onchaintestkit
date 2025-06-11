@@ -1,7 +1,7 @@
 import { getNotificationPageAndWaitForLoad } from "../../utils/getNotificationPageAndWaitForLoad"
 import { BasePage } from "../BasePage"
 import { connectToDapp } from "./actions"
-// import { confirmTransaction, rejectTransaction } from "./actions/transaction"
+import { confirmTransaction, rejectTransaction } from "./actions/transaction"
 
 /**
  * Types of notifications that can appear in the Coinbase Wallet
@@ -34,23 +34,21 @@ export class NotificationPage extends BasePage {
   }
 
   async confirmTransaction(extensionId: string): Promise<void> {
-    const _notificationPage = await getNotificationPageAndWaitForLoad(
+    const notificationPage = await getNotificationPageAndWaitForLoad(
       this.page.context(),
       extensionId,
     )
     // TODO: Implement transaction confirmation
-    // await confirmTransaction(notificationPage)
-    throw new Error("confirmTransaction not implemented for Coinbase")
+    await confirmTransaction(notificationPage)
   }
 
   async rejectTransaction(extensionId: string): Promise<void> {
-    const _notificationPage = await getNotificationPageAndWaitForLoad(
+    const notificationPage = await getNotificationPageAndWaitForLoad(
       this.page.context(),
       extensionId,
     )
     // TODO: Implement transaction rejection
-    // await rejectTransaction(notificationPage)
-    throw new Error("rejectTransaction not implemented for Coinbase")
+    await rejectTransaction(notificationPage)
   }
 
   async approveTokenPermission(_extensionId: string): Promise<void> {
