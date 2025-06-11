@@ -34,7 +34,6 @@ jobs:
         working-directory: example/frontend
         run: |
           echo "E2E_TEST_SEED_PHRASE=beyond sport exotic joy ketchup kick quarter all gas orient gorilla purse" > .env
-          echo "E2E_TEST_PRIVATE_KEY=0xd5ad0d50fd61e56e4cd7f153e9a2ae125554fa2b88c3d66a09762b9f089a0e5d" >> .env
 
       # Install frontend workspace dependencies (Ensures its own deps are available)
       - name: Install frontend dependencies
