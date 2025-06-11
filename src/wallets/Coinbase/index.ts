@@ -213,14 +213,11 @@ export class CoinbaseWallet extends BaseWallet {
         break
 
       case BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY:
-        // TODO: Implement wallet import from private key
-        // await this.homePage.importWalletFromPrivateKey(
-        //   additionalOptions.privateKey as string,
-        //   this.config.password as string,
-        // )
-        throw new Error(
-          "importWalletFromPrivateKey not implemented for Coinbase Wallet",
+        await this.homePage.importWalletFromPrivateKey(
+          additionalOptions.privateKey as string,
+          this.config.password as string,
         )
+        break
 
       // Network actions
       case CoinbaseSpecificActionType.ADD_NETWORK:

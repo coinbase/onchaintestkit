@@ -6,13 +6,9 @@ on:
   pull_request:
     branches: [master]
 
-permissions:
-  contents: read
-
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    environment: CI
 
     steps:
       # Checkout repository
@@ -37,7 +33,8 @@ jobs:
       - name: Set E2E env variables
         working-directory: example/frontend
         run: |
-          echo "E2E_TEST_SEED_PHRASE=${{ secrets.E2E_TEST_SEED_PHRASE }}" > .env
+          echo "E2E_TEST_SEED_PHRASE=beyond sport exotic joy ketchup kick quarter all gas orient gorilla purse" > .env
+          echo "E2E_TEST_PRIVATE_KEY=0xd5ad0d50fd61e56e4cd7f153e9a2ae125554fa2b88c3d66a09762b9f089a0e5d" >> .env
 
       # Install frontend workspace dependencies (Ensures its own deps are available)
       - name: Install frontend dependencies
@@ -71,4 +68,4 @@ jobs:
       # Run the end-to-end test suite under virtual display
       - name: Run E2E tests
         working-directory: example/frontend
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" yarn test:e2e --workers=2
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" yarn test:e2e 
