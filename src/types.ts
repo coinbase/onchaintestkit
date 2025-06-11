@@ -2,6 +2,10 @@ import { SmartContractManager } from "./contracts/SmartContractManager"
 import { LocalNodeManager } from "./node/LocalNodeManager"
 import { NodeConfig } from "./node/types"
 import { CoinbaseWallet } from "./wallets/Coinbase"
+// import {
+//   CoinbaseSmartWallet,
+//   SmartWalletConfig,
+// } from "./wallets/Coinbase/SmartWallet"
 import { MetaMask } from "./wallets/MetaMask"
 import { CoinbaseConfig, MetaMaskConfig } from "./wallets/types"
 
@@ -13,6 +17,7 @@ export type WalletFixtureOptions = {
   wallets: {
     metamask?: WalletConfig
     coinbase?: WalletConfig
+    // "coinbase-smart"?: SmartWalletConfig
   }
   nodeConfig?: NodeConfig
 }
@@ -20,6 +25,7 @@ export type WalletFixtureOptions = {
 export type OnchainFixtures = {
   metamask?: MetaMask
   coinbase?: CoinbaseWallet
+  // coinbaseSmart?: CoinbaseSmartWallet
   node?: LocalNodeManager
   smartContractManager?: SmartContractManager
 }

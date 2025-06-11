@@ -26,7 +26,8 @@ const createNetworkInterceptorFixture = () => {
   return base.extend<OnchainFixtures>({
     context: async ({ context, node }, use) => {
       // Get the dynamic port from the node fixture
-      const localNodePort = node?.port
+      const localNodePort =
+        node && "port" in node ? (node as { port: number }).port : null
 
       if (localNodePort) {
         // Apply interception at the context level so it works for all pages

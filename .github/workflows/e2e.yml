@@ -45,6 +45,11 @@ jobs:
         working-directory: example/frontend
         run: yarn prepare-metamask
 
+      # Prepare the Coinbase extension for Playwright  
+      - name: Prepare Coinbase extension
+        working-directory: example/frontend
+        run: yarn prepare-coinbase
+
       # Install browsers & system deps for Playwright
       - name: Install Playwright browsers
         working-directory: example/frontend
