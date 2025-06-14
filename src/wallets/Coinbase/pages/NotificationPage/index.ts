@@ -38,7 +38,6 @@ export class NotificationPage extends BasePage {
       this.page.context(),
       extensionId,
     )
-    // TODO: Implement transaction confirmation
     await confirmTransaction(notificationPage)
   }
 
@@ -47,7 +46,6 @@ export class NotificationPage extends BasePage {
       this.page.context(),
       extensionId,
     )
-    // TODO: Implement transaction rejection
     await rejectTransaction(notificationPage)
   }
 
