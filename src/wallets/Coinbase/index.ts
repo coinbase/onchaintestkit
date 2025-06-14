@@ -307,6 +307,19 @@ export class CoinbaseWallet extends BaseWallet {
     }
     return this.notificationPage.identifyNotificationType(this.extensionId)
   }
+
+  // Public getters for SmartWallet integration
+  get walletContext(): BrowserContext {
+    return this.context
+  }
+
+  get walletPage(): Page {
+    return this.page
+  }
+
+  get walletExtensionId(): string | undefined {
+    return this.extensionId
+  }
 }
 
 export * from "./fixtures"
