@@ -12,6 +12,7 @@ import { CoinbaseConfig } from "../types"
 import { NetworkConfig } from "../types"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
 import { setupCoinbase } from "./utils/prepareExtension"
+import { PasskeyAuthenticator, WebAuthnCredential } from "./PasskeyAuthenticator"
 
 // Extend BaseActionType with Coinbase-specific actions
 export enum CoinbaseSpecificActionType {
@@ -22,6 +23,7 @@ export enum CoinbaseSpecificActionType {
   SWITCH_ACCOUNT = "switchAccount",
   ADD_NETWORK = "addNetwork",
   SEND_TOKENS = "sendTokens",
+  HANDLE_PASSKEY_POPUP = "handlePasskeyPopup",
 }
 
 type CoinbaseActionType = BaseActionType | CoinbaseSpecificActionType
@@ -29,6 +31,14 @@ type CoinbaseActionType = BaseActionType | CoinbaseSpecificActionType
 const NO_EXTENSION_ID_ERROR = new Error(
   "Coinbase Wallet extensionId is not set",
 )
+
+export type PasskeyConfig = {
+  name: string
+  rpId: string
+  rpName: string
+  userId: string
+  isUserVerified?: boolean
+}
 
 export class CoinbaseWallet extends BaseWallet {
   private readonly context: BrowserContext
@@ -44,6 +54,13 @@ export class CoinbaseWallet extends BaseWallet {
   readonly homePage: HomePage
 
   readonly notificationPage: NotificationPage
+
+  // Passkey authenticator state
+  public passkeyAuthenticator: PasskeyAuthenticator | null = null;
+  public passkeyCredentials: WebAuthnCredential[] = [];
+  public get authenticator(): PasskeyAuthenticator | null {
+    return this.passkeyAuthenticator;
+  }
 
   constructor(
     walletConfig: CoinbaseConfig,
@@ -184,6 +201,89 @@ export class CoinbaseWallet extends BaseWallet {
     throw lastError ?? new Error("Failed to create context after all retries")
   }
 
+  /**
+   * Handle a passkey popup for registration or authentication.
+   * For registration, receives the main page and the first popup, clicks the switch link, waits for the second popup, and registers there.
+   * For approve, receives the transaction popup directly.
+   * @param mainPage The Playwright Page for the main dapp (only needed for registration)
+   * @param popup The Playwright Page for the popup (first popup for registration, transaction popup for approve)
+   * @param action 'register' or 'approve'
+   * @param config PasskeyConfig (required for 'register')
+   */
+  async handlePasskeyPopup(
+    mainPageOrPopup: Page,
+    popup: Page,
+    action: 'register' | 'approve',
+    config?: PasskeyConfig
+  ): Promise<void> {
+    if (action === 'register') {
+      // Registration: popup is the first popup, need to click switch and wait for second popup
+      const firstPopup = popup;
+      // Click the switch-to-scw-link and wait for the second popup
+      const [secondPopup] = await Promise.all([
+        mainPageOrPopup.context().waitForEvent("page"),
+        firstPopup.click('[data-testid="switch-to-scw-link"]'),
+      ]);
+      await secondPopup.waitForLoadState("domcontentloaded");
+      await secondPopup.waitForSelector('button:has-text("Create an account")', {
+        timeout: 10000,
+      });
+      if (!this.passkeyAuthenticator) {
+        this.passkeyAuthenticator = new PasskeyAuthenticator(secondPopup);
+      } else {
+        await this.passkeyAuthenticator.setPage(secondPopup);
+      }
+      if (!config) throw new Error('PasskeyConfig required for registration');
+      await this.passkeyAuthenticator.initialize({
+        protocol: "ctap2",
+        transport: "internal",
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: config.isUserVerified ?? true,
+        automaticPresenceSimulation: true,
+      });
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
+        await secondPopup.locator('button:has-text("Create an account")').click();
+        await secondPopup.locator('[data-testid="passkey-name-input"]').fill(config.name);
+        await secondPopup.locator('[data-testid="continue-button"]').click();
+      });
+      this.passkeyCredentials = await this.passkeyAuthenticator.exportCredentials();
+    } else if (action === 'approve') {
+      // Approve: popup is the transaction popup
+      if (!this.passkeyAuthenticator) {
+        this.passkeyAuthenticator = new PasskeyAuthenticator(popup);
+      } else {
+        await this.passkeyAuthenticator.setPage(popup);
+      }
+      // Wait for the popup to reach the expected URL
+      const expectedUrl = "https://keys.coinbase.com/sign/wallet-send-calls";
+      let currentUrl = await popup.url();
+      if (currentUrl !== expectedUrl) {
+        await popup.waitForURL(expectedUrl, { timeout: 15000 });
+        currentUrl = await popup.url();
+      }
+      await this.passkeyAuthenticator.initialize({
+        protocol: "ctap2",
+        transport: "internal",
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: true,
+        automaticPresenceSimulation: true,
+      });
+      // Import credentials from registration
+      for (const cred of this.passkeyCredentials) {
+        await this.passkeyAuthenticator.importCredential(cred);
+      }
+      await popup.waitForLoadState("domcontentloaded");
+      await popup.waitForLoadState("networkidle");
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
+        await popup.locator('[data-testid="approve-transaction-button"]').click();
+      });
+    } else {
+      throw new Error(`Unknown passkey popup action: ${action}`);
+    }
+  }
+
   async handleAction(
     action: CoinbaseActionType,
     options?: ActionOptions,
@@ -201,6 +301,17 @@ export class CoinbaseWallet extends BaseWallet {
     ) {
       await this.page.goto(extensionUrl, { waitUntil: "domcontentloaded" })
       await this.page.waitForLoadState("networkidle")
+    }
+
+    // Passkey popup handling
+    if (action === CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP) {
+      // expects: options.mainPage, options.popup, options.passkeyAction, options.passkeyConfig
+      const mainPage = additionalOptions.mainPage as Page;
+      const popup = additionalOptions.popup as Page;
+      const passkeyAction = additionalOptions.passkeyAction as 'register' | 'approve';
+      const passkeyConfig = additionalOptions.passkeyConfig as PasskeyConfig | undefined;
+      await this.handlePasskeyPopup(mainPage, popup, passkeyAction, passkeyConfig);
+      return;
     }
 
     switch (action) {
