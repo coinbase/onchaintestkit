@@ -10,9 +10,12 @@ import {
 import { syncStorage } from "../MetaMask/utils/syncStorage"
 import { CoinbaseConfig } from "../types"
 import { NetworkConfig } from "../types"
+import {
+  PasskeyAuthenticator,
+  WebAuthnCredential,
+} from "./PasskeyAuthenticator"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
 import { setupCoinbase } from "./utils/prepareExtension"
-import { PasskeyAuthenticator, WebAuthnCredential } from "./PasskeyAuthenticator"
 
 // Extend BaseActionType with Coinbase-specific actions
 export enum CoinbaseSpecificActionType {
@@ -56,10 +59,10 @@ export class CoinbaseWallet extends BaseWallet {
   readonly notificationPage: NotificationPage
 
   // Passkey authenticator state
-  public passkeyAuthenticator: PasskeyAuthenticator | null = null;
-  public passkeyCredentials: WebAuthnCredential[] = [];
+  public passkeyAuthenticator: PasskeyAuthenticator | null = null
+  public passkeyCredentials: WebAuthnCredential[] = []
   public get authenticator(): PasskeyAuthenticator | null {
-    return this.passkeyAuthenticator;
+    return this.passkeyAuthenticator
   }
 
   constructor(
@@ -213,27 +216,30 @@ export class CoinbaseWallet extends BaseWallet {
   async handlePasskeyPopup(
     mainPageOrPopup: Page,
     popup: Page,
-    action: 'register' | 'approve',
-    config?: PasskeyConfig
+    action: "register" | "approve",
+    config?: PasskeyConfig,
   ): Promise<void> {
-    if (action === 'register') {
+    if (action === "register") {
       // Registration: popup is the first popup, need to click switch and wait for second popup
-      const firstPopup = popup;
+      const firstPopup = popup
       // Click the switch-to-scw-link and wait for the second popup
       const [secondPopup] = await Promise.all([
         mainPageOrPopup.context().waitForEvent("page"),
         firstPopup.click('[data-testid="switch-to-scw-link"]'),
-      ]);
-      await secondPopup.waitForLoadState("domcontentloaded");
-      await secondPopup.waitForSelector('button:has-text("Create an account")', {
-        timeout: 10000,
-      });
-      if (!this.passkeyAuthenticator) {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(secondPopup);
+      ])
+      await secondPopup.waitForLoadState("domcontentloaded")
+      await secondPopup.waitForSelector(
+        'button:has-text("Create an account")',
+        {
+          timeout: 10000,
+        },
+      )
+      if (this.passkeyAuthenticator) {
+        await this.passkeyAuthenticator.setPage(secondPopup)
       } else {
-        await this.passkeyAuthenticator.setPage(secondPopup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(secondPopup)
       }
-      if (!config) throw new Error('PasskeyConfig required for registration');
+      if (!config) throw new Error("PasskeyConfig required for registration")
       await this.passkeyAuthenticator.initialize({
         protocol: "ctap2",
         transport: "internal",
@@ -241,26 +247,33 @@ export class CoinbaseWallet extends BaseWallet {
         hasUserVerification: true,
         isUserVerified: config.isUserVerified ?? true,
         automaticPresenceSimulation: true,
-      });
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await secondPopup.locator('button:has-text("Create an account")').click();
-        await secondPopup.locator('[data-testid="passkey-name-input"]').fill(config.name);
-        await secondPopup.locator('[data-testid="continue-button"]').click();
-      });
-      this.passkeyCredentials = await this.passkeyAuthenticator.exportCredentials();
-    } else if (action === 'approve') {
+      })
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await secondPopup
+            .locator('button:has-text("Create an account")')
+            .click()
+          await secondPopup
+            .locator('[data-testid="passkey-name-input"]')
+            .fill(config.name)
+          await secondPopup.locator('[data-testid="continue-button"]').click()
+        },
+      )
+      this.passkeyCredentials =
+        await this.passkeyAuthenticator.exportCredentials()
+    } else if (action === "approve") {
       // Approve: popup is the transaction popup
-      if (!this.passkeyAuthenticator) {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(popup);
+      if (this.passkeyAuthenticator) {
+        await this.passkeyAuthenticator.setPage(popup)
       } else {
-        await this.passkeyAuthenticator.setPage(popup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(popup)
       }
       // Wait for the popup to reach the expected URL
-      const expectedUrl = "https://keys.coinbase.com/sign/wallet-send-calls";
-      let currentUrl = await popup.url();
+      const expectedUrl = "https://keys.coinbase.com/sign/wallet-send-calls"
+      let currentUrl = await popup.url()
       if (currentUrl !== expectedUrl) {
-        await popup.waitForURL(expectedUrl, { timeout: 15000 });
-        currentUrl = await popup.url();
+        await popup.waitForURL(expectedUrl, { timeout: 15000 })
+        currentUrl = await popup.url()
       }
       await this.passkeyAuthenticator.initialize({
         protocol: "ctap2",
@@ -269,18 +282,22 @@ export class CoinbaseWallet extends BaseWallet {
         hasUserVerification: true,
         isUserVerified: true,
         automaticPresenceSimulation: true,
-      });
+      })
       // Import credentials from registration
       for (const cred of this.passkeyCredentials) {
-        await this.passkeyAuthenticator.importCredential(cred);
+        await this.passkeyAuthenticator.importCredential(cred)
       }
-      await popup.waitForLoadState("domcontentloaded");
-      await popup.waitForLoadState("networkidle");
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await popup.locator('[data-testid="approve-transaction-button"]').click();
-      });
+      await popup.waitForLoadState("domcontentloaded")
+      await popup.waitForLoadState("networkidle")
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await popup
+            .locator('[data-testid="approve-transaction-button"]')
+            .click()
+        },
+      )
     } else {
-      throw new Error(`Unknown passkey popup action: ${action}`);
+      throw new Error(`Unknown passkey popup action: ${action}`)
     }
   }
 
@@ -306,12 +323,21 @@ export class CoinbaseWallet extends BaseWallet {
     // Passkey popup handling
     if (action === CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP) {
       // expects: options.mainPage, options.popup, options.passkeyAction, options.passkeyConfig
-      const mainPage = additionalOptions.mainPage as Page;
-      const popup = additionalOptions.popup as Page;
-      const passkeyAction = additionalOptions.passkeyAction as 'register' | 'approve';
-      const passkeyConfig = additionalOptions.passkeyConfig as PasskeyConfig | undefined;
-      await this.handlePasskeyPopup(mainPage, popup, passkeyAction, passkeyConfig);
-      return;
+      const mainPage = additionalOptions.mainPage as Page
+      const popup = additionalOptions.popup as Page
+      const passkeyAction = additionalOptions.passkeyAction as
+        | "register"
+        | "approve"
+      const passkeyConfig = additionalOptions.passkeyConfig as
+        | PasskeyConfig
+        | undefined
+      await this.handlePasskeyPopup(
+        mainPage,
+        popup,
+        passkeyAction,
+        passkeyConfig,
+      )
+      return
     }
 
     switch (action) {

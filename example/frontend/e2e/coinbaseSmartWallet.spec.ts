@@ -1,9 +1,9 @@
 import { expect } from "@playwright/test"
 import { createOnchainTest } from "../../../src/createOnchainTest"
+import { CoinbaseSpecificActionType } from "../../../src/wallets/Coinbase"
 import type { WebAuthnCredential } from "../../../src/wallets/Coinbase/PasskeyAuthenticator"
 import { PasskeyAuthenticator } from "../../../src/wallets/Coinbase/PasskeyAuthenticator"
 import { coinbaseWalletConfig } from "./walletConfig/coinbaseWalletConfig"
-import { CoinbaseSpecificActionType } from "../../../src/wallets/Coinbase"
 
 const test = createOnchainTest(coinbaseWalletConfig)
 
@@ -13,7 +13,9 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
   }) => {
     if (!coinbase) throw new Error("Coinbase is not defined")
     // Manually initialize the authenticator for this test using the extension page
-    coinbase.passkeyAuthenticator = new PasskeyAuthenticator(coinbase.walletPage)
+    coinbase.passkeyAuthenticator = new PasskeyAuthenticator(
+      coinbase.walletPage,
+    )
     const authenticator = coinbase.passkeyAuthenticator
     await authenticator.initialize()
     const credentials = await authenticator.getCredentials()
@@ -46,16 +48,20 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
     })
 
     // 2. Use handleAction to perform registration (handles switch-to-scw-link and popup internally)
-    await coinbase.handleAction(CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP, {
-      mainPage: page,
-      popup: firstPopup,
-      passkeyAction: "register",
-      passkeyConfig,
-    })
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
+      {
+        mainPage: page,
+        popup: firstPopup,
+        passkeyAction: "register",
+        passkeyConfig,
+      },
+    )
     const authenticator = coinbase.passkeyAuthenticator
       ? coinbase.passkeyAuthenticator
       : coinbase.authenticator
-    if (!authenticator) throw new Error("Authenticator is null after registration")
+    if (!authenticator)
+      throw new Error("Authenticator is null after registration")
     const credentials = await authenticator.getCredentials()
     expect(
       credentials.some(
@@ -89,16 +95,20 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
     })
 
     // 2. Use handleAction to perform registration (handles switch-to-scw-link and popup internally)
-    await coinbase.handleAction(CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP, {
-      mainPage: page,
-      popup: firstPopup,
-      passkeyAction: "register",
-      passkeyConfig,
-    })
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
+      {
+        mainPage: page,
+        popup: firstPopup,
+        passkeyAction: "register",
+        passkeyConfig,
+      },
+    )
     const authenticator = coinbase.passkeyAuthenticator
       ? coinbase.passkeyAuthenticator
       : coinbase.authenticator
-    if (!authenticator) throw new Error("Authenticator is null after registration")
+    if (!authenticator)
+      throw new Error("Authenticator is null after registration")
     const credentials = await authenticator.getCredentials()
     expect(
       credentials.some(
@@ -120,10 +130,13 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
     await popup.waitForLoadState("domcontentloaded")
 
     // Use handleAction to approve the transaction with passkey
-    await coinbase.handleAction(CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP, {
-      popup,
-      passkeyAction: "approve",
-    })
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
+      {
+        popup,
+        passkeyAction: "approve",
+      },
+    )
 
     // Check for 'Successful' text on the main page after transaction
     await expect(
