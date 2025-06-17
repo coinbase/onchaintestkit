@@ -283,7 +283,9 @@ export class LocalNodeManager {
   async reset(forkBlock?: bigint): Promise<void> {
     await this.send(
       "anvil_reset",
-      forkBlock ? [{ forking: { blockNumber: forkBlock } }] : [],
+      forkBlock
+        ? [{ forking: { blockNumber: `0x${forkBlock.toString(16)}` } }]
+        : [],
     )
   }
 
@@ -347,7 +349,7 @@ export class LocalNodeManager {
    * @param balance - New balance in wei
    */
   async setBalance(address: string, balance: bigint): Promise<void> {
-    await this.send("anvil_setBalance", [address, balance])
+    await this.send("anvil_setBalance", [address, `0x${balance.toString(16)}`])
   }
 
   /**
@@ -391,7 +393,9 @@ export class LocalNodeManager {
    * @param fee - Base fee in wei
    */
   async setNextBlockBaseFeePerGas(fee: bigint): Promise<void> {
-    await this.send("anvil_setNextBlockBaseFeePerGas", [fee])
+    await this.send("anvil_setNextBlockBaseFeePerGas", [
+      `0x${fee.toString(16)}`,
+    ])
   }
 
   /**
@@ -399,7 +403,7 @@ export class LocalNodeManager {
    * @param price - Min gas price in wei
    */
   async setMinGasPrice(price: bigint): Promise<void> {
-    await this.send("anvil_setMinGasPrice", [price])
+    await this.send("anvil_setMinGasPrice", [`0x${price.toString(16)}`])
   }
 
   // Chain Management
@@ -499,6 +503,7 @@ export class LocalNodeManager {
       throw new Error("Node not started")
     }
 
+    // BigInts must be converted to hex strings for Anvil's RPC methods
     return this.provider.send(method, params)
   }
 }
