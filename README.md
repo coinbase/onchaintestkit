@@ -17,6 +17,8 @@ npm install -g corepack
 yarn set version 4.9.2
 ```
 
+And then run this to install the dependencies: 
+
 ```bash
 npm install --save-dev @playwright/test @coinbase/onchaintestkit
 # or

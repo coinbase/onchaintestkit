@@ -68,5 +68,10 @@
     ".": "./src/index.ts",
     "./src/*": "./src/*"
   },
-  "packageManager": "yarn@4.9.2"
+  "packageManager": "yarn@4.9.2",
+  "resolutions": {
+    "ws": "^8.17.1",
+    "@babel/runtime": "^7.26.10",
+    "brace-expansion": "^2.0.2"
+  }
 }

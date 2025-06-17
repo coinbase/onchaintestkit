@@ -6,9 +6,14 @@ on:
   pull_request:
     branches: [master]
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    environment: CI
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4

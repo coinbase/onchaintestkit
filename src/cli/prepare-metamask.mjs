@@ -78,10 +78,27 @@ async function setupMetaMaskExtraction() {
       // Verify the final URL is trusted
       const finalUrl = response.url
       const finalUrlObj = new URL(finalUrl)
-      if (
-        !finalUrlObj.hostname.endsWith("github.com") &&
-        !finalUrlObj.hostname.endsWith("githubusercontent.com")
-      ) {
+
+      // Function to check if a hostname is a valid subdomain of a base domain
+      const isValidSubdomainOf = (hostname, baseDomain) => {
+        if (hostname === baseDomain) return true
+
+        const suffix = `.${baseDomain}`
+        if (!hostname.endsWith(suffix)) return false
+
+        // Check that what comes before is a valid subdomain (no dots immediately before the suffix)
+        const subdomainPart = hostname.slice(0, -suffix.length)
+        return subdomainPart.length > 0 && !subdomainPart.endsWith(".")
+      }
+
+      const hostname = finalUrlObj.hostname.toLowerCase()
+
+      // Check if hostname is from GitHub or GitHubUserContent domains
+      const isAllowed =
+        isValidSubdomainOf(hostname, "github.com") ||
+        isValidSubdomainOf(hostname, "githubusercontent.com")
+
+      if (!isAllowed) {
         throw new Error(`Redirect to untrusted host: ${finalUrlObj.hostname}`)
       }
 

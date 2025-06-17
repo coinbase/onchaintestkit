@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [master]
 
+permissions:
+  contents: read
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    environment: CI
 
     steps:
       # Checkout repository
@@ -33,7 +37,7 @@ jobs:
       - name: Set E2E env variables
         working-directory: example/frontend
         run: |
-          echo "E2E_TEST_SEED_PHRASE=beyond sport exotic joy ketchup kick quarter all gas orient gorilla purse" > .env
+          echo "E2E_TEST_SEED_PHRASE=${{ secrets.E2E_TEST_SEED_PHRASE }}" > .env
 
       # Install frontend workspace dependencies (Ensures its own deps are available)
       - name: Install frontend dependencies
