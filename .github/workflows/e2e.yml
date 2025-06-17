@@ -67,4 +67,4 @@ jobs:
       # Run the end-to-end test suite under virtual display
       - name: Run E2E tests
         working-directory: example/frontend
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" yarn test:e2e 
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" yarn test:e2e --workers=2
