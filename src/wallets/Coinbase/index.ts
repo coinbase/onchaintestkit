@@ -515,10 +515,14 @@ export class CoinbaseWallet extends BaseWallet {
     }
   }
 
+  /**
+   * Identify the notification type from a notification popup Page (not the main extension page)
+   * @param notificationPopupPage The Playwright Page for the notification popup
+   */
   async identifyNotificationType(
-    page: import("@playwright/test").Page,
+    notificationPopupPage: import("@playwright/test").Page,
   ): Promise<string> {
-    return this.notificationPage.identifyNotificationType(page)
+    return this.notificationPage.identifyNotificationType(notificationPopupPage)
   }
 
   // Public getters for SmartWallet integration
