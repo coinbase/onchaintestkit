@@ -46,6 +46,7 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
     // Check notification type after registration popup
     // const notifType1 = await coinbase.notificationPage.identifyNotificationType(firstPopup)
     // console.log("Notification type after registration:", notifType1)
+
     // 2. Use handleAction to perform registration (handles switch-to-scw-link and popup internally)
     await coinbase.handleAction(
       CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
@@ -96,6 +97,7 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
     // Check notification type after registration popup
     // const notifType1 = await coinbase.notificationPage.identifyNotificationType(firstPopup)
     // console.log("Notification type after registration:", notifType1)
+
     // 2. Use handleAction to perform registration (handles switch-to-scw-link and popup internally)
     await coinbase.handleAction(
       CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
@@ -134,6 +136,7 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
     // Check notification type after transaction popup
     // const notifType2 = await coinbase.notificationPage.identifyNotificationType(popup)
     // console.log("Notification type after transaction:", notifType2)
+
     // Use handleAction to approve the transaction with passkey
     await coinbase.handleAction(
       CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
@@ -141,6 +144,7 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
         popup: popup,
         passkeyAction: "approve",
         passkeyConfig,
+
       },
     )
 
@@ -318,3 +322,4 @@ test.describe("coinbase wallet sdk tests", () => {
     )
   })
 })
+

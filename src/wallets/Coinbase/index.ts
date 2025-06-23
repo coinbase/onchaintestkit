@@ -224,6 +224,7 @@ export class CoinbaseWallet extends BaseWallet {
     config?: PasskeyConfig,
   ): Promise<void> {
     if (action === "registerWithCBExtension") {
+
       // Registration: popup is the first popup, need to click switch and wait for second popup
       const firstPopup = popup
       // Click the switch-to-scw-link and wait for the second popup
@@ -340,6 +341,7 @@ export class CoinbaseWallet extends BaseWallet {
     } else if (action === "approve") {
       // Approve: popup is the transaction popup
 
+
       if (this.passkeyAuthenticator) {
         await this.passkeyAuthenticator.setPage(popup)
       } else {
@@ -356,6 +358,7 @@ export class CoinbaseWallet extends BaseWallet {
           url => expectedUrls.some(prefix => String(url).startsWith(prefix)),
           { timeout: 15000 },
         )
+
         currentUrl = await popup.url()
       }
       await this.passkeyAuthenticator.initialize({
@@ -403,6 +406,26 @@ export class CoinbaseWallet extends BaseWallet {
         | "registerWithCBExtension"
         | "registerWithSmartWalletSDK"
         | "signMessage"
+        | "approve"
+      const passkeyConfig = additionalOptions.passkeyConfig as
+        | PasskeyConfig
+        | undefined
+      await this.handlePasskeyPopup(
+        mainPage,
+        popup,
+        passkeyAction,
+        passkeyConfig,
+      )
+      return
+    }
+
+    // Passkey popup handling
+    if (action === CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP) {
+      // expects: options.mainPage, options.popup, options.passkeyAction, options.passkeyConfig
+      const mainPage = additionalOptions.mainPage as Page
+      const popup = additionalOptions.popup as Page
+      const passkeyAction = additionalOptions.passkeyAction as
+        | "register"
         | "approve"
       const passkeyConfig = additionalOptions.passkeyConfig as
         | PasskeyConfig
@@ -518,6 +541,19 @@ export class CoinbaseWallet extends BaseWallet {
     page: import("@playwright/test").Page,
   ): Promise<string> {
     return this.notificationPage.identifyNotificationType(page)
+  }
+
+  // Public getters for SmartWallet integration
+  get walletContext(): BrowserContext {
+    return this.context
+  }
+
+  get walletPage(): Page {
+    return this.page
+  }
+
+  get walletExtensionId(): string | undefined {
+    return this.extensionId
   }
 
   // Public getters for SmartWallet integration
