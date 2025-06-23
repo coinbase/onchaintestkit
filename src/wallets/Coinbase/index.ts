@@ -216,10 +216,14 @@ export class CoinbaseWallet extends BaseWallet {
   async handlePasskeyPopup(
     mainPageOrPopup: Page,
     popup: Page,
-    action: "register" | "approve",
+    action:
+      | "registerWithCBExtension"
+      | "registerWithSmartWalletSDK"
+      | "signMessage"
+      | "approve",
     config?: PasskeyConfig,
   ): Promise<void> {
-    if (action === "register") {
+    if (action === "registerWithCBExtension") {
       // Registration: popup is the first popup, need to click switch and wait for second popup
       const firstPopup = popup
       // Click the switch-to-scw-link and wait for the second popup
@@ -261,18 +265,97 @@ export class CoinbaseWallet extends BaseWallet {
       )
       this.passkeyCredentials =
         await this.passkeyAuthenticator.exportCredentials()
+    } else if (action === "registerWithSmartWalletSDK") {
+      // Registration with SDK: use the first popup directly, no switch-to-scw-link click
+      const sdkPopup = popup
+      await sdkPopup.waitForLoadState("domcontentloaded")
+      await sdkPopup.waitForSelector('button:has-text("Create an account")', {
+        timeout: 10000,
+      })
+      if (this.passkeyAuthenticator) {
+        await this.passkeyAuthenticator.setPage(sdkPopup)
+      } else {
+        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup)
+      }
+      if (!config) throw new Error("PasskeyConfig required for registration")
+      await this.passkeyAuthenticator.initialize({
+        protocol: "ctap2",
+        transport: "internal",
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: config.isUserVerified ?? true,
+        automaticPresenceSimulation: true,
+      })
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await sdkPopup.locator('button:has-text("Create an account")').click()
+          await sdkPopup
+            .locator('[data-testid="passkey-name-input"]')
+            .fill(config.name)
+          await sdkPopup.locator('[data-testid="continue-button"]').click()
+        },
+      )
+      this.passkeyCredentials =
+        await this.passkeyAuthenticator.exportCredentials()
+    } else if (action === "signMessage") {
+      const signPopup = popup
+      await signPopup.waitForLoadState("domcontentloaded")
+
+      // Wait for the popup to reach the expected URL
+      const expectedUrl = "https://keys.coinbase.com/sign/personal-sign"
+      let currentUrl = await signPopup.url()
+      if (!String(currentUrl).startsWith(expectedUrl)) {
+        await signPopup.waitForURL(url => String(url).startsWith(expectedUrl), {
+          timeout: 15000,
+        })
+        currentUrl = await signPopup.url()
+      }
+
+      if (this.passkeyAuthenticator) {
+        await this.passkeyAuthenticator.setPage(signPopup)
+      } else {
+        this.passkeyAuthenticator = new PasskeyAuthenticator(signPopup)
+      }
+      if (!config) throw new Error("PasskeyConfig required for signMessage")
+      await this.passkeyAuthenticator.initialize({
+        protocol: "ctap2",
+        transport: "internal",
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: config.isUserVerified ?? true,
+        automaticPresenceSimulation: true,
+      })
+      for (const cred of this.passkeyCredentials) {
+        await this.passkeyAuthenticator.importCredential(cred)
+      }
+      await popup.waitForLoadState("domcontentloaded")
+      await popup.waitForLoadState("networkidle")
+
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await signPopup.waitForLoadState("domcontentloaded")
+          await signPopup.locator('[data-testid="button-1"]').click()
+        },
+      )
     } else if (action === "approve") {
       // Approve: popup is the transaction popup
+
       if (this.passkeyAuthenticator) {
         await this.passkeyAuthenticator.setPage(popup)
       } else {
         this.passkeyAuthenticator = new PasskeyAuthenticator(popup)
       }
       // Wait for the popup to reach the expected URL
-      const expectedUrl = "https://keys.coinbase.com/sign/wallet-send-calls"
+      const expectedUrls = [
+        "https://keys.coinbase.com/sign/wallet-send-calls",
+        "https://keys.coinbase.com/sign/eth-send-transaction",
+      ]
       let currentUrl = await popup.url()
-      if (currentUrl !== expectedUrl) {
-        await popup.waitForURL(expectedUrl, { timeout: 15000 })
+      if (!expectedUrls.some(prefix => String(currentUrl).startsWith(prefix))) {
+        await popup.waitForURL(
+          url => expectedUrls.some(prefix => String(url).startsWith(prefix)),
+          { timeout: 15000 },
+        )
         currentUrl = await popup.url()
       }
       await this.passkeyAuthenticator.initialize({
@@ -311,22 +394,15 @@ export class CoinbaseWallet extends BaseWallet {
       throw NO_EXTENSION_ID_ERROR
     }
 
-    // Ensure we're on the extension page
-    const extensionUrl = `chrome-extension://${this.extensionId}/index.html?inPageRequest=false`
-    if (
-      !this.page.url().startsWith(`chrome-extension://${this.extensionId}/`)
-    ) {
-      await this.page.goto(extensionUrl, { waitUntil: "domcontentloaded" })
-      await this.page.waitForLoadState("networkidle")
-    }
-
     // Passkey popup handling
     if (action === CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP) {
       // expects: options.mainPage, options.popup, options.passkeyAction, options.passkeyConfig
       const mainPage = additionalOptions.mainPage as Page
       const popup = additionalOptions.popup as Page
       const passkeyAction = additionalOptions.passkeyAction as
-        | "register"
+        | "registerWithCBExtension"
+        | "registerWithSmartWalletSDK"
+        | "signMessage"
         | "approve"
       const passkeyConfig = additionalOptions.passkeyConfig as
         | PasskeyConfig
@@ -438,11 +514,10 @@ export class CoinbaseWallet extends BaseWallet {
     }
   }
 
-  async identifyNotificationType(): Promise<string> {
-    if (!this.extensionId) {
-      throw NO_EXTENSION_ID_ERROR
-    }
-    return this.notificationPage.identifyNotificationType(this.extensionId)
+  async identifyNotificationType(
+    page: import("@playwright/test").Page,
+  ): Promise<string> {
+    return this.notificationPage.identifyNotificationType(page)
   }
 
   // Public getters for SmartWallet integration

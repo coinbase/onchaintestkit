@@ -43,20 +43,20 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
       page.click("#wallet-type-smart"),
     ])
     await firstPopup.waitForLoadState("domcontentloaded")
-    await firstPopup.waitForSelector('[data-testid="switch-to-scw-link"]', {
-      timeout: 10000,
-    })
-
+    // Check notification type after registration popup
+    // const notifType1 = await coinbase.notificationPage.identifyNotificationType(firstPopup)
+    // console.log("Notification type after registration:", notifType1)
     // 2. Use handleAction to perform registration (handles switch-to-scw-link and popup internally)
     await coinbase.handleAction(
       CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
       {
         mainPage: page,
         popup: firstPopup,
-        passkeyAction: "register",
+        passkeyAction: "registerWithCBExtension",
         passkeyConfig,
       },
     )
+
     const authenticator = coinbase.passkeyAuthenticator
       ? coinbase.passkeyAuthenticator
       : coinbase.authenticator
@@ -93,17 +93,20 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
     await firstPopup.waitForSelector('[data-testid="switch-to-scw-link"]', {
       timeout: 10000,
     })
-
+    // Check notification type after registration popup
+    // const notifType1 = await coinbase.notificationPage.identifyNotificationType(firstPopup)
+    // console.log("Notification type after registration:", notifType1)
     // 2. Use handleAction to perform registration (handles switch-to-scw-link and popup internally)
     await coinbase.handleAction(
       CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
       {
         mainPage: page,
         popup: firstPopup,
-        passkeyAction: "register",
+        passkeyAction: "registerWithCBExtension",
         passkeyConfig,
       },
     )
+
     const authenticator = coinbase.passkeyAuthenticator
       ? coinbase.passkeyAuthenticator
       : coinbase.authenticator
@@ -128,13 +131,16 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
 
     // Wait for the popup to load
     await popup.waitForLoadState("domcontentloaded")
-
+    // Check notification type after transaction popup
+    // const notifType2 = await coinbase.notificationPage.identifyNotificationType(popup)
+    // console.log("Notification type after transaction:", notifType2)
     // Use handleAction to approve the transaction with passkey
     await coinbase.handleAction(
       CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
       {
-        popup,
+        popup: popup,
         passkeyAction: "approve",
+        passkeyConfig,
       },
     )
 
@@ -150,4 +156,165 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
   //     // Pause for manual exploration
   //     await page.pause()
   //   })
+})
+
+// New test suite for Coinbase Wallet SDK
+
+test.describe("coinbase wallet sdk tests", () => {
+  test("should register a passkey via SDK and find it in the authenticator", async ({
+    page,
+    coinbase,
+  }) => {
+    if (!coinbase) throw new Error("Coinbase is not defined")
+    await page.goto("https://coinbase.github.io/coinbase-wallet-sdk/")
+    await page.waitForLoadState("networkidle")
+    const passkeyConfig = {
+      name: "Minimal Test Passkey",
+      rpId: "keys.coinbase.com",
+      rpName: "Coinbase Smart Wallet",
+      userId: "test-user-123",
+      isUserVerified: true,
+    }
+    await page.getByRole("button", { name: "Option: all" }).click()
+    await page.getByRole("menuitem", { name: "smartWalletOnly" }).click()
+    await page
+      .locator(
+        'form:has(code:has-text("eth_requestAccounts")) button[type="submit"]',
+      )
+      .click()
+
+    const [firstPopup] = await Promise.all([
+      page.context().waitForEvent("page"),
+      await page
+        .locator(
+          'form:has(code:has-text("eth_requestAccounts")) button[type="submit"]',
+        )
+        .click(),
+    ])
+    await firstPopup.waitForLoadState("domcontentloaded")
+    // No switch-to-scw-link click for SDK
+
+    // Check notification type after registration popup
+    // const notifType1 = await coinbase.notificationPage.identifyNotificationType(firstPopup)
+    // console.log("Notification type after registration:", notifType1)
+    // 2. Use handleAction to perform registration with SDK (no switch-to-scw-link)
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
+      {
+        mainPage: page,
+        popup: firstPopup,
+        passkeyAction: "registerWithSmartWalletSDK",
+        passkeyConfig,
+      },
+    )
+
+    const authenticator = coinbase.passkeyAuthenticator
+      ? coinbase.passkeyAuthenticator
+      : coinbase.authenticator
+    if (!authenticator)
+      throw new Error("Authenticator is null after registration")
+    const credentials = await authenticator.getCredentials()
+    expect(credentials.some(c => c.rpId === "keys.coinbase.com")).toBe(true)
+  })
+
+  test("Full SDK test suite (import wallet, send transaction, sign message)", async ({
+    page,
+    coinbase,
+  }) => {
+    if (!coinbase) throw new Error("Coinbase is not defined")
+    await page.goto("https://coinbase.github.io/coinbase-wallet-sdk/")
+    await page.waitForLoadState("networkidle")
+    const passkeyConfig = {
+      name: "Minimal Test Passkey",
+      rpId: "keys.coinbase.com",
+      rpName: "Coinbase Smart Wallet",
+      userId: "test-user-123",
+      isUserVerified: true,
+    }
+
+    await page.getByRole("button", { name: "Option: all" }).click()
+    await page.getByRole("menuitem", { name: "smartWalletOnly" }).click()
+    await page
+      .locator(
+        'form:has(code:has-text("eth_requestAccounts")) button[type="submit"]',
+      )
+      .click()
+
+    const [firstPopup] = await Promise.all([
+      page.context().waitForEvent("page"),
+      await page
+        .locator(
+          'form:has(code:has-text("eth_requestAccounts")) button[type="submit"]',
+        )
+        .click(),
+    ])
+    await firstPopup.waitForLoadState("domcontentloaded")
+    // No switch-to-scw-link click for SDK
+
+    // 2. Use handleAction to perform registration with SDK (no switch-to-scw-link)
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
+      {
+        mainPage: page,
+        popup: firstPopup,
+        passkeyAction: "registerWithSmartWalletSDK",
+        passkeyConfig,
+      },
+    )
+
+    const authenticator = coinbase.passkeyAuthenticator
+      ? coinbase.passkeyAuthenticator
+      : coinbase.authenticator
+    if (!authenticator)
+      throw new Error("Authenticator is null after registration")
+    const credentials = await authenticator.getCredentials()
+    expect(credentials.some(c => c.rpId === "keys.coinbase.com")).toBe(true)
+
+    await page.waitForTimeout(3000)
+
+    const [secondPopup] = await Promise.all([
+      page.context().waitForEvent("page"),
+      await page.getByRole("button", { name: "Example Tx" }).click(),
+    ])
+    await secondPopup.waitForLoadState("domcontentloaded")
+    // Check notification type after transaction popup
+    // const notifType2 = await coinbase.notificationPage.identifyNotificationType(secondPopup)
+    // console.log("Notification type after transaction:", notifType2)
+
+    // Use handleAction to approve the transaction with passkey
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
+      {
+        popup: secondPopup,
+        passkeyAction: "approve",
+        passkeyConfig,
+      },
+    )
+
+    // await page.pause()
+
+    await page.waitForTimeout(6000)
+
+    const [thirdPopup] = await Promise.all([
+      page.context().waitForEvent("page"),
+      await page
+        .locator('.chakra-accordion__panel button:has-text("Example Message")')
+        .first()
+        .click(),
+    ])
+    await thirdPopup.waitForLoadState("domcontentloaded")
+    // Check notification type after sign message popup
+    // const notifType3 = await coinbase.notificationPage.identifyNotificationType(thirdPopup)
+    // console.log("Notification type after sign message:", notifType3)
+    // 3. Use handleAction to sign a message with the passkey
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
+      {
+        mainPage: page,
+        popup: thirdPopup,
+        passkeyAction: "signMessage",
+        passkeyConfig,
+      },
+    )
+  })
 })
