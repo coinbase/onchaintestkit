@@ -144,7 +144,6 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
         popup: popup,
         passkeyAction: "approve",
         passkeyConfig,
-
       },
     )
 
@@ -322,4 +321,3 @@ test.describe("coinbase wallet sdk tests", () => {
     )
   })
 })
-
