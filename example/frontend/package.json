@@ -17,7 +17,7 @@
     "@coinbase/onchaintestkit": "workspace:*",
     "@tanstack/react-query": "^5",
     "dotenv": "^16.4.7",
-    "next": "^14.2.30",
+    "next": "^15.3.4",
     "react": "^18",
     "react-dom": "^18",
     "viem": "^2.17.4",
