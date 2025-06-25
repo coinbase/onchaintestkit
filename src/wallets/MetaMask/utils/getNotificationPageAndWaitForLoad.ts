@@ -1,12 +1,11 @@
+import { LoadingStateDetector } from "../../../utils"
 import type { BrowserContext, Page } from "@playwright/test"
-import { waitForMetaMaskLoad, waitUntilStable } from "./waitFor"
 
 export async function getNotificationPageAndWaitForLoad(
   context: BrowserContext,
   extensionId: string,
-) {
+): Promise<Page> {
   const notificationPageUrl = `chrome-extension://${extensionId}/notification.html`
-  console.log("notificationPageUrl", notificationPageUrl)
 
   const isNotificationPage = (page: Page) =>
     page.url().includes(notificationPageUrl)
@@ -19,7 +18,8 @@ export async function getNotificationPageAndWaitForLoad(
     })
   }
 
-  await waitUntilStable(notificationPage)
+  // Wait for DOM content to load (direct Playwright call instead of waitUntilStable)
+  await notificationPage.waitForLoadState("domcontentloaded")
 
   // set pop-up window view port
   await notificationPage.setViewportSize({
@@ -27,5 +27,8 @@ export async function getNotificationPageAndWaitForLoad(
     height: 592,
   })
 
-  return waitForMetaMaskLoad(notificationPage)
+  // Wait for MetaMask loading indicators to disappear
+  await LoadingStateDetector.waitForPageLoadingComplete(notificationPage, 10000)
+
+  return notificationPage
 }

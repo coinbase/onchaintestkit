@@ -1,5 +1,5 @@
+import { ConditionWatcher } from "../../../../../utils/ConditionWatcher"
 import type { Page } from "@playwright/test"
-import { waitForCondition } from "../../../utils/waitFor"
 
 export async function importWalletFromPrivateKey(
   page: Page,
@@ -32,13 +32,16 @@ export async function importWalletFromPrivateKey(
   await importButton.click()
 
   // Wait for import button to disappear, indicating success
-  const isImportButtonHidden = await waitForCondition(
-    async () => importButton.isHidden(),
-    1_000,
-    false,
-  )
-
-  if (!isImportButtonHidden) {
+  try {
+    await ConditionWatcher.waitForCondition(
+      async () => {
+        const isHidden = await importButton.isHidden()
+        return isHidden ? true : null
+      },
+      1_000,
+      "import button to disappear",
+    )
+  } catch {
     // If button still visible, get error message
     const errorText = await page
       .locator(

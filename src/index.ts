@@ -19,5 +19,4 @@ export type {
 } from "./wallets/types"
 
 // Utils
-export { setupMetaMask } from "./wallets/MetaMask/utils/prepareExtension"
 export { setupRpcPortInterceptor } from "./node/NetworkInterceptor"

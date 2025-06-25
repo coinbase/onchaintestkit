@@ -1,5 +1,5 @@
+import { ConditionWatcher } from "../../../utils"
 import type { Locator } from "@playwright/test"
-import { waitFor } from "./waitFor"
 
 export async function toggle(toggleLocator: Locator) {
   const classes = await toggleLocator.getAttribute("class", { timeout: 3_000 })
@@ -12,21 +12,25 @@ export async function toggle(toggleLocator: Locator) {
 
   await toggleLocator.click()
 
-  const waitForAction = async () => {
-    const classes = await toggleLocator.getAttribute("class")
+  const waitForAction = async (): Promise<boolean | null> => {
+    const updatedClasses = await toggleLocator.getAttribute("class")
 
-    if (!classes) {
+    if (!updatedClasses) {
       throw new Error(
-        "[ToggleShowTestNetworks] Toggle class returned null inside waitFor",
+        "[ToggleShowTestNetworks] Toggle class returned null inside ConditionWatcher",
       )
     }
 
     if (isOn) {
-      return classes.includes("toggle-button--off")
+      return updatedClasses.includes("toggle-button--off") ? true : null
     }
 
-    return classes.includes("toggle-button--on")
+    return updatedClasses.includes("toggle-button--on") ? true : null
   }
 
-  await waitFor(waitForAction, 3_000, true)
+  await ConditionWatcher.waitForCondition(
+    waitForAction,
+    3_000,
+    "toggle state change",
+  )
 }

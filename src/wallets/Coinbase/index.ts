@@ -7,7 +7,6 @@ import {
   BaseActionType,
   BaseWallet,
 } from "../BaseWallet"
-import { syncStorage } from "../MetaMask/utils/syncStorage"
 import { CoinbaseConfig } from "../types"
 import { NetworkConfig } from "../types"
 import {
@@ -15,7 +14,7 @@ import {
   WebAuthnCredential,
 } from "./PasskeyAuthenticator"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
-import { setupCoinbase } from "./utils/prepareExtension"
+import path from "node:path"
 
 // Extend BaseActionType with Coinbase-specific actions
 export enum CoinbaseSpecificActionType {
@@ -31,9 +30,10 @@ export enum CoinbaseSpecificActionType {
 
 type CoinbaseActionType = BaseActionType | CoinbaseSpecificActionType
 
-const NO_EXTENSION_ID_ERROR = new Error(
-  "Coinbase Wallet extensionId is not set",
+const WALLET_CONNECTION_ERROR = new Error(
+  "Coinbase Wallet extension connection not established",
 )
+const COINBASE_VERSION = "3.117.1"
 
 export type PasskeyConfig = {
   name: string
@@ -93,13 +93,9 @@ export class CoinbaseWallet extends BaseWallet {
 
     // Handle cookie and storage transfer if currentContext exists
     if (currentContext) {
-      const { cookies, origins } = await currentContext.storageState()
+      const { cookies } = await currentContext.storageState()
       if (cookies) {
         await context.addCookies(cookies)
-      }
-      if (origins && origins.length > 0) {
-        // @ts-expect-error - Type mismatch, but the syncStorage function can handle this
-        await syncStorage(origins, context)
       }
     }
 
@@ -152,7 +148,15 @@ export class CoinbaseWallet extends BaseWallet {
           )
         }
 
-        const coinbasePath = await setupCoinbase()
+        // Get coinbase extension path (assumes prepare-coinbase.mjs was run first)
+        const cacheDir = path.join(
+          process.cwd(),
+          "e2e",
+          ".cache",
+          "coinbase-extension",
+        )
+        const coinbasePath = path.join(cacheDir, `coinbase-${COINBASE_VERSION}`)
+
         console.log("Coinbase extension prepared at:", coinbasePath)
 
         const browserArgs = [
@@ -392,7 +396,7 @@ export class CoinbaseWallet extends BaseWallet {
     const { approvalType, ...additionalOptions } = options ?? {}
 
     if (!this.extensionId) {
-      throw NO_EXTENSION_ID_ERROR
+      throw WALLET_CONNECTION_ERROR
     }
 
     // Passkey popup handling
