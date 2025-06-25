@@ -116,10 +116,8 @@ export class ConditionWatcher<T> {
       }
 
       // Don't delay after the last attempt or if we're about to timeout
-      if (
-        this.shouldContinue() &&
-        this.attempts < this.options.retryOptions?.config.maxAttempts
-      ) {
+      const maxAttempts = this.options.retryOptions?.config.maxAttempts ?? 50
+      if (this.shouldContinue() && this.attempts < maxAttempts) {
         const delay = delayFn(this.attempts - 1)
         await this.sleep(delay)
       }
@@ -209,8 +207,8 @@ export class ConditionWatcher<T> {
   private shouldContinue(): boolean {
     const elapsed = Date.now() - this.startTime
     const withinTimeout = elapsed < this.options.timeout
-    const withinAttempts =
-      this.attempts < this.options.retryOptions?.config.maxAttempts
+    const maxAttempts = this.options.retryOptions?.config.maxAttempts ?? 50
+    const withinAttempts = this.attempts < maxAttempts
 
     return withinTimeout && withinAttempts
   }

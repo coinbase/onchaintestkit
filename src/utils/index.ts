@@ -1,6 +1,10 @@
 // Core utility classes for onchainTestKit
 export {
-  RetryStrategy,
+  exponentialBackoff,
+  linearBackoff,
+  customStrategy,
+  createDelayFunction,
+  executeWithRetry,
   type BackoffConfig,
   type RetryOptions,
 } from "./RetryStrategy"
