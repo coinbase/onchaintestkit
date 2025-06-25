@@ -8,9 +8,9 @@ import { confirmTransaction, rejectTransaction } from "./actions/transaction"
  */
 export enum NotificationPageType {
   CONNECT = "connect",
-  TRANSACTION = "transaction",
+  SIGNATURE = "signature",
   TOKEN_PERMISSION = "token_permission",
-  SPENDING_CAP_REMOVAL = "spending_cap_removal",
+  SPENDING_CAP = "spending_cap",
 }
 
 /**
@@ -79,11 +79,59 @@ export class NotificationPage extends BasePage {
     console.log("Rejecting spending cap removal")
   }
 
-  async identifyNotificationType(_extensionId: string): Promise<string> {
-    // TODO: Implement notification type identification for Coinbase
-    // This should:
-    // 1. Check the notification page content
-    // 2. Return the appropriate NotificationPageType
-    return NotificationPageType.CONNECT
+  async identifyNotificationType(
+    notificationPage: import("@playwright/test").Page,
+    _checkTimeout = 10000,
+  ): Promise<NotificationPageType> {
+    let pageContent = ""
+    let mainText = ""
+    try {
+      // Poll for up to 3 seconds for non-empty body content
+      for (let i = 0; i < 10; i++) {
+        pageContent = (await notificationPage.textContent("body")) || ""
+        if (pageContent.trim()) break
+        await notificationPage.waitForTimeout(300)
+      }
+      // If still empty, try [data-testid="app-main"]
+      if (!pageContent.trim()) {
+        mainText =
+          (await notificationPage.textContent('[data-testid="app-main"]')) || ""
+      }
+    } catch (_err) {
+      console.warn(
+        "Notification page was closed before type could be identified.",
+      )
+      throw new Error(
+        "Notification popup closed before type could be identified.",
+      )
+    }
+
+    const checks = [
+      { type: NotificationPageType.SIGNATURE, text: "network fee" },
+      {
+        type: NotificationPageType.SIGNATURE,
+        text: "previewing your transaction",
+      },
+      { type: NotificationPageType.SIGNATURE, text: "signing with" },
+      { type: NotificationPageType.CONNECT, text: "connect" },
+      // { type: NotificationPageType.TOKEN_PERMISSION, text: "token permission" },
+      { type: NotificationPageType.SPENDING_CAP, text: "Set a spend limit" },
+    ]
+
+    // Case-insensitive search for each check
+    for (const { type, text } of checks) {
+      if (
+        pageContent.toLowerCase().includes(text.toLowerCase()) ||
+        mainText.toLowerCase().includes(text.toLowerCase())
+      ) {
+        return type
+      }
+    }
+    throw new Error(
+      `Unknown notification type: no known text found. Body text: ${pageContent.substring(
+        0,
+        200,
+      )} Main text: ${mainText.substring(0, 200)}`,
+    )
   }
 }
