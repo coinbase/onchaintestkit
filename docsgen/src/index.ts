@@ -1,0 +1,7 @@
+export { scanFiles } from "./scanner.js"
+export { groupComponents } from "./grouper.js"
+export { chunkComponent } from "./chunker.js"
+export { buildPrompt } from "./promptBuilder.js"
+export { LlmClient } from "./llmClient.js"
+export { writeDoc } from "./docWriter.js"
+export type { DocsGenConfig, Component, Chunk } from "./types.js" 

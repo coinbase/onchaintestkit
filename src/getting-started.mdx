@@ -1,0 +1,162 @@
+# Getting Started with Onchain Test Kit
+
+This page stitches together the **core building blocks** located at the root of `src/`—the parts you touch first when wiring OCTK into a project.
+
+* `configBuilder.ts` – fluent API to describe wallets + local node  
+* `createOnchainTest.ts` – turns that config into a fully-featured Playwright `test` object  
+* `types.ts` – shared type aliases exported for your editor's auto-complete  
+* `index.ts` – public barrel file (what you `import` from)  
+* `playwright.config.ts` – starter Playwright configuration optimised for E2E + local nodes  
+* `constants.ts` – misc globals (e.g. cache dir) used by other modules
+
+---
+
+## 1. Configuration Builder (`configure()`)
+
+Located in **`configBuilder.ts`**, the builder is the canonical way to create a `WalletFixtureOptions` object.
+
+```ts
+import { configure } from '@coinbase/onchaintestkit';
+import { baseSepolia } from 'viem/chains';
+
+export const octkOptions = configure()
+  .withLocalNode({ chainId: 1337 })   // optional – spins up Anvil automatically
+  .withMetaMask()                     // or .withCoinbase()
+  .withNetwork({
+    name: baseSepolia.name,
+    rpcUrl: baseSepolia.rpcUrls.default.http[0],
+    chainId: baseSepolia.id,
+    symbol: baseSepolia.nativeCurrency.symbol,
+  })
+  .withSeedPhrase({                  // optional but common
+    seedPhrase: process.env.E2E_TEST_SEED_PHRASE!,
+    password: 'PASSWORD',
+  })
+  // .withCustomSetup(async wallet => {/* import tokens etc. */})
+  .build();
+```
+
+### 1.1 Why a builder?
+
+* **Type-safe chaining** – each step narrows what methods are still available.  
+* **Composable setup functions** – `withCustomSetup` chains multiple async hooks without losing order.  
+* **Wallet-specific logic** – MetaMask and Coinbase builders each patch your RPC URL when a `LocalNodeManager` port becomes available.
+
+---
+
+## 2. Creating the Playwright Test (`createOnchainTest`)
+
+Once you have `octkOptions`, feed it into **`createOnchainTest.ts`**:
+
+```ts
+import { createOnchainTest } from '@coinbase/onchaintestkit';
+import { octkOptions } from './octkOptions';
+
+export const test = createOnchainTest(octkOptions);
+```
+
+Under the hood:
+
+1. **Wallet fixture builders** – maps `options.wallets` to either `MetaMaskFixturesBuilder` or `CoinbaseFixturesBuilder`.
+2. **Node fixture** – each wallet fixture spins its own `LocalNodeManager`, meaning tests can run in parallel workers without port clashes.
+3. **Network interceptor** – if `options.nodeConfig` exists, a Playwright `route()` rewrites all `http://localhost:8545` requests to the dynamically-assigned Anvil port.
+4. **`mergeTests`** – combines all wallet (and optional node / interceptor) fixtures into a single `test` object.
+
+The resulting fixture set looks like:
+
+```ts
+interface OnchainFixtures {
+  page: Page;                 // Playwright default
+  context: BrowserContext;    // ─┐  also default
+  metamask?: MetaMask;        // │  depends on wallet
+  coinbase?: CoinbaseWallet;  // │
+  node?: LocalNodeManager;    // from wallet fixture
+  smartContractManager?: SmartContractManager; // optional helper
+}
+```
+
+Use it in tests like any other Playwright fixture environment.
+
+---
+
+## 3. Shared Types (`types.ts`)
+
+```ts
+type SupportedWallet = 'metamask' | 'coinbase';
+
+type WalletFixtureOptions = {
+  wallets: { [K in SupportedWallet]?: MetaMaskConfig | CoinbaseConfig };
+  nodeConfig?: NodeConfig;
+};
+```
+
+These aliases make it trivial to pass the right shape to `createOnchainTest` and strongly-type the fixture object you destructure in test callbacks.
+
+---
+
+## 4. Barrel Exports (`index.ts`)
+
+When you `import { configure } from '@coinbase/onchaintestkit'`, you're reading from `src/index.ts`.  It re-exports:
+
+* Public functions – `configure`, `createOnchainTest`, `setupRpcPortInterceptor` …
+* Enums – `BaseActionType`, `ActionApprovalType`, plus wallet-specific action enums.
+* All the TypeScript types so consumers don't have to deep-import path strings.
+
+Feel free to treat the package as a **single entry-point**—deep imports are only needed for advanced customisation.
+
+---
+
+## 5. Playwright Baseline (`playwright.config.ts`)
+
+The repo ships with a sensible default:
+
+* **HTML reporter** enabled – view screenshots, traces in `playwright-report/`.  
+* `fullyParallel: true` – each test file runs in its own worker unless you set `workers:`.  
+* `trace: 'on-first-retry'` – captures a trace the first time a test retries (great for flaky debugging).  
+* CI overrides:  
+  * `workers: 1` (Anvil downloads per job are heavy)  
+  * `retries: 2` for extra robustness.
+
+Override any field by adding your own root-level `playwright.config.ts`; Playwright will merge configs.
+
+---
+
+## 6. Constants (`constants.ts`)
+
+Nothing fancy yet—just `CACHE_DIR_NAME = 'e2e/onchainTestKit/.cache'`, used by extension download helpers to avoid re-fetching CRX files every test run.
+
+---
+
+## 7. Putting It All Together
+
+```ts
+// e2e/octkSetup.ts
+import { configure, createOnchainTest } from '@coinbase/onchaintestkit';
+
+export const test = createOnchainTest(
+  configure()
+    .withLocalNode()          // defaults are fine
+    .withMetaMask()
+    .withSeedPhrase({
+      seedPhrase: process.env.E2E_TEST_SEED!,
+      password: 'pw',
+    })
+    .build(),
+);
+
+test('happy path', async ({ page, metamask }) => {
+  await page.goto('https://app.fi');
+  await metamask.handleAction(BaseActionType.CONNECT_TO_DAPP);
+  // … assertions …
+});
+```
+
+Add your own `playwright.config.ts` if you need multiple browsers or extra reporters—otherwise the default one in `src/` will be used.
+
+---
+
+### Next Steps
+
+* Read **`contracts.mdx`** to see how to seed chain state deterministically.  
+* Dive into **`node.mdx`** for full Anvil control.  
+* Explore **`wallets.mdx`** for specific extension automations. 

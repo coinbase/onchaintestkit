@@ -62,7 +62,8 @@
   },
   "workspaces": [
     ".",
-    "example/frontend"
+    "example/frontend",
+    "docsgen"
   ],
   "exports": {
     ".": "./src/index.ts",
