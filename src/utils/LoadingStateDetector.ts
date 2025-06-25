@@ -1,5 +1,5 @@
-import { ConditionWatcher } from "./ConditionWatcher"
 import type { Page } from "@playwright/test"
+import { ConditionWatcher } from "./ConditionWatcher"
 
 export type LoadingElement = {
   selector: string
@@ -112,7 +112,7 @@ export class LoadingStateDetector {
           this.options.timeout,
           `${element.description} to disappear`,
         )
-      } catch (error) {
+      } catch (_error) {
         // If we can't find the selector, that's actually good - it means no loading elements
         console.log(
           `Loading check for "${element.description}" completed (${element.selector})`,

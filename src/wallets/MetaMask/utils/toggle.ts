@@ -1,5 +1,5 @@
-import { ConditionWatcher } from "../../../utils"
 import type { Locator } from "@playwright/test"
+import { ConditionWatcher } from "../../../utils"
 
 export async function toggle(toggleLocator: Locator) {
   const classes = await toggleLocator.getAttribute("class", { timeout: 3_000 })

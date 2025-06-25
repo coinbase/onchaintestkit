@@ -1,4 +1,4 @@
-import { RetryStrategy, RetryOptions } from "./RetryStrategy"
+import { RetryOptions, createDelayFunction } from "./RetryStrategy"
 
 export interface WatchOptions {
   timeout: number
@@ -35,8 +35,8 @@ export class WatchAbortedError extends Error {
 export class ConditionWatcher<T> {
   private condition: () => Promise<T | null>
   private options: WatchOptions
-  private startTime: number = 0
-  private attempts: number = 0
+  private startTime = 0
+  private attempts = 0
 
   private constructor(
     condition: () => Promise<T | null>,
@@ -75,8 +75,17 @@ export class ConditionWatcher<T> {
     this.startTime = Date.now()
     this.attempts = 0
 
-    const delayFn = RetryStrategy.createDelayFunction(
-      this.options.retryOptions!,
+    const delayFn = createDelayFunction(
+      this.options.retryOptions ?? {
+        strategy: "exponential",
+        config: {
+          baseDelay: 50,
+          maxDelay: 1000,
+          multiplier: 1.2,
+          jitter: true,
+          maxAttempts: 50,
+        },
+      },
     )
 
     while (this.shouldContinue()) {
@@ -109,7 +118,7 @@ export class ConditionWatcher<T> {
       // Don't delay after the last attempt or if we're about to timeout
       if (
         this.shouldContinue() &&
-        this.attempts < this.options.retryOptions!.config.maxAttempts
+        this.attempts < this.options.retryOptions?.config.maxAttempts
       ) {
         const delay = delayFn(this.attempts - 1)
         await this.sleep(delay)
@@ -201,7 +210,7 @@ export class ConditionWatcher<T> {
     const elapsed = Date.now() - this.startTime
     const withinTimeout = elapsed < this.options.timeout
     const withinAttempts =
-      this.attempts < this.options.retryOptions!.config.maxAttempts
+      this.attempts < this.options.retryOptions?.config.maxAttempts
 
     return withinTimeout && withinAttempts
   }
@@ -225,17 +234,21 @@ export class ConditionWatcher<T> {
 
   static async waitForElement(
     locator: () => Promise<Element | null>,
-    timeout: number = 5000,
+    timeout = 5000,
   ): Promise<Element> {
-    return this.waitForCondition(locator, timeout, "element to appear")
+    return ConditionWatcher.waitForCondition(
+      locator,
+      timeout,
+      "element to appear",
+    )
   }
 
   static async waitForValue<T>(
     getter: () => Promise<T | null | undefined>,
-    timeout: number = 5000,
+    timeout = 5000,
     description?: string,
   ): Promise<T> {
-    return this.waitForCondition(
+    return ConditionWatcher.waitForCondition(
       async () => {
         const value = await getter()
         return value !== null && value !== undefined ? value : null

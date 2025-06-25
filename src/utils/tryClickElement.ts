@@ -1,5 +1,5 @@
-import { ConditionWatcher } from "./ConditionWatcher"
 import type { Locator } from "@playwright/test"
+import { ConditionWatcher } from "./ConditionWatcher"
 
 export async function tryClickElement(
   element: Locator,

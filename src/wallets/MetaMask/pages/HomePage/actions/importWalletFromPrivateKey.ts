@@ -1,5 +1,5 @@
-import { ConditionWatcher } from "../../../../../utils/ConditionWatcher"
 import type { Page } from "@playwright/test"
+import { ConditionWatcher } from "../../../../../utils/ConditionWatcher"
 
 export async function importWalletFromPrivateKey(
   page: Page,

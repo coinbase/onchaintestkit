@@ -1,16 +1,16 @@
 import path from "node:path"
 import { chromium } from "@playwright/test"
-import fs from "fs-extra"
-import {
-  BaseWallet,
-  BaseActionType,
-  ActionOptions,
-  ActionApprovalType,
-} from "../BaseWallet"
-import { NetworkConfig, MetaMaskConfig } from "../types"
-import { getExtensionId } from "../../utils/extensionManager"
-import { HomePage, OnboardingPage, NotificationPage } from "./pages"
 import type { BrowserContext, Page } from "@playwright/test"
+import fs from "fs-extra"
+import { getExtensionId } from "../../utils/extensionManager"
+import {
+  ActionApprovalType,
+  ActionOptions,
+  BaseActionType,
+  BaseWallet,
+} from "../BaseWallet"
+import { MetaMaskConfig, NetworkConfig } from "../types"
+import { HomePage, NotificationPage, OnboardingPage } from "./pages"
 
 // Extend BaseActionType with MetaMask-specific actions
 export enum MetaMaskSpecificActionType {
@@ -70,7 +70,7 @@ export class MetaMask extends BaseWallet {
     walletConfig: MetaMaskConfig,
   ): Promise<{ metamaskPage: Page; metamaskContext: BrowserContext }> {
     // Create browser context with MetaMask extension
-    const context = await this.createContext(contextPath)
+    const context = await MetaMask.createContext(contextPath)
 
     // Handle cookie and storage transfer if currentContext exists
     if (currentContext) {
@@ -135,9 +135,7 @@ export class MetaMask extends BaseWallet {
           const manifestPath = path.join(metamaskPath, "manifest.json")
           if (!(await fs.pathExists(manifestPath))) {
             throw new Error(
-              `MetaMask extension not found at ${metamaskPath}. ` +
-                "Please run the extraction command before running tests:\n" +
-                "yarn e2e:metamask:prepare",
+              `MetaMask extension not found at ${metamaskPath}. Please run the extraction command before running tests:\nyarn e2e:metamask:prepare`,
             )
           }
         }

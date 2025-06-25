@@ -1,5 +1,5 @@
-import { LoadingStateDetector } from "../../../utils"
 import type { BrowserContext, Page } from "@playwright/test"
+import { LoadingStateDetector } from "../../../utils"
 
 export async function getNotificationPageAndWaitForLoad(
   context: BrowserContext,

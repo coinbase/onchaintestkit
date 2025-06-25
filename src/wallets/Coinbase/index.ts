@@ -1,3 +1,4 @@
+import path from "node:path"
 import type { BrowserContext, Page } from "@playwright/test"
 import { chromium } from "@playwright/test"
 import { getExtensionId } from "../../utils/extensionManager"
@@ -14,7 +15,6 @@ import {
   WebAuthnCredential,
 } from "./PasskeyAuthenticator"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
-import path from "node:path"
 
 // Extend BaseActionType with Coinbase-specific actions
 export enum CoinbaseSpecificActionType {

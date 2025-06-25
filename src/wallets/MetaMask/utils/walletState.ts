@@ -1,5 +1,5 @@
-import { LoadingStateDetector } from "../../../utils"
 import type { Page } from "@playwright/test"
+import { LoadingStateDetector } from "../../../utils"
 
 export enum WalletState {
   LOCKED = "locked",
