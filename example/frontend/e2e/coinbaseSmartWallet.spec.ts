@@ -267,6 +267,8 @@ test.describe("coinbase wallet sdk tests", () => {
 
     await page.waitForTimeout(3000)
 
+    //   await page.pause()
+
     const [secondPopup] = await Promise.all([
       page.context().waitForEvent("page"),
       await page.getByRole("button", { name: "Example Tx" }).click(),
