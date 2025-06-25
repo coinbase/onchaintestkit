@@ -1,5 +1,7 @@
+import path from "node:path"
 import { chromium } from "@playwright/test"
 import type { BrowserContext, Page } from "@playwright/test"
+import fs from "fs-extra"
 import { getExtensionId } from "../../utils/extensionManager"
 import {
   ActionApprovalType,
@@ -9,8 +11,6 @@ import {
 } from "../BaseWallet"
 import { MetaMaskConfig, NetworkConfig } from "../types"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
-import { setupMetaMask } from "./utils/prepareExtension"
-import { syncStorage } from "./utils/syncStorage"
 
 // Extend BaseActionType with MetaMask-specific actions
 export enum MetaMaskSpecificActionType {
@@ -27,7 +27,13 @@ export enum MetaMaskSpecificActionType {
 
 type MetaMaskActionType = BaseActionType | MetaMaskSpecificActionType
 
-const NO_EXTENSION_ID_ERROR = new Error("MetaMask extensionId is not set")
+const WALLET_CONNECTION_ERROR = new Error(
+  "Wallet extension connection not established",
+)
+
+// MetaMask extension constants
+const TARGET_EXTENSION_VERSION = "12.8.1"
+const SETUP_COMPLETION_MARKER = ".extraction_complete"
 
 export class MetaMask extends BaseWallet {
   readonly onboardingPage: OnboardingPage
@@ -68,13 +74,9 @@ export class MetaMask extends BaseWallet {
 
     // Handle cookie and storage transfer if currentContext exists
     if (currentContext) {
-      const { cookies, origins } = await currentContext.storageState()
+      const { cookies } = await currentContext.storageState()
       if (cookies) {
         await context.addCookies(cookies)
-      }
-      if (origins && origins.length > 0) {
-        // @ts-expect-error - Type mismatch, but the syncStorage function can handle this
-        await syncStorage(origins, context)
       }
     }
 
@@ -115,8 +117,30 @@ export class MetaMask extends BaseWallet {
           )
         }
 
-        const metamaskPath = await setupMetaMask()
-        console.log("MetaMask extension prepared at:", metamaskPath)
+        // Get MetaMask extension path (assumes prepare-metamask.mjs was run first)
+        const cacheDir = path.join(
+          process.cwd(),
+          "e2e",
+          ".cache",
+          "metamask-extension",
+        )
+        const metamaskPath = path.join(
+          cacheDir,
+          `metamask-${TARGET_EXTENSION_VERSION}`,
+        )
+        const flagPath = path.join(metamaskPath, SETUP_COMPLETION_MARKER)
+
+        // Validate that extension exists and was properly extracted
+        if (!(await fs.pathExists(flagPath))) {
+          const manifestPath = path.join(metamaskPath, "manifest.json")
+          if (!(await fs.pathExists(manifestPath))) {
+            throw new Error(
+              `MetaMask extension not found at ${metamaskPath}. Please run the extraction command before running tests:\nyarn e2e:metamask:prepare`,
+            )
+          }
+        }
+
+        console.log("MetaMask extension found at:", metamaskPath)
 
         const browserArgs = [
           `--disable-extensions-except=${metamaskPath}`,
@@ -209,7 +233,7 @@ export class MetaMask extends BaseWallet {
     const { approvalType, ...additionalOptions } = options ?? {}
 
     if (!this.extensionId) {
-      throw NO_EXTENSION_ID_ERROR
+      throw WALLET_CONNECTION_ERROR
     }
 
     switch (action) {
@@ -255,7 +279,7 @@ export class MetaMask extends BaseWallet {
       // Network actions
       case MetaMaskSpecificActionType.ADD_NETWORK:
         if (!this.extensionId) {
-          throw NO_EXTENSION_ID_ERROR
+          throw WALLET_CONNECTION_ERROR
         }
 
         // Add type safety and validation for network
@@ -269,7 +293,7 @@ export class MetaMask extends BaseWallet {
         break
       case BaseActionType.SWITCH_NETWORK:
         if (!this.extensionId) {
-          throw NO_EXTENSION_ID_ERROR
+          throw WALLET_CONNECTION_ERROR
         }
         await this.homePage.switchNetwork(
           additionalOptions.networkName as string,
@@ -318,7 +342,7 @@ export class MetaMask extends BaseWallet {
 
   async identifyNotificationType(): Promise<string> {
     if (!this.extensionId) {
-      throw NO_EXTENSION_ID_ERROR
+      throw WALLET_CONNECTION_ERROR
     }
     return this.notificationPage.identifyNotificationType(this.extensionId)
   }
