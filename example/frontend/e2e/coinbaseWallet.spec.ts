@@ -38,10 +38,6 @@ test.describe("Coinbase Wallet Setup", () => {
 
     // Connect to dapp using the UI flow
     await connectCoinbaseWallet(page, coinbase)
-
-    // Add more assertions here as needed
-    // For example, verify the wallet address is displayed on the page
-    // await expect(page.locator('[data-testid="wallet-address"]')).toBeVisible()
   })
 
   test("should import wallet from private key", async ({ coinbase }) => {
@@ -69,9 +65,6 @@ test.describe("Coinbase Wallet Setup", () => {
 
     // Wait a bit to ensure the import process is complete
     await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // Additional assertions can be added here
-    // For example, verify the imported account appears in the account list
   })
 
   test("should add Linea Testnet network", async ({ coinbase }) => {
@@ -112,18 +105,45 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
 
     await page.getByTestId("ockConnectButton").click()
 
-    await page.getByRole("button", { name: "Coinbase Wallet" }).click()
+    // await page.getByRole("button", { name: "Coinbase Wallet" }).click()
+
+    const [notificationPopup1] = await Promise.all([
+      page.context().waitForEvent("page"),
+      page
+        .getByRole("button", { name: "Coinbase Wallet" })
+        .click(),
+      // trigger the transaction (e.g., click send, etc.)
+    ])
+    await notificationPopup1.waitForLoadState("domcontentloaded")
+    const notifType1 =
+      await coinbase.notificationPage.identifyNotificationType(
+        notificationPopup1,
+      )
+    console.log("Notification type after transaction:", notifType1)
 
     // First connect to the dapp
     await coinbase.handleAction(BaseActionType.CONNECT_TO_DAPP)
 
     await inputTransactionDetails(page)
+    // Trigger the transaction, wait for the popup
+    const [notificationPopup] = await Promise.all([
+      page
+        .context()
+        .waitForEvent("page"),
+      // trigger the transaction (e.g., click send, etc.)
+    ])
+    await notificationPopup.waitForLoadState("domcontentloaded")
 
-    // Confirm the transaction in Coinbase Wallet
+    // Identify the notification type BEFORE approving/rejecting
+    const notifType =
+      await coinbase.notificationPage.identifyNotificationType(
+        notificationPopup,
+      )
+    console.log("Notification type after transaction:", notifType)
+
     await coinbase.handleAction(BaseActionType.HANDLE_TRANSACTION, {
       approvalType: ActionApprovalType.APPROVE,
     })
-
     // Verify the transaction was sent (check for success message)
     await page.getByText("Transaction confirmed!").waitFor()
   })
@@ -141,6 +161,9 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
 
     await inputTransactionDetails(page)
 
+    const notifType =
+      await coinbase.notificationPage.identifyNotificationType(page)
+    console.log("Notification type after transaction:", notifType)
     // Reject the transaction in Coinbase Wallet
     await coinbase.handleAction(BaseActionType.HANDLE_TRANSACTION, {
       approvalType: ActionApprovalType.REJECT,
@@ -148,5 +171,13 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
 
     // Verify the transaction was rejected (check for error message)
     await page.getByText("User rejected the request").waitFor()
+
+    // If you have the popup page, pass it directly to identifyNotificationType
+    // Example: const notifType = await coinbase.notificationPage.identifyNotificationType(popupPage)
+    // console.log("Notification type after rejection:", notifType)
+  })
+
+  test.only("sandbox onchainkit playground", async ({ page }) => {
+    await page.pause()
   })
 })
