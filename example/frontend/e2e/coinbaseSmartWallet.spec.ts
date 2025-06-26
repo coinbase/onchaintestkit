@@ -197,10 +197,6 @@ test.describe("coinbase wallet sdk tests", () => {
     await firstPopup.waitForLoadState("domcontentloaded")
     // No switch-to-scw-link click for SDK
 
-    // Check notification type after registration popup
-    const notifType1 =
-      await coinbase.notificationPage.identifyNotificationType(firstPopup)
-    console.log("Notification type after registration:", notifType1)
     // 2. Use handleAction to perform registration with SDK (no switch-to-scw-link)
     await coinbase.handleAction(
       CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP,
