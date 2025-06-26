@@ -137,7 +137,7 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
       // trigger the transaction (e.g., click send, etc.)
     ])
     await notificationPopup.waitForLoadState("domcontentloaded")
-    await page.waitForSelector('[data-testid="request-confirm-button"]', {
+    await notificationPopup.waitForSelector('[data-testid="request-confirm-button"]', {
       state: "visible",
       timeout: 10000,
     })
@@ -176,7 +176,7 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
       // trigger the transaction (e.g., click send, etc.)
     ])
     await notificationPopup.waitForLoadState("domcontentloaded")
-    await page.waitForSelector('[data-testid="request-cancel-button"]', {
+    await notificationPopup.waitForSelector('[data-testid="request-cancel-button"]', {
       state: "visible",
       timeout: 10000,
     })
