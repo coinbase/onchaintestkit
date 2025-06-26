@@ -194,13 +194,5 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
 
     // Verify the transaction was rejected (check for error message)
     await page.getByText("User rejected the request").waitFor()
-
-    // If you have the popup page, pass it directly to identifyNotificationType
-    // Example: const notifType = await coinbase.notificationPage.identifyNotificationType(popupPage)
-    // console.log("Notification type after rejection:", notifType)
   })
-
-  // test.only("sandbox onchainkit playground", async ({ page }) => {
-  //   await page.pause()
-  // })
 })

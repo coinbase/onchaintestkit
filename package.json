@@ -1,6 +1,6 @@
 {
   "name": "@coinbase/onchaintestkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "End-to-end testing toolkit for blockchain applications, powered by Playwright",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -68,8 +68,10 @@
     "example/frontend"
   ],
   "exports": {
-    ".": "./src/index.ts",
-    "./src/*": "./src/*"
+    ".": "./dist/src/index.js",
+    "./*": "./dist/src/*",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
   },
   "packageManager": "yarn@4.9.2",
   "resolutions": {
