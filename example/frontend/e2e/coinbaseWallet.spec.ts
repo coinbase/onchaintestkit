@@ -119,7 +119,7 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
       await coinbase.notificationPage.identifyNotificationType(
         notificationPopup1,
       )
-    console.log("Notification type after transaction:", notifType1)
+    console.log("Notification type after connecting:", notifType1)
 
     // First connect to the dapp
     await coinbase.handleAction(BaseActionType.CONNECT_TO_DAPP)
