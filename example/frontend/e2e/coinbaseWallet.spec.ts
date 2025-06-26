@@ -137,10 +137,13 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
       // trigger the transaction (e.g., click send, etc.)
     ])
     await notificationPopup.waitForLoadState("domcontentloaded")
-    await notificationPopup.waitForSelector('[data-testid="request-confirm-button"]', {
-      state: "visible",
-      timeout: 10000,
-    })
+    await notificationPopup.waitForSelector(
+      '[data-testid="request-confirm-button"]',
+      {
+        state: "visible",
+        timeout: 10000,
+      },
+    )
 
     // Identify the notification type BEFORE approving/rejecting
     const notifType =
@@ -176,10 +179,13 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
       // trigger the transaction (e.g., click send, etc.)
     ])
     await notificationPopup.waitForLoadState("domcontentloaded")
-    await notificationPopup.waitForSelector('[data-testid="request-cancel-button"]', {
-      state: "visible",
-      timeout: 10000,
-    })
+    await notificationPopup.waitForSelector(
+      '[data-testid="request-cancel-button"]',
+      {
+        state: "visible",
+        timeout: 10000,
+      },
+    )
 
     const notifType =
       await coinbase.notificationPage.identifyNotificationType(
