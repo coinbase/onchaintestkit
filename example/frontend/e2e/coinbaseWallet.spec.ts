@@ -115,6 +115,10 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
       // trigger the transaction (e.g., click send, etc.)
     ])
     await notificationPopup1.waitForLoadState("domcontentloaded")
+    await notificationPopup1.waitForSelector(
+      '[data-testid="allow-authorize-button"]',
+      { timeout: 10000 },
+    )
     const notifType1 =
       await coinbase.notificationPage.identifyNotificationType(
         notificationPopup1,
