@@ -177,7 +177,7 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
     // console.log("Notification type after rejection:", notifType)
   })
 
-  test.only("sandbox onchainkit playground", async ({ page }) => {
-    await page.pause()
-  })
+  // test.only("sandbox onchainkit playground", async ({ page }) => {
+  //   await page.pause()
+  // })
 })
