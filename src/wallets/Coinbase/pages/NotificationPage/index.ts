@@ -127,6 +127,7 @@ export class NotificationPage extends BasePage {
         return type
       }
     }
+
     throw new Error(
       `Unknown notification type: no known text found. Body text: ${pageContent.substring(
         0,
