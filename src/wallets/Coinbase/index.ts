@@ -86,6 +86,8 @@ export class CoinbaseWallet extends BaseWallet {
     contextPath: string,
     _walletConfig: CoinbaseConfig,
   ): Promise<{ coinbasePage: Page; coinbaseContext: BrowserContext }> {
+    console.log("Initializing Coinbase Wallet extension...")
+
     // Create browser context with Coinbase extension
     const context = await CoinbaseWallet.createContext(contextPath)
 
@@ -102,15 +104,18 @@ export class CoinbaseWallet extends BaseWallet {
       context,
       "Coinbase Wallet extension",
     )
+    console.log("Found Coinbase extension ID:", extensionId)
 
     // Get the extension page using the correct path from manifest.json
     const extensionUrl = `chrome-extension://${extensionId}/index.html?inPageRequest=false`
+    console.log("Opening extension URL:", extensionUrl)
 
     const coinbasePage = await context.newPage()
     await coinbasePage.goto(extensionUrl, { waitUntil: "domcontentloaded" })
 
     // Wait for extension to be ready
     await coinbasePage.waitForLoadState("networkidle")
+    console.log("Extension page loaded successfully")
 
     // Close any other pages
     const pages = context.pages()
@@ -127,6 +132,8 @@ export class CoinbaseWallet extends BaseWallet {
     contextPath: string,
     slowMo = 0,
   ): Promise<BrowserContext> {
+    console.log("Starting context creation...")
+
     // Use retry logic to handle potential race conditions when setting up extension
     const MAX_RETRIES = 3
     let lastError: Error | null = null
@@ -217,9 +224,7 @@ export class CoinbaseWallet extends BaseWallet {
       | "registerWithCBExtension"
       | "registerWithSmartWalletSDK"
       | "signMessage"
-      | "approve"
-      | "grantSpendPermission"
-      | "signIn",
+      | "approve",
     config?: PasskeyConfig,
   ): Promise<void> {
     if (action === "registerWithCBExtension") {
@@ -291,9 +296,8 @@ export class CoinbaseWallet extends BaseWallet {
           await sdkPopup.locator('[data-testid="continue-button"]').click()
         },
       )
-
-      const creds = await this.passkeyAuthenticator.exportCredentials()
-      this.passkeyCredentials = creds
+      this.passkeyCredentials =
+        await this.passkeyAuthenticator.exportCredentials()
     } else if (action === "signMessage") {
       const signPopup = popup
       await signPopup.waitForLoadState("domcontentloaded")
@@ -416,49 +420,6 @@ export class CoinbaseWallet extends BaseWallet {
             .click()
         },
       )
-    } else if (action === "signIn") {
-      const sdkPopup = popup
-      await sdkPopup.waitForLoadState("domcontentloaded")
-
-      await sdkPopup.waitForSelector('button:has-text("Sign in")', {
-        timeout: 10000,
-      })
-      if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(sdkPopup)
-      } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup)
-      }
-      await this.passkeyAuthenticator.initialize({
-        protocol: "ctap2",
-        transport: "internal",
-        hasResidentKey: true,
-        hasUserVerification: true,
-        isUserVerified: true,
-        automaticPresenceSimulation: true,
-      })
-
-      const hardcodedCredential = {
-        credentialId: "LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=",
-        isResidentCredential: true,
-        rpId: "keys-dev.coinbase.com",
-        privateKey:
-          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS",
-        userHandle: "MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0",
-        signCount: 1,
-      }
-
-      await this.passkeyAuthenticator.importCredential(hardcodedCredential)
-      await sdkPopup.waitForLoadState("domcontentloaded")
-      await sdkPopup.waitForLoadState("networkidle")
-
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
-        async () => {
-          await sdkPopup.locator('button:has-text("Sign in")').click()
-        },
-      )
-      await sdkPopup
-        .getByRole("button", { name: "Confirm", exact: true })
-        .click()
     } else {
       throw new Error(`Unknown passkey popup action: ${action}`)
     }
@@ -484,8 +445,6 @@ export class CoinbaseWallet extends BaseWallet {
         | "registerWithSmartWalletSDK"
         | "signMessage"
         | "approve"
-        | "grantSpendPermission"
-        | "signIn"
       const passkeyConfig = additionalOptions.passkeyConfig as
         | PasskeyConfig
         | undefined
@@ -594,6 +553,16 @@ export class CoinbaseWallet extends BaseWallet {
       default:
         throw new Error(`Unsupported action: ${action}`)
     }
+  }
+
+  /**
+   * Identify the notification type from a notification popup Page (not the main extension page)
+   * @param notificationPopupPage The Playwright Page for the notification popup
+   */
+  async identifyNotificationType(
+    notificationPopupPage: import("@playwright/test").Page,
+  ): Promise<string> {
+    return this.notificationPage.identifyNotificationType(notificationPopupPage)
   }
 
   // Public getters for SmartWallet integration
