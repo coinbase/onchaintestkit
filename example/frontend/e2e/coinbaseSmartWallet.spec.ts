@@ -375,6 +375,8 @@ test.describe("coinbase wallet sdk tests", () => {
         .click(),
     ])
     await sixthPopup.waitForLoadState("domcontentloaded")
+    await sixthPopup.waitForSelector('[data-testid="grant-permissions-approve-button"]', { state: 'visible', timeout: 10000 });
+
     const notifType6 =
       await coinbase.notificationPage.identifyNotificationType(sixthPopup)
     console.log("Notification type after grant permission:", notifType6)
