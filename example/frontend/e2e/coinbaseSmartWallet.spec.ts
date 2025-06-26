@@ -152,13 +152,6 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
       page.getByTestId("ockToast").getByText("Successful"),
     ).toBeVisible({ timeout: 30000 })
   })
-
-  //   test.only("sandbox onchainkit playground", async ({ page }) => {
-  //     await page.goto("https://onchainkit.xyz/playground")
-  //     await page.waitForLoadState("networkidle")
-  //     // Pause for manual exploration
-  //     await page.pause()
-  //   })
 })
 
 // New test suite for Coinbase Wallet SDK
@@ -274,8 +267,6 @@ test.describe("coinbase wallet sdk tests", () => {
 
     await page.waitForTimeout(3000)
 
-    //   await page.pause()
-
     const [secondPopup] = await Promise.all([
       page.context().waitForEvent("page"),
       await page.getByRole("button", { name: "Example Tx" }).click(),
@@ -295,8 +286,6 @@ test.describe("coinbase wallet sdk tests", () => {
         passkeyConfig,
       },
     )
-
-    // await page.pause()
 
     await page.waitForTimeout(10000)
 

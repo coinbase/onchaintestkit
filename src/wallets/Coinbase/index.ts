@@ -223,9 +223,7 @@ export class CoinbaseWallet extends BaseWallet {
     config?: PasskeyConfig,
   ): Promise<void> {
     if (action === "registerWithCBExtension") {
-      // Registration: popup is the first popup, need to click switch and wait for second popup
       const firstPopup = popup
-      // Click the switch-to-scw-link and wait for the second popup
       const [secondPopup] = await Promise.all([
         mainPageOrPopup.context().waitForEvent("page"),
         firstPopup.click('[data-testid="switch-to-scw-link"]'),
@@ -265,7 +263,6 @@ export class CoinbaseWallet extends BaseWallet {
       this.passkeyCredentials =
         await this.passkeyAuthenticator.exportCredentials()
     } else if (action === "registerWithSmartWalletSDK") {
-      // Registration with SDK: use the first popup directly, no switch-to-scw-link click
       const sdkPopup = popup
       await sdkPopup.waitForLoadState("domcontentloaded")
       await sdkPopup.waitForSelector('button:has-text("Create an account")', {
@@ -361,10 +358,6 @@ export class CoinbaseWallet extends BaseWallet {
         automaticPresenceSimulation: true,
       })
 
-      // for (const cred of this.passkeyCredentials) {
-      //   await this.passkeyAuthenticator.importCredential(cred)
-      // }
-      // Import hardcoded credential
       const hardcodedCredential = {
         credentialId: "LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=",
         isResidentCredential: true,
@@ -383,8 +376,6 @@ export class CoinbaseWallet extends BaseWallet {
         },
       )
     } else if (action === "approve") {
-      // Approve: popup is the transaction popup
-
       if (this.passkeyAuthenticator) {
         await this.passkeyAuthenticator.setPage(popup)
       } else {

@@ -90,9 +90,6 @@ test.describe("Coinbase Wallet Setup", () => {
 
     // Wait a bit to ensure the network is added
     await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // Additional assertions can be added here
-    // For example, verify the network appears in the network list
   })
 })
 
@@ -104,8 +101,6 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
     if (!coinbase) throw new Error("Coinbase wallet not initialized")
 
     await page.getByTestId("ockConnectButton").click()
-
-    // await page.getByRole("button", { name: "Coinbase Wallet" }).click()
 
     const [notificationPopup1] = await Promise.all([
       page.context().waitForEvent("page"),
@@ -199,13 +194,5 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
 
     // Verify the transaction was rejected (check for error message)
     await page.getByText("User rejected the request").waitFor()
-
-    // If you have the popup page, pass it directly to identifyNotificationType
-    // Example: const notifType = await coinbase.notificationPage.identifyNotificationType(popupPage)
-    // console.log("Notification type after rejection:", notifType)
   })
-
-  // test.only("sandbox onchainkit playground", async ({ page }) => {
-  //   await page.pause()
-  // })
 })
