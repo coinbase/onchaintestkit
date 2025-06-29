@@ -379,13 +379,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@coinbase/onchaintestkit@workspace:*, @coinbase/onchaintestkit@workspace:.":
+"@coinbase/onchaintestkit@npm:^1.1.0, @coinbase/onchaintestkit@workspace:*, @coinbase/onchaintestkit@workspace:.":
   version: 0.0.0-use.local
   resolution: "@coinbase/onchaintestkit@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.5.3"
     "@changesets/cli": "npm:^2.29.5"
     "@coinbase/onchainkit": "npm:^0.36.4"
+    "@coinbase/onchaintestkit": "npm:^1.1.0"
     "@playwright/test": "npm:^1.34.0"
     "@types/fs-extra": "npm:^11.0.1"
     "@types/node": "npm:^18.16.0"
@@ -1582,13 +1583,13 @@ __metadata:
   linkType: hard
 
 "@playwright/test@npm:^1.34.0, @playwright/test@npm:^1.49.0":
-  version: 1.50.1
-  resolution: "@playwright/test@npm:1.50.1"
+  version: 1.53.1
+  resolution: "@playwright/test@npm:1.53.1"
   dependencies:
-    playwright: "npm:1.50.1"
+    playwright: "npm:1.53.1"
   bin:
     playwright: cli.js
-  checksum: 10c0/77c1a7cfaca7b3b88804256bb4c0e15c54b8df02690298086ef4a4fc8c2a42b99b69ba1b83906d00cc7ddb322ce8b2f19f0238f189913607c679779a4d132da1
+  checksum: 10c0/f2ef7899ca6bc178c9f2ba6c8633d0bbeb5ba135048e9df01ecb949c6f743811ba5ef76d495f619454074c81dbfa28be12e4c0a1224bb2af0d4cb403182c716f
   languageName: node
   linkType: hard
 
@@ -6576,27 +6577,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.50.1":
-  version: 1.50.1
-  resolution: "playwright-core@npm:1.50.1"
+"playwright-core@npm:1.53.1":
+  version: 1.53.1
+  resolution: "playwright-core@npm:1.53.1"
   bin:
     playwright-core: cli.js
-  checksum: 10c0/c158764257d870897c31807a830ddcc3f5aaf4376719e05aeada3489a01f751650b2dc43e027201a40405a1b075084e89f58cd3730a985a229efe9d8cecfe360
+  checksum: 10c0/8780552740741b94c346373ab6f949e9a44d3df54016b12123da9fe2f5fb60c1838197642916789b0a2ffb567e4ba0089f2e57d496bef7e460ddc4526f9b3b0f
   languageName: node
   linkType: hard
 
-"playwright@npm:1.50.1":
-  version: 1.50.1
-  resolution: "playwright@npm:1.50.1"
+"playwright@npm:1.53.1":
+  version: 1.53.1
+  resolution: "playwright@npm:1.53.1"
   dependencies:
     fsevents: "npm:2.3.2"
-    playwright-core: "npm:1.50.1"
+    playwright-core: "npm:1.53.1"
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 10c0/b292ee6e0d122748a3d024b85ace86a0d9c848fc4121685d90ffc5d43d6bcf13ed7dc7488b1055f69040599c420052306ccba6fabfe2f69a15fc109c55171207
+  checksum: 10c0/3dcbcd3791a7f0d1007db4d3126c8136258a2002c2fbfc8b840086b64cbc1fb628b2e25dd3b345d685fb27ba39790ab0f4ce81a8faade7dc748af3a63bdf3550
   languageName: node
   linkType: hard
 
