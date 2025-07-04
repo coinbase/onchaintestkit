@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test"
 import { spendingCapRemoval } from "../../pages/NotificationPage/actions/spendingCap"
-import { getNotificationPageAndWaitForLoad } from "../../utils/getNotificationPageAndWaitForLoad"
+import { waitForPage, type ViewportSize } from "../../../../utils"
 import {
   approvePermission,
   connectToDapp,
@@ -16,6 +16,10 @@ export enum NotificationPageType {
   RemoveSpendCap = "remove-spend-cap",
 }
 
+// Constants for MetaMask notification page
+const NOTIFICATION_PAGE_PATH = "notification.html"
+const DEFAULT_VIEWPORT: ViewportSize = { width: 360, height: 580 }
+
 export class NotificationPage {
   readonly page: Page
 
@@ -23,129 +27,91 @@ export class NotificationPage {
     this.page = page
   }
 
-  async connectToDapp(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
+  /**
+   * Helper method to get notification page URL
+   */
+  private getNotificationUrl(extensionId: string): string {
+    return `chrome-extension://${extensionId}/${NOTIFICATION_PAGE_PATH}`
+  }
 
+  /**
+   * Helper method to wait for notification page
+   */
+  private async getNotificationPage(extensionId: string): Promise<Page> {
+    return waitForPage(
+      this.page.context(),
+      this.getNotificationUrl(extensionId),
+      DEFAULT_VIEWPORT,
+    )
+  }
+
+  async connectToDapp(extensionId: string) {
+    const notificationPage = await this.getNotificationPage(extensionId)
     await connectToDapp(notificationPage)
   }
 
   async approveNewNetwork(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await network.approveNewNetwork(notificationPage)
   }
 
   async rejectNewNetwork(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await network.rejectNewNetwork(notificationPage)
   }
 
   async approveSwitchNetwork(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await network.approveSwitchNetwork(notificationPage)
   }
 
   async rejectSwitchNetwork(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await network.rejectSwitchNetwork(notificationPage)
   }
 
   async approveAddNetwork(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await network.approveNewNetwork(notificationPage)
   }
 
   async rejectAddNetwork(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await network.rejectNewNetwork(notificationPage)
   }
 
   async confirmTransaction(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await transaction.confirm(notificationPage)
   }
 
   async rejectTransaction(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await transaction.reject(notificationPage)
   }
 
   async approveTokenPermission(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await approvePermission.approve(notificationPage)
   }
 
   async rejectTokenPermission(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await approvePermission.reject(notificationPage)
   }
 
   async confirmSpendingCapRemoval(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await spendingCapRemoval.confirm(notificationPage)
   }
 
   async rejectSpendingCapRemoval(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await spendingCapRemoval.reject(notificationPage)
   }
 
   async addNewToken(extensionId: string) {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
-
+    const notificationPage = await this.getNotificationPage(extensionId)
     await token.addNew(notificationPage)
   }
 
@@ -155,10 +121,7 @@ export class NotificationPage {
     checkTimeout = 10000,
   ): Promise<NotificationPageType> {
     // Get the notification page and wait for it to load fully
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
+    const notificationPage = await this.getNotificationPage(extensionId)
 
     // Give the page an extra moment to fully render and stabilize
     await notificationPage.waitForTimeout(500)
@@ -271,7 +234,7 @@ export class NotificationPage {
               // Wait for the text to be visible with individual timeout
               const isVisible = await selector
                 .isVisible({ timeout: checkTimeout })
-                .catch(error => {
+                .catch((error: Error) => {
                   console.log(
                     `Selector for "${text}" timed out with error:`,
                     error.message,

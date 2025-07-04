@@ -245,7 +245,7 @@ export class MetaMask extends BaseWallet {
         )
         break
       case BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY:
-        await this.homePage.importWalletFromPrivateKey(
+        await this.homePage.importPrivateKey(
           additionalOptions.privateKey as string,
         )
         break
@@ -257,13 +257,6 @@ export class MetaMask extends BaseWallet {
         break
       case MetaMaskSpecificActionType.SWITCH_ACCOUNT:
         await this.homePage.switchAccount(
-          additionalOptions.accountName as string,
-        )
-        break
-
-      // account actions
-      case MetaMaskSpecificActionType.ADD_ACCOUNT:
-        await this.homePage.addNewAccount(
           additionalOptions.accountName as string,
         )
         break

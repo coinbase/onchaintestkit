@@ -508,7 +508,7 @@ export class CoinbaseWallet extends BaseWallet {
         break
 
       case BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY:
-        await this.homePage.importWalletFromPrivateKey(
+        await this.homePage.importPrivateKey(
           additionalOptions.privateKey as string,
           this.config.password as string,
         )

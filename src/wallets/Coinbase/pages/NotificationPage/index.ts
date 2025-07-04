@@ -1,4 +1,4 @@
-import { getNotificationPageAndWaitForLoad } from "../../utils/getNotificationPageAndWaitForLoad"
+import { waitForPage, type ViewportSize } from "../../../../utils"
 import { BasePage } from "../BasePage"
 import { connectToDapp } from "./actions"
 import { confirmTransaction, rejectTransaction } from "./actions/transaction"
@@ -13,6 +13,10 @@ export enum NotificationPageType {
   SPENDING_CAP = "spending_cap",
 }
 
+// Constants for Coinbase notification page
+const NOTIFICATION_PAGE_PATH = "index.html?inPageRequest=true"
+const DEFAULT_VIEWPORT: ViewportSize = { width: 360, height: 580 }
+
 /**
  * Represents the notification popup page in Coinbase Wallet
  * This page handles various notifications like:
@@ -23,30 +27,40 @@ export enum NotificationPageType {
  */
 export class NotificationPage extends BasePage {
   /**
+   * Helper method to get notification page URL
+   */
+  private getNotificationUrl(extensionId: string): string {
+    return `chrome-extension://${extensionId}/${NOTIFICATION_PAGE_PATH}`
+  }
+
+  /**
+   * Helper method to wait for notification page
+   */
+  private async getNotificationPage(
+    extensionId: string,
+  ): Promise<import("@playwright/test").Page> {
+    return waitForPage(
+      this.page.context(),
+      this.getNotificationUrl(extensionId),
+      DEFAULT_VIEWPORT,
+    )
+  }
+  /**
    * Handles the connect to dapp notification
    */
   async connectToDapp(extensionId: string): Promise<void> {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
+    const notificationPage = await this.getNotificationPage(extensionId)
     await connectToDapp(notificationPage)
   }
 
   async confirmTransaction(extensionId: string): Promise<void> {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
+    const notificationPage = await this.getNotificationPage(extensionId)
     // TODO: Implement transaction confirmation
     await confirmTransaction(notificationPage)
   }
 
   async rejectTransaction(extensionId: string): Promise<void> {
-    const notificationPage = await getNotificationPageAndWaitForLoad(
-      this.page.context(),
-      extensionId,
-    )
+    const notificationPage = await this.getNotificationPage(extensionId)
     // TODO: Implement transaction rejection
     await rejectTransaction(notificationPage)
   }
@@ -97,7 +111,7 @@ export class NotificationPage extends BasePage {
         mainText =
           (await notificationPage.textContent('[data-testid="app-main"]')) || ""
       }
-    } catch (_err) {
+    } catch {
       console.warn(
         "Notification page was closed before type could be identified.",
       )
