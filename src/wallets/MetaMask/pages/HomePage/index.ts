@@ -13,7 +13,7 @@ export class HomePage {
     await addNetwork(this.page, network)
   }
 
-  async importPrivateKey(privateKey: string): Promise<void> {
+  async importPrivateKey(_privateKey: string): Promise<void> {
     // TODO: a more stable implementation needed
   }
 

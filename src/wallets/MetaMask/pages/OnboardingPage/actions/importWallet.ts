@@ -97,7 +97,7 @@ async function setupWalletPassword(page: Page, userPassword: string) {
         const errorElement = page.locator(selector)
         if (await errorElement.isVisible()) {
           const text = await errorElement.textContent({ timeout: 1000 })
-          if (text && text.trim()) {
+          if (text?.trim()) {
             errorMessage = text.trim()
             break
           }
