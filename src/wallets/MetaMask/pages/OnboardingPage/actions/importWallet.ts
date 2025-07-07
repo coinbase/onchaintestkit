@@ -191,12 +191,17 @@ export async function importWallet(
   ]
 
   // Execute post-onboarding actions
-  for (const [index, action] of postOnboardingActions.entries()) {
+  for (
+    let actionIndex = 0;
+    actionIndex < postOnboardingActions.length;
+    actionIndex++
+  ) {
+    const currentAction = postOnboardingActions[actionIndex]
     try {
-      console.log(`Executing post-onboarding action ${index + 1}`)
-      await action()
+      console.log(`Executing post-onboarding action ${actionIndex + 1}`)
+      await currentAction()
     } catch (error) {
-      console.warn(`Post-onboarding action ${index + 1} failed:`, error)
+      console.warn(`Post-onboarding action ${actionIndex + 1} failed:`, error)
       // Don't throw here - these are optional cleanup steps
     }
   }
