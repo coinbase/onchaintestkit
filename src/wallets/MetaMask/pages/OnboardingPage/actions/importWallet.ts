@@ -16,16 +16,18 @@ async function processRecoveryPhrase(page: Page, recoveryPhrase: string) {
     )
   }
 
-  // Fill fields sequentially using for...of loop (different from synpress approach)
-  for (const [position, token] of phraseTokens.entries()) {
-    if (!token || token.trim().length === 0) {
-      throw new Error(`Empty word at position ${position + 1}`)
+  // Fill fields sequentially using array iteration (different approach from synpress)
+  for (let tokenIndex = 0; tokenIndex < phraseTokens.length; tokenIndex++) {
+    const currentToken = phraseTokens[tokenIndex]
+
+    if (!currentToken || currentToken.trim().length === 0) {
+      throw new Error(`Empty word at position ${tokenIndex + 1}`)
     }
 
     const inputField = page.locator(
-      `[data-testid="import-srp__srp-word-${position}"]`,
+      `[data-testid="import-srp__srp-word-${tokenIndex}"]`,
     )
-    await inputField.fill(token.trim())
+    await inputField.fill(currentToken.trim())
   }
 
   // Different approach to button handling - check state first
