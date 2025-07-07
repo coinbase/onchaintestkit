@@ -1,4 +1,4 @@
-import { waitForPage, type ViewportSize } from "../../../../utils"
+import { type ViewportSize, waitForPage } from "../../../../utils"
 import { BasePage } from "../BasePage"
 import { connectToDapp } from "./actions"
 import { confirmTransaction, rejectTransaction } from "./actions/transaction"

@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test"
+import { type ViewportSize, waitForPage } from "../../../../utils"
 import { spendingCapRemoval } from "../../pages/NotificationPage/actions/spendingCap"
-import { waitForPage, type ViewportSize } from "../../../../utils"
 import {
   approvePermission,
   connectToDapp,
