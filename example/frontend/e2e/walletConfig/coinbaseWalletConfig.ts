@@ -1,4 +1,4 @@
-import { base, baseSepolia } from "wagmi/chains"
+import { baseSepolia } from "wagmi/chains"
 import { configure } from "../../../../src/configBuilder"
 
 export const DEFAULT_PASSWORD = "COMPLEXPASSWORD1"

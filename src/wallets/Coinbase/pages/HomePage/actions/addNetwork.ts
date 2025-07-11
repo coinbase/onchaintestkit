@@ -25,7 +25,9 @@ export async function addNetwork(page: Page, network: NetworkConfig) {
 
   // Fill in network details
   await page.getByTestId("custom-network-name-input").fill(name)
-  await page.getByTestId("custom-network-rpc-url-input").fill(rpcUrl)
+  if (rpcUrl) {
+    await page.getByTestId("custom-network-rpc-url-input").fill(rpcUrl)
+  }
   await page
     .getByTestId("custom-network-chain-id-input")
     .fill(chainId.toString())
@@ -73,7 +75,9 @@ export async function addNetwork(page: Page, network: NetworkConfig) {
 
     // Edit the network details
     await page.getByTestId("custom-network-name-input").fill(name)
-    await page.getByTestId("custom-network-rpc-url-input").fill(rpcUrl)
+    if (rpcUrl) {
+      await page.getByTestId("custom-network-rpc-url-input").fill(rpcUrl)
+    }
     // Chain ID
     const chainIdInput = page.getByTestId("custom-network-chain-id-input")
     if (await chainIdInput.isEditable()) {

@@ -83,7 +83,7 @@ export function SendTransaction() {
         <div className="text-sm text-red-600" data-testid="transaction-error">
           Error: {error.message}
         </div>
-        )}
-      </div>
+      )}
+    </div>
   )
 }
