@@ -14,10 +14,9 @@ import {
   WalletDropdownDisconnect,
   WalletDropdownLink,
 } from "@coinbase/onchainkit/wallet"
-import { WagmiProvider } from "wagmi"
 import { NetworkSwitcher } from "./components/NetworkSwitcher"
 import { SendTransaction } from "./components/SendTransaction"
-import { config } from "./config"
+// import { config } from "./config"
 import ArrowSvg from "./svg/ArrowSvg"
 import ImageSvg from "./svg/Image"
 import OnchainkitSvg from "./svg/OnchainKit"
@@ -44,7 +43,6 @@ const templates = [
 
 export default function App() {
   return (
-    <WagmiProvider config={config}>
       <div className="flex flex-col min-h-screen font-sans dark:bg-background dark:text-white bg-white text-black">
         <header className="pt-4 pr-4">
           <div className="flex justify-end">
@@ -162,6 +160,5 @@ export default function App() {
           </div>
         </div>
       </div>
-    </WagmiProvider>
   )
 }

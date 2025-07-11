@@ -156,7 +156,6 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
 
   test("should be able to reject a transaction", async ({ page, coinbase }) => {
     if (!coinbase) throw new Error("Coinbase wallet not initialized")
-
     //click connect button
     await page.getByTestId("ockConnectButton").click()
 
