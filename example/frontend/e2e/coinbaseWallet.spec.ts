@@ -149,7 +149,7 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
     await page.waitForTimeout(5000)
     await coinbase.handleAction(BaseActionType.HANDLE_TRANSACTION, {
       approvalType: ActionApprovalType.APPROVE,
-      page: notificationPopup
+      page: notificationPopup,
     })
     // Verify the transaction was sent (check for success message)
     await page.getByText("Transaction confirmed!").waitFor()
