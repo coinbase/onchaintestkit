@@ -147,6 +147,10 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
       )
     console.log("Notification type after transaction:", notifType)
     await page.waitForTimeout(5000)
+    const htmlContent = await notificationPopup.content()
+    console.log("=== NOTIFICATION POPUP HTML ===")
+    console.log(htmlContent)
+    console.log("=== END HTML ===")
     await coinbase.handleAction(BaseActionType.HANDLE_TRANSACTION, {
       approvalType: ActionApprovalType.APPROVE,
       page: notificationPopup,
