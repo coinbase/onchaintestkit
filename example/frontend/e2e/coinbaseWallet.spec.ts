@@ -146,9 +146,14 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
         notificationPopup,
       )
     console.log("Notification type after transaction:", notifType)
-
+    await page.waitForTimeout(5000)
+    const htmlContent = await notificationPopup.content()
+    console.log("=== NOTIFICATION POPUP HTML ===")
+    console.log(htmlContent)
+    console.log("=== END HTML ===")
     await coinbase.handleAction(BaseActionType.HANDLE_TRANSACTION, {
       approvalType: ActionApprovalType.APPROVE,
+      page: notificationPopup,
     })
     // Verify the transaction was sent (check for success message)
     await page.getByText("Transaction confirmed!").waitFor()
@@ -156,7 +161,6 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
 
   test("should be able to reject a transaction", async ({ page, coinbase }) => {
     if (!coinbase) throw new Error("Coinbase wallet not initialized")
-
     //click connect button
     await page.getByTestId("ockConnectButton").click()
 
