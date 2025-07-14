@@ -145,30 +145,30 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
         notificationPopup,
       )
     console.log("Notification type after transaction:", notifType)
-    await page.waitForTimeout(5000)
+    await page.waitForTimeout(30000)
 
-    //--------------------------------
-    // Option 1: Log just the body content
-    const bodyContent = await notificationPopup.locator("body").innerHTML()
-    console.log("=== NOTIFICATION POPUP BODY ===")
-    console.log(bodyContent)
-    console.log("=== END BODY ===")
+    // //--------------------------------
+    // // Option 1: Log just the body content
+    // const bodyContent = await notificationPopup.locator("body").innerHTML()
+    // console.log("=== NOTIFICATION POPUP BODY ===")
+    // console.log(bodyContent)
+    // console.log("=== END BODY ===")
 
-    // Option 2: Log the button specifically
-    const buttonHtml = await notificationPopup
-      .getByTestId("request-confirm-button")
-      .innerHTML()
-      .catch(() => "Button not found")
-    console.log("=== BUTTON HTML ===")
-    console.log(buttonHtml)
-    console.log("=== END BUTTON ===")
+    // // Option 2: Log the button specifically
+    // const buttonHtml = await notificationPopup
+    //   .getByTestId("request-confirm-button")
+    //   .innerHTML()
+    //   .catch(() => "Button not found")
+    // console.log("=== BUTTON HTML ===")
+    // console.log(buttonHtml)
+    // console.log("=== END BUTTON ===")
 
-    // Option 3: Log button attributes
-    const button = notificationPopup.getByTestId("request-confirm-button")
-    console.log("Button disabled:", await button.getAttribute("disabled"))
-    console.log("Button class:", await button.getAttribute("class"))
-    console.log("Button aria-busy:", await button.getAttribute("aria-busy"))
-    //--------------------------------
+    // // Option 3: Log button attributes
+    // const button = notificationPopup.getByTestId("request-confirm-button")
+    // console.log("Button disabled:", await button.getAttribute("disabled"))
+    // console.log("Button class:", await button.getAttribute("class"))
+    // console.log("Button aria-busy:", await button.getAttribute("aria-busy"))
+    // //--------------------------------
 
     await coinbase.handleAction(BaseActionType.HANDLE_TRANSACTION, {
       approvalType: ActionApprovalType.APPROVE,
