@@ -16,7 +16,6 @@ import {
 } from "@coinbase/onchainkit/wallet"
 import { NetworkSwitcher } from "./components/NetworkSwitcher"
 import { SendTransaction } from "./components/SendTransaction"
-// import { config } from "./config"
 import ArrowSvg from "./svg/ArrowSvg"
 import ImageSvg from "./svg/Image"
 import OnchainkitSvg from "./svg/OnchainKit"

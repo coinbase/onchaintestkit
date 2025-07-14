@@ -45,20 +45,20 @@ export async function addNetwork(page: Page, network: NetworkConfig) {
   await page.getByTestId("custom-network-save").click()
 
   // Check if network already exists (handle both error messages)
-  const alreadyExistsError1 = await page
+  const testnetErrorMessage = await page
     .getByText(
       `Testnet chain id: ${chainId} already exists. Please enable testnets from settings.`,
     )
     .isVisible()
     .catch(() => false)
-  const alreadyExistsError2 = await page
+  const networkErrorMessage = await page
     .getByText(
       `Chain id: ${chainId} already exists. Select from default networks.`,
     )
     .isVisible()
     .catch(() => false)
 
-  if (alreadyExistsError1 || alreadyExistsError2) {
+  if (testnetErrorMessage || networkErrorMessage) {
     console.log(
       `Network with chain ID ${chainId} already exists. Editing existing network instead.`,
     )
