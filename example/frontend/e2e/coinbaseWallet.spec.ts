@@ -145,7 +145,7 @@ test.describe("Coinbase Wallet Transaction Handling", () => {
         notificationPopup,
       )
     console.log("Notification type after transaction:", notifType)
-    await page.waitForTimeout(30000)
+    await page.waitForTimeout(3000)
 
     // //--------------------------------
     // // Option 1: Log just the body content
