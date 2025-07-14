@@ -10,7 +10,6 @@ import { getConfig } from "./config"
 export function Providers(props: { children: ReactNode }) {
   const [config] = useState(() => getConfig())
 
-
   return (
     <WagmiProvider config={config}>
       <OnchainKitProvider
