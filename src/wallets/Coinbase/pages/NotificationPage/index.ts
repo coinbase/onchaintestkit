@@ -129,7 +129,7 @@ export class NotificationPage extends BasePage {
       { type: NotificationPageType.SIGNATURE, text: "signing with" },
       { type: NotificationPageType.CONNECT, text: "connect" },
       // { type: NotificationPageType.TOKEN_PERMISSION, text: "token permission" },
-      { type: NotificationPageType.SPENDING_CAP, text: "Set a spend limit" },
+      { type: NotificationPageType.SPENDING_CAP, text: "Allow Spend Permission" },
     ]
 
     // Case-insensitive search for each check
