@@ -56,7 +56,7 @@ jobs:
         run: |
           echo "E2E_TEST_SEED_PHRASE=${{ secrets.E2E_TEST_SEED_PHRASE }}" > .env
           echo "E2E_CONTRACT_PROJECT_ROOT=../smart-contracts" >> .env
-          echo "E2E_TEST_FORK_URL=https://base-sepolia.g.alchemy.com/v2/ZBMg8s9i9_7gVZv_FUvzEfwa4F-9R6Vn" >> .env
+          echo "E2E_TEST_FORK_URL=${{ secrets.E2E_TEST_FORK_URL }}" >> .env
           echo "E2E_TEST_FORK_BLOCK_NUMBER=23850654" >> .env
 
       # Install frontend workspace dependencies (Ensures its own deps are available)

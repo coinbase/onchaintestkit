@@ -457,7 +457,7 @@ export class CoinbaseWallet extends BaseWallet {
         },
       )
       await sdkPopup
-        .getByRole("button", { name: "Confirm", exact: true })
+        .getByRole("button", { name: "Continue", exact: true })
         .click()
     } else {
       throw new Error(`Unknown passkey popup action: ${action}`)
