@@ -219,7 +219,8 @@ export class CoinbaseWallet extends BaseWallet {
       | "signMessage"
       | "approve"
       | "grantSpendPermission"
-      | "signIn",
+      | "signIn"
+      | "signInWithCBExtension",
     config?: PasskeyConfig,
   ): Promise<void> {
     if (action === "registerWithCBExtension") {
@@ -459,6 +460,54 @@ export class CoinbaseWallet extends BaseWallet {
       await sdkPopup
         .getByRole("button", { name: "Continue", exact: true })
         .click()
+    } else if (action === "signInWithCBExtension") {
+
+      const firstPopup = popup
+      const [sdkPopup] = await Promise.all([
+        mainPageOrPopup.context().waitForEvent("page"),
+        firstPopup.click('[data-testid="switch-to-scw-link"]'),
+      ])
+      await sdkPopup.waitForLoadState("domcontentloaded")
+
+      await sdkPopup.waitForSelector('button:has-text("Sign in")', {
+        timeout: 10000,
+      });
+      if (this.passkeyAuthenticator) {
+        await this.passkeyAuthenticator.setPage(sdkPopup);
+      } else {
+        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup);
+      }
+      await this.passkeyAuthenticator.initialize({
+        protocol: "ctap2",
+        transport: "internal",
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: true,
+        automaticPresenceSimulation: true,
+      });
+
+      const hardcodedCredential = {
+        credentialId: "LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=",
+        isResidentCredential: true,
+        rpId: config?.rpId ?? "keys-dev.coinbase.com",
+        privateKey:
+          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS",
+        userHandle: "MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0",
+        signCount: 1,
+      };
+
+      await this.passkeyAuthenticator.importCredential(hardcodedCredential);
+      await sdkPopup.waitForLoadState("domcontentloaded");
+      await sdkPopup.waitForLoadState("networkidle");
+
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await sdkPopup.locator('button:has-text("Sign in")').click();
+        },
+      );
+      await sdkPopup
+        .getByRole("button", { name: "Continue", exact: true })
+        .click();
     } else {
       throw new Error(`Unknown passkey popup action: ${action}`)
     }
@@ -486,6 +535,7 @@ export class CoinbaseWallet extends BaseWallet {
         | "approve"
         | "grantSpendPermission"
         | "signIn"
+        | "signInWithCBExtension"
       const passkeyConfig = additionalOptions.passkeyConfig as
         | PasskeyConfig
         | undefined
