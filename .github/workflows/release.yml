@@ -10,6 +10,7 @@ jobs:
     environment: release
     permissions:
       contents: write   # required for changesets to push tags/commits
+      pull-requests: write   # required for changesets to create PRs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
