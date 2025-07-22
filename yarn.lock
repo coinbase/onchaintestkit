@@ -379,14 +379,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@coinbase/onchaintestkit@npm:^1.1.0, @coinbase/onchaintestkit@workspace:*, @coinbase/onchaintestkit@workspace:.":
+"@coinbase/onchaintestkit@npm:^1.2.0, @coinbase/onchaintestkit@workspace:*, @coinbase/onchaintestkit@workspace:.":
   version: 0.0.0-use.local
   resolution: "@coinbase/onchaintestkit@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.5.3"
     "@changesets/cli": "npm:^2.29.5"
     "@coinbase/onchainkit": "npm:^0.36.4"
-    "@coinbase/onchaintestkit": "npm:^1.1.0"
+    "@coinbase/onchaintestkit": "npm:^1.2.0"
     "@playwright/test": "npm:^1.34.0"
     "@types/fs-extra": "npm:^11.0.1"
     "@types/node": "npm:^18.16.0"
