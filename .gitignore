@@ -33,3 +33,7 @@ yarn-error.log*
 /blob-report/
 
 .yarn/
+
+example/smart-contracts/lib/
+example/smart-contracts/out/
+example/smart-contracts/cache/

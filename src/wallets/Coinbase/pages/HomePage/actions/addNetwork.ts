@@ -25,7 +25,9 @@ export async function addNetwork(page: Page, network: NetworkConfig) {
 
   // Fill in network details
   await page.getByTestId("custom-network-name-input").fill(name)
-  await page.getByTestId("custom-network-rpc-url-input").fill(rpcUrl)
+  if (rpcUrl) {
+    await page.getByTestId("custom-network-rpc-url-input").fill(rpcUrl)
+  }
   await page
     .getByTestId("custom-network-chain-id-input")
     .fill(chainId.toString())
@@ -42,16 +44,61 @@ export async function addNetwork(page: Page, network: NetworkConfig) {
   // Save network
   await page.getByTestId("custom-network-save").click()
 
-  // Check if network already exists
-  const errorText = await page
+  // Check if network already exists (handle both error messages)
+  const testnetErrorMessage = await page
     .getByText(
       `Testnet chain id: ${chainId} already exists. Please enable testnets from settings.`,
     )
     .isVisible()
-  if (errorText) {
-    console.log(
-      `Network with chain ID ${chainId} already exists. Skipping addition.`,
+    .catch(() => false)
+  const networkErrorMessage = await page
+    .getByText(
+      `Chain id: ${chainId} already exists. Select from default networks.`,
     )
+    .isVisible()
+    .catch(() => false)
+
+  if (testnetErrorMessage || networkErrorMessage) {
+    console.log(
+      `Network with chain ID ${chainId} already exists. Editing existing network instead.`,
+    )
+    await page.waitForTimeout(1000)
+    // Go back to the network list
+    await page.getByTestId("nav-title-back").click()
+    // Click the edit button for the existing network
+    if (isTestnet) {
+      await page.getByTestId("tabNavigation-tabLabel--testnets").click()
+    }
+
+    const testIdName = name.toLowerCase().replace(/\s+/g, "-")
+    await page.getByTestId(`list-item-${testIdName}-edit-button`).click()
+
+    // Edit the network details
+    await page.getByTestId("custom-network-name-input").fill(name)
+    if (rpcUrl) {
+      await page.getByTestId("custom-network-rpc-url-input").fill(rpcUrl)
+    }
+    // Chain ID
+    const chainIdInput = page.getByTestId("custom-network-chain-id-input")
+    if (await chainIdInput.isEditable()) {
+      await chainIdInput.fill(chainId.toString())
+    }
+
+    // Symbol
+    const symbolInput = page.getByTestId("custom-network-currency-symbol-input")
+    if (await symbolInput.isEditable()) {
+      await symbolInput.fill(symbol)
+    }
+    if (blockExplorerUrl) {
+      await page
+        .getByTestId("custom-network-block-url-input")
+        .fill(blockExplorerUrl)
+    }
+    // Save the updated network
+    const saveButton = page.getByTestId("custom-network-save")
+    await saveButton.scrollIntoViewIfNeeded()
+    await saveButton.click()
+    // No success message, just close the function
     return
   }
 

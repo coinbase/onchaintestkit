@@ -22,3 +22,8 @@ export {
   type LoadingElement,
   type LoadingDetectionOptions,
 } from "./LoadingStateDetector"
+
+export {
+  waitForPage,
+  type ViewportSize,
+} from "./waitForPage"

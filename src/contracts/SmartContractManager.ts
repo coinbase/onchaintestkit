@@ -8,12 +8,12 @@ import {
   concat,
   createPublicClient,
   createWalletClient,
+  defineChain,
   encodeDeployData,
   getContractAddress,
 } from "viem"
 import type { PublicClient, WalletClient } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import { localhost } from "viem/chains"
 
 import type { LocalNodeManager } from "../node/LocalNodeManager"
 import { ProxyDeployer } from "./ProxyDeployer"
@@ -34,6 +34,7 @@ export class SmartContractManager {
   private walletClient?: WalletClient
   private deployedContracts = new Map<Address, Abi>() // Store deployed contract ABIs
   private proxyDeployer?: ProxyDeployer
+  private chain?: ReturnType<typeof defineChain>
 
   constructor(projectRoot: string) {
     this.projectRoot = projectRoot
@@ -45,8 +46,25 @@ export class SmartContractManager {
   async initialize(node: LocalNodeManager): Promise<void> {
     const rpcUrl = node.rpcUrl
 
+    // Create a custom chain configuration based on the node's chain ID
+    const nodeChainId = await this.getChainId(rpcUrl)
+    this.chain = defineChain({
+      id: nodeChainId,
+      network: "localhost",
+      name: "Local Test Network",
+      nativeCurrency: {
+        decimals: 18,
+        name: "Ether",
+        symbol: "ETH",
+      },
+      rpcUrls: {
+        default: { http: [rpcUrl] },
+        public: { http: [rpcUrl] },
+      },
+    })
+
     this.publicClient = createPublicClient({
-      chain: localhost,
+      chain: this.chain,
       transport: http(rpcUrl),
     })
 
@@ -58,13 +76,31 @@ export class SmartContractManager {
 
     this.walletClient = createWalletClient({
       account,
-      chain: localhost,
+      chain: this.chain,
       transport: http(rpcUrl),
     })
 
     // Initialize proxy deployer
     this.proxyDeployer = new ProxyDeployer(node)
     await this.proxyDeployer.ensureProxyDeployed()
+  }
+
+  /**
+   * Get the chain ID from the RPC endpoint
+   */
+  private async getChainId(rpcUrl: string): Promise<number> {
+    const response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_chainId",
+        params: [],
+        id: 1,
+      }),
+    })
+    const data = await response.json()
+    return parseInt(data.result, 16)
   }
 
   /**
@@ -118,7 +154,7 @@ export class SmartContractManager {
       to: proxyAddress,
       data: create2Data,
       account: this.walletClient.account,
-      chain: localhost,
+      chain: this.chain,
     })
 
     // Wait for deployment
@@ -160,7 +196,7 @@ export class SmartContractManager {
       functionName: call.functionName,
       args: call.args,
       account: this.walletClient.account,
-      chain: localhost,
+      chain: this.chain,
       ...(call.value !== undefined && { value: call.value }),
     })
 

@@ -5,7 +5,7 @@ import { parseEther } from "viem"
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 
 export function SendTransaction() {
-  const { data: hash, error, isPending, sendTransaction } = useSendTransaction()
+  const { data, error, isPending, sendTransaction } = useSendTransaction()
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -25,7 +25,7 @@ export function SendTransaction() {
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
-      hash,
+      hash: data,
     })
 
   return (
@@ -55,9 +55,9 @@ export function SendTransaction() {
         </button>
       </form>
 
-      {hash && (
+      {data && (
         <div className="text-sm" data-testid="transaction-hash">
-          Transaction Hash: <span className="font-mono">{hash}</span>
+          Transaction Hash: <span className="font-mono">{data}</span>
         </div>
       )}
 

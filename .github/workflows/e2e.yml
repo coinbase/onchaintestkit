@@ -38,11 +38,26 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@82dee4ba654bd2146511f85f0d013af94670c4de # v1.4.0
 
+      # Install Forge dependencies
+      - name: Install Forge dependencies
+        working-directory: example/smart-contracts
+        run: |
+          forge install foundry-rs/forge-std
+          forge install OpenZeppelin/openzeppelin-contracts
+
+      # Build smart contracts with Foundry
+      - name: Build smart contracts
+        working-directory: example/smart-contracts
+        run: forge build
+
       # Create the .env file required by Playwright tests
       - name: Set E2E env variables
         working-directory: example/frontend
         run: |
           echo "E2E_TEST_SEED_PHRASE=${{ secrets.E2E_TEST_SEED_PHRASE }}" > .env
+          echo "E2E_CONTRACT_PROJECT_ROOT=../smart-contracts" >> .env
+          echo "E2E_TEST_FORK_URL=${{ secrets.E2E_TEST_FORK_URL }}" >> .env
+          echo "E2E_TEST_FORK_BLOCK_NUMBER=23850654" >> .env
 
       # Install frontend workspace dependencies (Ensures its own deps are available)
       - name: Install frontend dependencies
@@ -76,4 +91,4 @@ jobs:
       # Run the end-to-end test suite under virtual display
       - name: Run E2E tests
         working-directory: example/frontend
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" yarn test:e2e --workers=2
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" yarn test:e2e

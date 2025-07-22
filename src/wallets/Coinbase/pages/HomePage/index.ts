@@ -1,8 +1,7 @@
 import { Page } from "@playwright/test"
 import { NetworkConfig } from "../../../types"
 import { addNetwork } from "./actions/addNetwork"
-import { importWalletFromPrivateKey } from "./actions/importWalletFromPrivateKey"
-// import { sendTokens } from "./actions/sendTokens"
+import { importPrivateKey } from "./actions/importPrivateKey"
 
 export class HomePage {
   private readonly page: Page
@@ -15,20 +14,9 @@ export class HomePage {
     await addNetwork(this.page, network)
   }
 
-  async importWalletFromPrivateKey(
-    privateKey: string,
-    password: string,
-  ): Promise<void> {
-    await importWalletFromPrivateKey(this.page, privateKey, password)
+  async importPrivateKey(privateKey: string, password: string): Promise<void> {
+    await importPrivateKey(this.page, privateKey, password)
   }
-
-  // async sendTokens(
-  //   recipientAddress: string,
-  //   amount: string,
-  //   tokenSymbol?: string,
-  // ): Promise<void> {
-  //   await sendTokens(this.page, { recipientAddress, amount, tokenSymbol })
-  // }
 
   async switchNetwork(networkName: string, isTestnet: boolean): Promise<void> {
     // TODO: Implement network switching for Coinbase

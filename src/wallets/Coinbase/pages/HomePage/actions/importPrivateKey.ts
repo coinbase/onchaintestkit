@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test"
 
-export async function importWalletFromPrivateKey(
+export async function importPrivateKey(
   page: Page,
   privateKey: string,
   password: string,

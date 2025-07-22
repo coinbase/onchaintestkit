@@ -1,8 +1,6 @@
 import { Page } from "@playwright/test"
 import { Network } from "../../type/Network"
 import { addNetwork } from "./actions/addNetwork"
-import { addNewAccount } from "./actions/addNewAccount"
-import { importWalletFromPrivateKey } from "./actions/importWalletFromPrivateKey"
 
 export class HomePage {
   private readonly page: Page
@@ -15,12 +13,8 @@ export class HomePage {
     await addNetwork(this.page, network)
   }
 
-  async addNewAccount(accountName: string): Promise<void> {
-    await addNewAccount(this.page, accountName)
-  }
-
-  async importWalletFromPrivateKey(privateKey: string): Promise<void> {
-    await importWalletFromPrivateKey(this.page, privateKey)
+  async importPrivateKey(_privateKey: string): Promise<void> {
+    // TODO: a more stable implementation needed
   }
 
   async switchNetwork(networkName: string, isTestnet: boolean): Promise<void> {
