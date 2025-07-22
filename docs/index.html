@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@coinbase/onchaintestkit – Weekly Downloads</title>
+  <!-- Coinbase theme fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <style>
+    :root {
+      --cb-blue: #1652F0;
+      --cb-blue-light: #3b82f6;
+      --cb-bg: #F5F7FA;
+      --cb-card-bg: #ffffff;
+      --cb-text: #1e293b;
+    }
+    body {
+      font-family: "Inter", Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: var(--cb-bg);
+      color: var(--cb-text);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    #chart-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--cb-card-bg);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+    #stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--cb-card-bg);
+      border-radius: 8px;
+      padding: 1.5rem 1rem;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .card .icon {
+      font-size: 1.4rem;
+      margin-bottom: 0.25rem;
+    }
+    .card .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--cb-blue);
+    }
+    .card .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+    }
+    #commit-chart-container {
+      display: none; /* hidden until data arrives */
+      max-width: 900px;
+      margin: 2rem auto;
+      background: var(--cb-card-bg);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>@coinbase/onchaintestkit — Usage Metrics</h1>
+  <div id="stats">
+    <div class="card">
+      <div class="icon">⭐</div>
+      <div class="value" id="stars">…</div>
+      <div class="label">Stars</div>
+    </div>
+    <div class="card">
+      <div class="icon">🍴</div>
+      <div class="value" id="forks">…</div>
+      <div class="label">Forks</div>
+    </div>
+    <div class="card">
+      <div class="icon">👀</div>
+      <div class="value" id="watchers">…</div>
+      <div class="label">Watchers</div>
+    </div>
+    <div class="card">
+      <div class="icon">🐞</div>
+      <div class="value" id="open-issues">…</div>
+      <div class="label">Open Issues</div>
+    </div>
+  </div>
+  <div id="chart-container">
+    <canvas id="downloadsChart"></canvas>
+  </div>
+
+  <div id="commit-chart-container">
+    <canvas id="commitChart"></canvas>
+  </div>
+
+  <!-- Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    (async function () {
+      const pkg = "@coinbase/onchaintestkit";
+
+      // Helper to format Date → YYYY-MM-DD
+      const toISO = (d) => d.toISOString().slice(0, 10);
+
+      const today = new Date();
+      const start = new Date();
+      start.setFullYear(today.getFullYear() - 1); // 1-year range
+
+      const apiUrl = `https://api.npmjs.org/downloads/range/${toISO(start)}:${toISO(today)}/${encodeURIComponent(
+        pkg
+      )}`;
+
+      try {
+        const res = await fetch(apiUrl);
+        const json = await res.json();
+
+        // Aggregate daily → calendar weeks (Mon–Sun)
+        const weekly = {};
+        json.downloads.forEach(({ day, downloads }) => {
+          const date = new Date(day);
+          const monday = new Date(date);
+          // Shift to Monday
+          const diff = (monday.getDay() + 6) % 7; // Mon=0, Sun=6
+          monday.setDate(monday.getDate() - diff);
+          const label = toISO(monday);
+          weekly[label] = (weekly[label] || 0) + downloads;
+        });
+
+        const labels = Object.keys(weekly).sort();
+        const data = labels.map((l) => weekly[l]);
+
+        const ctx = document.getElementById("downloadsChart").getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Downloads per week",
+                data,
+                borderColor: "var(--cb-blue)",
+                backgroundColor: "rgba(22,82,240,0.25)",
+                fill: false,
+                tension: 0.1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+            plugins: {
+              tooltip: {
+                mode: "index",
+                intersect: false,
+              },
+            },
+          },
+        });
+
+        /* ---------------- GitHub Repo Stats ---------------- */
+        try {
+          const repo = "coinbase/onchaintestkit";
+          const repoMetaUrl = `https://api.github.com/repos/${repo}`;
+          const commitUrl = `${repoMetaUrl}/stats/commit_activity`;
+
+          // helper: polls until GitHub stats endpoint is ready (200) or fails
+          async function getCommitActivity(url, retries = 6, delay = 3000) {
+            for (let i = 0; i < retries; i++) {
+              const res = await fetch(url);
+              if (res.status === 200) {
+                return res.json();
+              }
+              if (res.status !== 202) {
+                throw new Error(`GitHub returned ${res.status}`);
+              }
+              await new Promise((r) => setTimeout(r, delay));
+            }
+            throw new Error("Commit stats still generating after retries");
+          }
+
+          const [repoMeta, commitData] = await Promise.all([
+            fetch(repoMetaUrl).then((r) => r.json()),
+            getCommitActivity(commitUrl),
+          ]);
+
+          document.getElementById("stars").textContent = repoMeta.stargazers_count.toLocaleString();
+          document.getElementById("forks").textContent = repoMeta.forks_count.toLocaleString();
+          document.getElementById("watchers").textContent = repoMeta.subscribers_count.toLocaleString();
+          document.getElementById("open-issues").textContent = repoMeta.open_issues_count.toLocaleString();
+
+          /* latest release display removed */
+
+          try {
+            const commitLabels = commitData.map((w) =>
+              new Date(w.week * 1000).toISOString().slice(0, 10)
+            );
+            const commitTotals = commitData.map((w) => w.total);
+
+            const commitContainer = document.getElementById("commit-chart-container");
+            const ctx2 = document.getElementById("commitChart").getContext("2d");
+            new Chart(ctx2, {
+              type: "bar",
+              data: {
+                labels: commitLabels,
+                datasets: [
+                  {
+                    label: "Commits per week",
+                    data: commitTotals,
+                    backgroundColor: "rgba(22,82,240,0.35)",
+                    borderColor: "var(--cb-blue)",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                  },
+                },
+              },
+            });
+
+            // reveal chart now that it's rendered
+            commitContainer.style.display = "block";
+          } catch (e) {
+            console.warn("Commit activity unavailable", e);
+          }
+        } catch (err) {
+          console.error("Failed to fetch GitHub stats", err);
+        }
+      } catch (err) {
+        console.error("Failed to fetch download stats", err);
+        document.getElementById("chart-container").innerHTML =
+          "<p style='color:red;text-align:center'>Failed to load data.</p>";
+      }
+    })();
+  </script>
+</body>
+</html> 
