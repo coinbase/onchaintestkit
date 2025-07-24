@@ -1,0 +1,129 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "OnchainTestKit Documentation",
+  "logo": {
+    "dark": "/logo/logo_dark.svg",
+    "light": "/logo/logo_light.svg"
+  },
+  "favicon": "/logo/favicon.svg",
+  "colors": {
+    "primary": "#578BFA",
+    "light": "#578BFA",
+    "dark": "#578BFA"
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "chatgpt",
+      "claude"
+    ]
+  },
+  "api": {
+    "playground": {
+      "display": "simple"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/coinbase/onchaintestkit"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "https://github.com/coinbase/onchaintestkit"
+  },
+  "tabs": [
+    {
+      "name": "Documentation",
+      "url": "/"
+    },
+    {
+      "name": "API Reference",
+      "url": "/api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/coinbase/onchaintestkit"
+    },
+    {
+      "name": "Discord",
+      "icon": "discord",
+      "url": "https://discord.com/invite/cdp"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "onchaintestkit/overview",
+        "onchaintestkit/quickstart",
+        "onchaintestkit/installation",
+        "onchaintestkit/configuration"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "onchaintestkit/writing-tests",
+        "onchaintestkit/smart-contracts",
+        "onchaintestkit/ci-cd"
+      ]
+    },
+    {
+      "group": "Components",
+      "pages": [
+        {
+          "group": "Contracts",
+          "pages": [
+            "onchaintestkit/contracts/overview",
+            "onchaintestkit/contracts/proxy-deployer",
+            "onchaintestkit/contracts/smart-contract-manager"
+          ]
+        },
+        {
+          "group": "Node",
+          "pages": [
+            "onchaintestkit/node/overview",
+            "onchaintestkit/node/configuration",
+            "onchaintestkit/node/api-reference"
+          ]
+        },
+        {
+          "group": "Wallets",
+          "pages": [
+            "onchaintestkit/wallets/overview",
+            "onchaintestkit/wallets/common-actions",
+            "onchaintestkit/wallets/metamask",
+            "onchaintestkit/wallets/coinbase",
+            "onchaintestkit/wallets/api-reference"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Legal",
+      "pages": [
+        "privacy-policy",
+        "terms-of-service",
+        "cookie-policy"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "x": "https://x.com/base",
+    "github": "https://github.com/base",
+    "linkedin": "https://linkedin.com/company/coinbase"
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
+  "modeToggle": {
+    "default": "light"
+  }
+} 
