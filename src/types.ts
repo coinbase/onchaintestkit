@@ -7,16 +7,18 @@ import { CoinbaseWallet } from "./wallets/Coinbase"
 //   SmartWalletConfig,
 // } from "./wallets/Coinbase/SmartWallet"
 import { MetaMask } from "./wallets/MetaMask"
-import { CoinbaseConfig, MetaMaskConfig } from "./wallets/types"
+import { PhantomWallet } from "./wallets/Phantom"
+import { CoinbaseConfig, MetaMaskConfig, PhantomConfig } from "./wallets/types"
 
-export type SupportedWallet = "metamask" | "coinbase"
+export type SupportedWallet = "metamask" | "coinbase" | "phantom"
 
-export type WalletConfig = MetaMaskConfig | CoinbaseConfig
+export type WalletConfig = MetaMaskConfig | CoinbaseConfig | PhantomConfig
 
 export type WalletFixtureOptions = {
   wallets: {
     metamask?: WalletConfig
     coinbase?: WalletConfig
+    phantom?: WalletConfig
     // "coinbase-smart"?: SmartWalletConfig
   }
   nodeConfig?: NodeConfig
@@ -25,6 +27,7 @@ export type WalletFixtureOptions = {
 export type OnchainFixtures = {
   metamask?: MetaMask
   coinbase?: CoinbaseWallet
+  phantom?: PhantomWallet
   // coinbaseSmart?: CoinbaseSmartWallet
   node?: LocalNodeManager
   smartContractManager?: SmartContractManager

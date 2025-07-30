@@ -4,7 +4,8 @@ import { setupRpcPortInterceptor } from "./node/NetworkInterceptor"
 import { OnchainFixtures, WalletFixtureOptions } from "./types"
 import { CoinbaseFixturesBuilder } from "./wallets/Coinbase"
 import { MetaMaskFixturesBuilder } from "./wallets/MetaMask"
-import { CoinbaseConfig, MetaMaskConfig } from "./wallets/types"
+import { PhantomFixturesBuilder } from "./wallets/Phantom"
+import { CoinbaseConfig, MetaMaskConfig, PhantomConfig } from "./wallets/types"
 
 /**
  * Map of wallet names to their corresponding fixture builders.
@@ -13,6 +14,7 @@ import { CoinbaseConfig, MetaMaskConfig } from "./wallets/types"
 const fixtureBuilderMap = {
   metamask: MetaMaskFixturesBuilder,
   coinbase: CoinbaseFixturesBuilder,
+  phantom: PhantomFixturesBuilder,
 } as const
 
 /**
@@ -46,7 +48,7 @@ const createNetworkInterceptorFixture = () => {
 /**
  * Creates a Playwright test instance with wallet-specific fixtures based on provided options.
  *
- * This function enables testing with different web3 wallets (MetaMask, Coinbase) by:
+ * This function enables testing with different web3 wallets (MetaMask, Coinbase, Phantom) by:
  * 1. Taking wallet configuration options
  * 2. Creating appropriate test fixtures for each enabled wallet
  * 3. Combining multiple wallet fixtures if needed
@@ -93,6 +95,8 @@ export function createOnchainTest(
       fixtureBuilderMap.metamask(walletConfig, options.nodeConfig),
     coinbase: (walletConfig: CoinbaseConfig) =>
       fixtureBuilderMap.coinbase(walletConfig, options.nodeConfig),
+    phantom: (walletConfig: PhantomConfig) =>
+      fixtureBuilderMap.phantom(walletConfig, options.nodeConfig),
   }
 
   // Start with the base test - no node fixture from createOnchainTest
@@ -113,6 +117,10 @@ export function createOnchainTest(
     } else if (walletName === "coinbase") {
       walletFixtures.push(
         walletBuilders.coinbase(walletConfig as CoinbaseConfig),
+      )
+    } else if (walletName === "phantom") {
+      walletFixtures.push(
+        walletBuilders.phantom(walletConfig as PhantomConfig),
       )
     }
   })

@@ -1,0 +1,1 @@
+export { connectToDapp } from "./connectToDapp" 

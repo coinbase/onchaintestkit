@@ -1,5 +1,6 @@
 import { CoinbaseWallet } from "./Coinbase"
 import { MetaMask } from "./MetaMask"
+import { PhantomWallet } from "./Phantom"
 
 export enum BaseActionType {
   // basic setup
@@ -38,26 +39,15 @@ export type ActionOptions = {
 export type WalletSetupContext = { localNodePort: number }
 
 export type BaseWalletConfig = {
-  type: "metamask" | "coinbase"
+  type: "metamask" | "coinbase" | "phantom"
   password?: string
   walletSetup?: (
-    wallet: MetaMask | CoinbaseWallet,
+    wallet: MetaMask | CoinbaseWallet | PhantomWallet,
     context: WalletSetupContext,
   ) => Promise<void>
 }
 
-export type MetaMaskConfig = {
-  type: "metamask"
-  walletSetup?: (wallet: MetaMask, context: WalletSetupContext) => Promise<void>
-} & BaseWalletConfig
 
-export type CoinbaseConfig = {
-  type: "coinbase"
-  walletSetup?: (
-    wallet: CoinbaseWallet,
-    context: WalletSetupContext,
-  ) => Promise<void>
-} & BaseWalletConfig
 
 export abstract class BaseWallet {
   // Method to handle actions with combined options

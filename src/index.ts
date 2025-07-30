@@ -3,6 +3,7 @@ export { configure } from "./configBuilder"
 export { BaseActionType, ActionApprovalType } from "./wallets/BaseWallet"
 export { CoinbaseSpecificActionType, CoinbaseWallet } from "./wallets/Coinbase"
 export { MetaMask } from "./wallets/MetaMask"
+export { PhantomSpecificActionType, PhantomWallet } from "./wallets/Phantom"
 
 // Types
 export type {
@@ -14,6 +15,7 @@ export type {
 export type {
   MetaMaskConfig,
   CoinbaseConfig,
+  PhantomConfig,
   NetworkConfig,
   WalletSetupFn,
 } from "./wallets/types"

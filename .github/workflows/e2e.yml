@@ -71,8 +71,11 @@ jobs:
 
       # Prepare the Coinbase extension for Playwright  
       - name: Prepare Coinbase extension
-        working-directory: example/frontend
         run: yarn prepare-coinbase
+
+        # Prepare the Phantom extension for Playwright  
+      - name: Prepare Phantom extension
+        run: yarn prepare-phantom
 
       # Install browsers & system deps for Playwright
       - name: Install Playwright browsers

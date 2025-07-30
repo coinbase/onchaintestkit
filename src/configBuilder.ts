@@ -7,6 +7,7 @@ import {
 } from "./wallets/BaseWallet"
 import { CoinbaseSpecificActionType, CoinbaseWallet } from "./wallets/Coinbase"
 import { MetaMask, MetaMaskSpecificActionType } from "./wallets/MetaMask"
+import { PhantomSpecificActionType, PhantomWallet } from "./wallets/Phantom"
 /**
  * Configuration builder for E2E testing with different wallet types.
  * Provides a fluent interface for configuring wallet behavior and setup.
@@ -52,7 +53,7 @@ import { MetaMask, MetaMaskSpecificActionType } from "./wallets/MetaMask"
  */
 import { NetworkConfig } from "./wallets/types"
 
-type WalletType = MetaMask | CoinbaseWallet
+type WalletType = MetaMask | CoinbaseWallet | PhantomWallet
 
 /**
  * Helper function to determine if a network is a testnet
@@ -89,7 +90,7 @@ abstract class BaseWalletBuilder<T extends WalletType> {
     const existingSetup = this.config.walletSetup
     this.config.walletSetup = async (wallet: WalletType, context) => {
       if (existingSetup) {
-        await existingSetup(wallet, context)
+        await existingSetup(wallet as T, context)
       }
       await newSetup(wallet as T, context)
     }
@@ -103,12 +104,14 @@ abstract class BaseWalletBuilder<T extends WalletType> {
   withSeedPhrase({
     seedPhrase,
     password,
-  }: { seedPhrase: string; password?: string }) {
+    username,
+  }: { seedPhrase: string; password?: string; username?: string }) {
     this.config.password = password
     this.chainSetup(async wallet => {
       await wallet.handleAction(BaseActionType.IMPORT_WALLET_FROM_SEED, {
         seedPhrase,
         password,
+        username,
       })
     })
     return this
@@ -194,10 +197,28 @@ class CoinbaseConfigBuilder extends BaseWalletBuilder<CoinbaseWallet> {
         network,
         isTestnet: isTestNetwork(network),
       })
+    })
+    return this
+  }
+}
 
-      // Switch to the network
-      await wallet.handleAction(BaseActionType.SWITCH_NETWORK, {
-        networkName: network.name,
+/**
+ * Phantom-specific configuration builder
+ * Extends base builder with Phantom-specific functionality
+ */
+class PhantomConfigBuilder extends BaseWalletBuilder<PhantomWallet> {
+  // Add Phantom-specific methods here
+  withNetwork(network: NetworkConfig) {
+    this.chainSetup(async (wallet, context) => {
+      if (context?.localNodePort) {
+        // if the context has a localNodePort, use it to connect to the local node
+        network.rpcUrl = `http://localhost:${context.localNodePort}`
+      }
+      console.log(`Adding network with RPC URL: ${network.rpcUrl}`)
+
+      // Add the network with the possibly modified URL
+      await wallet.handleAction(PhantomSpecificActionType.ADD_NETWORK, {
+        network,
         isTestnet: isTestNetwork(network),
       })
     })
@@ -233,6 +254,19 @@ export class ConfigBuilder {
   withCoinbase() {
     this.config = { type: "coinbase" }
     const builder = new CoinbaseConfigBuilder(this.config)
+    if (this.nodeConfig) {
+      builder.setNodeConfig(this.nodeConfig)
+    }
+    return builder
+  }
+
+  /**
+   * Initialize Phantom configuration
+   * @returns Phantom-specific builder
+   */
+  withPhantom() {
+    this.config = { type: "phantom" }
+    const builder = new PhantomConfigBuilder(this.config)
     if (this.nodeConfig) {
       builder.setNodeConfig(this.nodeConfig)
     }
