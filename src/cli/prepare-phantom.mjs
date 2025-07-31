@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * This script extracts the Phantom Wallet extension
+ * This script downloads and extracts the Phantom Wallet extension
  * to be used by Playwright tests.
  *
- * Expects a zip file to be present in the cache directory.
- * Run this before running tests to ensure the extension
+ * Run this before running tests in CI to ensure the extension
  * is ready and to avoid race conditions during test execution.
  */
 
@@ -13,13 +12,16 @@ import path from "path"
 import { fileURLToPath } from "url"
 import extract from "extract-zip"
 import fs from "fs-extra"
+import fetch from "node-fetch"
 
 // Support for ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 // Constants for Phantom Wallet
-const PHANTOM_VERSION = "25.27.0" // Update this version as needed
+const PHANTOM_VERSION = "25.27.0"
+const EXTENSION_ID = "bfnaelmomeimhlpmgjnjophhpkkoljpa"
+const DOWNLOAD_URL = `https://update.googleapis.com/service/update2/crx?response=redirect&os=win&arch=x64&os_arch=x86_64&nacl_arch=x86-64&prod=chromiumcrx&prodchannel=unknown&prodversion=120.0.0.0&acceptformat=crx3&x=id%3D${EXTENSION_ID}%26uc`
 const EXTRACTION_COMPLETE_FLAG = ".extraction_complete"
 
 /**
@@ -27,14 +29,7 @@ const EXTRACTION_COMPLETE_FLAG = ".extraction_complete"
  */
 async function setupCacheDir(cacheDirName) {
   const projectRoot = process.cwd()
-  const cacheDirPath = path.join(
-    projectRoot,
-    "example",
-    "frontend",
-    "e2e",
-    ".cache",
-    cacheDirName,
-  )
+  const cacheDirPath = path.join(projectRoot, "e2e", ".cache", cacheDirName)
 
   // Ensure the cache directory exists
   await fs.ensureDir(cacheDirPath)
@@ -43,7 +38,38 @@ async function setupCacheDir(cacheDirName) {
 }
 
 /**
- * Prepares the Phantom Wallet extension by extracting it from a zip file
+ * Download with retry logic for CI environments
+ */
+async function downloadWithRetry(url, options, maxRetries = 3) {
+  let lastError
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Download attempt ${attempt} of ${maxRetries}...`)
+      const response = await fetch(url, options)
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      return response
+    } catch (error) {
+      lastError = error
+      console.error(`Attempt ${attempt} failed: ${error.message}`)
+
+      if (attempt < maxRetries) {
+        const waitTime = Math.min(1000 * 2 ** (attempt - 1), 10000)
+        console.log(`Waiting ${waitTime}ms before retry...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+  }
+
+  throw new Error(`Failed after ${maxRetries} attempts: ${lastError.message}`)
+}
+
+/**
+ * Prepares the Phantom Wallet extension by downloading and extracting it
  */
 async function setupPhantomExtraction() {
   console.log(`Preparing Phantom Wallet extension v${PHANTOM_VERSION}...`)
@@ -53,26 +79,54 @@ async function setupPhantomExtraction() {
   const extractionPath = path.join(cacheDir, `phantom-${PHANTOM_VERSION}`)
   const flagPath = path.join(extractionPath, EXTRACTION_COMPLETE_FLAG)
 
-  // Look for the zip file
-  const zipPath = path.join(cacheDir, `phantom-${PHANTOM_VERSION}.zip`)
-  console.log(`Looking for Phantom Wallet extension zip at: ${zipPath}`)
+  // Download the CRX file
+  const crxPath = path.join(cacheDir, `phantom-${PHANTOM_VERSION}.crx`)
+  console.log(`Downloading Phantom Wallet extension to: ${crxPath}`)
 
-  // Check if zip file exists
-  if (!(await fs.pathExists(zipPath))) {
-    throw new Error(
-      `Phantom wallet zip file not found at ${zipPath}. Please ensure the zip file is placed in the cache directory.`,
-    )
+  // Check if file already exists
+  let cached = false
+  if (await fs.pathExists(crxPath)) {
+    const stats = await fs.stat(crxPath)
+    if (stats.size > 0) {
+      console.log(`Using cached download at ${crxPath}`)
+      cached = true
+    }
   }
 
-  // Verify the zip file is not empty
-  const stats = await fs.stat(zipPath)
-  if (stats.size === 0) {
-    throw new Error(
-      `Phantom wallet zip file at ${zipPath} is empty. Please provide a valid zip file.`,
-    )
-  }
+  // Download if not cached
+  if (!cached) {
+    console.log("Downloading from Chrome Web Store...")
+    try {
+      // Attempt download with retry logic
+      const response = await downloadWithRetry(
+        DOWNLOAD_URL,
+        {
+          redirect: "follow",
+          follow: 20,
+        },
+        3,
+      )
 
-  console.log(`Found Phantom wallet zip file (${stats.size} bytes)`)
+      const contentType = response.headers.get("content-type")
+      console.log(`Response content-type: ${contentType}`)
+
+      const buffer = await response.arrayBuffer()
+
+      await fs.writeFile(crxPath, Buffer.from(buffer))
+      console.log("Download complete")
+
+      // Verify the download
+      const downloadedStats = await fs.stat(crxPath)
+      if (downloadedStats.size === 0) {
+        await fs.remove(crxPath)
+        throw new Error(
+          "Downloaded file is empty. The Chrome Web Store might be blocking automated downloads.",
+        )
+      }
+    } catch (error) {
+      throw new Error(`Extension download failed: ${error.message}`)
+    }
+  }
 
   // Clean any existing extraction directory
   if (await fs.pathExists(extractionPath)) {
@@ -80,10 +134,50 @@ async function setupPhantomExtraction() {
     await fs.emptyDir(extractionPath)
   }
 
-  // Extract the ZIP file
+  // Extract the CRX file
   console.log(`Extracting to: ${extractionPath}`)
   try {
+    // Read the CRX file
+    const crxBuffer = await fs.readFile(crxPath)
+    console.log(`CRX file size: ${crxBuffer.length} bytes`)
+
+    // CRX3 files start with "Cr24" magic number
+    const crx3Magic = Buffer.from("Cr24")
+
+    let zipStart = -1
+
+    if (crxBuffer.subarray(0, 4).equals(crx3Magic)) {
+      console.log("Detected CRX3 format")
+      // CRX3 format:
+      // 4 bytes: "Cr24" magic
+      // 4 bytes: version (3)
+      // 4 bytes: header length
+      const version = crxBuffer.readUInt32LE(4)
+      const headerLength = crxBuffer.readUInt32LE(8)
+      console.log(`CRX version: ${version}, header length: ${headerLength}`)
+
+      // ZIP content starts after the header
+      zipStart = 12 + headerLength
+    } else {
+      throw new Error(
+        "Invalid CRX file format - expected CRX3 with 'Cr24' header",
+      )
+    }
+
+    // Extract the ZIP portion
+    const zipBuffer = crxBuffer.subarray(zipStart)
+    console.log(
+      `Extracting ZIP content from offset ${zipStart}, size: ${zipBuffer.length} bytes`,
+    )
+
+    const zipPath = path.join(cacheDir, `phantom-${PHANTOM_VERSION}.zip`)
+    await fs.writeFile(zipPath, zipBuffer)
+
+    // Now extract the ZIP file
     await extract(zipPath, { dir: extractionPath })
+
+    // Clean up the temporary ZIP file
+    await fs.remove(zipPath)
 
     // Verify extraction succeeded
     const manifestPath = path.join(extractionPath, "manifest.json")
@@ -93,12 +187,6 @@ async function setupPhantomExtraction() {
       )
     }
 
-    // Read and validate manifest
-    const manifest = await fs.readJson(manifestPath)
-    console.log(
-      `Extracted Phantom extension: ${manifest.name} v${manifest.version}`,
-    )
-
     // Create flag file to indicate successful extraction
     await fs.writeFile(flagPath, new Date().toISOString())
 
@@ -107,7 +195,7 @@ async function setupPhantomExtraction() {
     )
     return extractionPath
   } catch (error) {
-    console.error(`Error extracting ZIP: ${error.message}`)
+    console.error(`Error extracting CRX: ${error.message}`)
     // Clean up on failure
     try {
       await fs.emptyDir(extractionPath)

@@ -402,6 +402,7 @@ __metadata:
   bin:
     prepare-coinbase: ./src/cli/prepare-coinbase.mjs
     prepare-metamask: ./src/cli/prepare-metamask.mjs
+    prepare-phantom: ./src/cli/prepare-phantom.mjs
   languageName: unknown
   linkType: soft
 
