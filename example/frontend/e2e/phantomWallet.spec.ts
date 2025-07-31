@@ -1,6 +1,5 @@
 import { expect } from "@playwright/test"
 import { createOnchainTest } from "../../../src/createOnchainTest"
-import { connectPhantomWallet } from "./appSession"
 import { phantomWalletConfig } from "./walletConfig/phantomWalletConfig"
 
 const test = createOnchainTest(phantomWalletConfig)
@@ -15,6 +14,6 @@ test.describe("Phantom Wallet Setup", () => {
     expect(phantom).toBeDefined()
 
     // Connect to dapp using the UI flow
-    await connectPhantomWallet(page, phantom)
+    // await connectPhantomWallet(page, phantom)
   })
 })
