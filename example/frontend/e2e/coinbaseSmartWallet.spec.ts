@@ -53,7 +53,7 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
       {
         mainPage: page,
         popup: firstPopup,
-        passkeyAction: "registerWithCBExtension",
+        passkeyAction: "registerWithSmartWalletSDK",
         passkeyConfig,
       },
     )
@@ -104,7 +104,7 @@ test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
       {
         mainPage: page,
         popup: firstPopup,
-        passkeyAction: "registerWithCBExtension",
+        passkeyAction: "registerWithSmartWalletSDK",
         passkeyConfig,
       },
     )

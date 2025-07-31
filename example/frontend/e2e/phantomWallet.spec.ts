@@ -1,7 +1,5 @@
 import { expect } from "@playwright/test"
 import { createOnchainTest } from "../../../src/createOnchainTest"
-import { BaseActionType } from "../../../src/wallets/BaseWallet"
-import { PhantomSpecificActionType } from "../../../src/wallets/Phantom"
 import { connectPhantomWallet } from "./appSession"
 import { phantomWalletConfig } from "./walletConfig/phantomWalletConfig"
 

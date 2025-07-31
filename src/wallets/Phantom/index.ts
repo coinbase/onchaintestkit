@@ -98,7 +98,6 @@ export class PhantomWallet extends BaseWallet {
 
     // Check current URL to determine the state
     const currentUrl = phantomPage.url()
-    console.log(`Current Phantom page URL: ${currentUrl}`)
 
     // If we're on onboarding.html or about:blank, or no extension URL, try different approaches
     if (
@@ -110,13 +109,11 @@ export class PhantomWallet extends BaseWallet {
       const onboardingUrl = `chrome-extension://${extensionId}/onboarding.html`
 
       try {
-        console.log(`Navigating to onboarding page: ${onboardingUrl}`)
         await phantomPage.goto(onboardingUrl, {
           waitUntil: "domcontentloaded",
           timeout: 10000,
         })
         await phantomPage.waitForLoadState("networkidle", { timeout: 10000 })
-        console.log("Successfully loaded onboarding page")
       } catch (error) {
         console.error("Failed to load onboarding page:", error)
 
@@ -129,7 +126,6 @@ export class PhantomWallet extends BaseWallet {
         let loaded = false
         for (const altUrl of altUrls) {
           try {
-            console.log(`Trying alternative URL: ${altUrl}`)
             await phantomPage.goto(altUrl, {
               waitUntil: "domcontentloaded",
               timeout: 10000,
@@ -137,7 +133,6 @@ export class PhantomWallet extends BaseWallet {
             await phantomPage.waitForLoadState("networkidle", {
               timeout: 10000,
             })
-            console.log(`Successfully loaded: ${altUrl}`)
             loaded = true
             break
           } catch (altError) {
@@ -181,8 +176,6 @@ export class PhantomWallet extends BaseWallet {
    */
   private async navigateToMainPopup(): Promise<void> {
     try {
-      console.log("Navigating to main Phantom extension popup...")
-
       // Create a new page or use existing one for the main popup
       const popupUrl = `chrome-extension://${this.extensionId}/popup.html`
 
@@ -193,7 +186,6 @@ export class PhantomWallet extends BaseWallet {
           timeout: 5000,
         })
         await this.page.waitForLoadState("networkidle", { timeout: 5000 })
-        console.log("Successfully navigated to main popup")
         return
       } catch (_navigationError) {
         console.log("Current page navigation failed, creating new page...")
@@ -212,8 +204,6 @@ export class PhantomWallet extends BaseWallet {
       this.homePage = new HomePage(newPage)
       this.onboardingPage = new OnboardingPage(newPage)
       this.notificationPage = new NotificationPage(newPage)
-
-      console.log("Successfully created new page for main popup")
     } catch (error) {
       console.error("Failed to navigate to main popup:", error)
       throw new Error(`Could not navigate to Phantom main popup: ${error}`)
@@ -230,12 +220,6 @@ export class PhantomWallet extends BaseWallet {
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
-        if (attempt > 0) {
-          console.log(
-            `Retrying Phantom setup (attempt ${attempt + 1}/${MAX_RETRIES})...`,
-          )
-        }
-
         // Get phantom extension path (assumes prepare-phantom.mjs was run first)
         const cacheDir = path.join(
           process.cwd(),
@@ -244,8 +228,6 @@ export class PhantomWallet extends BaseWallet {
           "phantom-extension",
         )
         const phantomPath = path.join(cacheDir, `phantom-${PHANTOM_VERSION}`)
-
-        console.log("Phantom extension prepared at:", phantomPath)
 
         const browserArgs = [
           `--disable-extensions-except=${phantomPath}`,
