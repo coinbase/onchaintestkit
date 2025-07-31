@@ -14,7 +14,11 @@ export class OnboardingPage {
    * @param password - The password to set for the wallet
    * @param username - The username for the wallet
    */
-  async importWallet(seedPhrase: string, password: string, username?: string): Promise<void> {
+  async importWallet(
+    seedPhrase: string,
+    password: string,
+    username?: string,
+  ): Promise<void> {
     await importWalletAction(this.page, seedPhrase, password, username)
   }
-} 
+}

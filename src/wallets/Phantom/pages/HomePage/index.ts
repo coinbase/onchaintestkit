@@ -1,8 +1,8 @@
 import { Page } from "@playwright/test"
 import { NetworkConfig } from "../../../types"
 import { addNetwork } from "./actions/addNetwork"
-import { importPrivateKey } from "./actions/importPrivateKey"
 import { enableTestMode } from "./actions/enableTestMode"
+import { importPrivateKey } from "./actions/importPrivateKey"
 
 export class HomePage {
   private readonly page: Page
@@ -48,4 +48,4 @@ export class HomePage {
   async enableTestMode(): Promise<void> {
     await enableTestMode(this.page)
   }
-} 
+}

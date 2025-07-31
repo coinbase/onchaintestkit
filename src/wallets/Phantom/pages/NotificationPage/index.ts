@@ -70,61 +70,61 @@ export class NotificationPage extends BasePage {
     await rejectTransaction(notificationPage)
   }
 
-//   /**
-//    * Identifies the type of notification based on page content
-//    */
-//   async identifyNotificationType(
-//     notificationPage: import("@playwright/test").Page,
-//     _checkTimeout = 10000,
-//   ): Promise<NotificationPageType> {
-//     let pageContent = ""
-//     let mainText = ""
-//     try {
-//       // Poll for up to 3 seconds for non-empty body content
-//       for (let i = 0; i < 10; i++) {
-//         pageContent = (await notificationPage.textContent("body")) || ""
-//         if (pageContent.trim()) break
-//         await notificationPage.waitForTimeout(300)
-//       }
-//       // If still empty, try [data-testid="app-main"]
-//       if (!pageContent.trim()) {
-//         mainText =
-//           (await notificationPage.textContent('[data-testid="app-main"]')) || ""
-//       }
-//     } catch {
-//       console.warn(
-//         "Notification page was closed before type could be identified.",
-//       )
-//       throw new Error(
-//         "Notification popup closed before type could be identified.",
-//       )
-//     }
+  //   /**
+  //    * Identifies the type of notification based on page content
+  //    */
+  //   async identifyNotificationType(
+  //     notificationPage: import("@playwright/test").Page,
+  //     _checkTimeout = 10000,
+  //   ): Promise<NotificationPageType> {
+  //     let pageContent = ""
+  //     let mainText = ""
+  //     try {
+  //       // Poll for up to 3 seconds for non-empty body content
+  //       for (let i = 0; i < 10; i++) {
+  //         pageContent = (await notificationPage.textContent("body")) || ""
+  //         if (pageContent.trim()) break
+  //         await notificationPage.waitForTimeout(300)
+  //       }
+  //       // If still empty, try [data-testid="app-main"]
+  //       if (!pageContent.trim()) {
+  //         mainText =
+  //           (await notificationPage.textContent('[data-testid="app-main"]')) || ""
+  //       }
+  //     } catch {
+  //       console.warn(
+  //         "Notification page was closed before type could be identified.",
+  //       )
+  //       throw new Error(
+  //         "Notification popup closed before type could be identified.",
+  //       )
+  //     }
 
-//     const checks = [
-//       { type: NotificationPageType.SIGNATURE, text: "sign" },
-//       { type: NotificationPageType.SIGNATURE, text: "approve" },
-//       { type: NotificationPageType.CONNECT, text: "connect" },
-//       { type: NotificationPageType.TOKEN_PERMISSION, text: "permission" },
-//       { type: NotificationPageType.SPENDING_CAP, text: "spending" },
-//     ]
+  //     const checks = [
+  //       { type: NotificationPageType.SIGNATURE, text: "sign" },
+  //       { type: NotificationPageType.SIGNATURE, text: "approve" },
+  //       { type: NotificationPageType.CONNECT, text: "connect" },
+  //       { type: NotificationPageType.TOKEN_PERMISSION, text: "permission" },
+  //       { type: NotificationPageType.SPENDING_CAP, text: "spending" },
+  //     ]
 
-//     // Case-insensitive search for each check
-//     for (const { type, text } of checks) {
-//       if (
-//         pageContent.toLowerCase().includes(text.toLowerCase()) ||
-//         mainText.toLowerCase().includes(text.toLowerCase())
-//       ) {
-//         return type
-//       }
-//     }
+  //     // Case-insensitive search for each check
+  //     for (const { type, text } of checks) {
+  //       if (
+  //         pageContent.toLowerCase().includes(text.toLowerCase()) ||
+  //         mainText.toLowerCase().includes(text.toLowerCase())
+  //       ) {
+  //         return type
+  //       }
+  //     }
 
-//     throw new Error(
-//       `Unknown notification type: no known text found. Body text: ${pageContent.substring(
-//         0,
-//         200,
-//       )} Main text: ${mainText.substring(0, 200)}`,
-//     )
-//   }
+  //     throw new Error(
+  //       `Unknown notification type: no known text found. Body text: ${pageContent.substring(
+  //         0,
+  //         200,
+  //       )} Main text: ${mainText.substring(0, 200)}`,
+  //     )
+  //   }
 
   // TODO: Implement other notification methods for Phantom
   async approveTokenPermission(_extensionId: string): Promise<void> {
@@ -142,4 +142,4 @@ export class NotificationPage extends BasePage {
   async rejectSpendingCapRemoval(_extensionId: string): Promise<void> {
     console.log("Spending cap rejection for Phantom not yet implemented")
   }
-} 
+}

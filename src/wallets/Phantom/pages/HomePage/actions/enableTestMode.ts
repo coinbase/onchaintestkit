@@ -22,7 +22,7 @@ export async function enableTestMode(page: Page): Promise<void> {
     console.log("Opened Wallet Settings")
 
     // Step 3: Click "Developer Settings" using ID
-    await page.click('button#settings-item-developer-settings')
+    await page.click("button#settings-item-developer-settings")
     await page.waitForLoadState("networkidle")
     console.log("Opened Developer Settings")
 
@@ -41,13 +41,14 @@ export async function enableTestMode(page: Page): Promise<void> {
     await page.waitForLoadState("networkidle")
     console.log("Selected Base Sepolia network")
 
-    console.log("✅ Test mode enabled successfully! Base Sepolia is now available.")
-    
+    console.log(
+      "✅ Test mode enabled successfully! Base Sepolia is now available.",
+    )
+
     // Short delay to allow UI to stabilize
     await page.waitForTimeout(2000)
-    
   } catch (error) {
     console.error("Error enabling test mode:", error)
     throw new Error(`Failed to enable test mode in Phantom wallet: ${error}`)
   }
-} 
+}

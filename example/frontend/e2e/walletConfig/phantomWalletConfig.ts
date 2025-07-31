@@ -20,7 +20,7 @@ const baseConfig = configure()
     password: DEFAULT_PASSWORD,
     username: USERNAME,
   })
-  .withCustomSetup(async (wallet) => {
+  .withCustomSetup(async wallet => {
     // Enable test mode to support testnets like Base Sepolia
     await wallet.handleAction(PhantomSpecificActionType.ENABLE_TEST_MODE)
   })
@@ -36,4 +36,4 @@ const baseConfig = configure()
 // Build the config
 const config = baseConfig.build()
 
-export const phantomWalletConfig = config 
+export const phantomWalletConfig = config

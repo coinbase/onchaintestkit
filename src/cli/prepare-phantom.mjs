@@ -27,7 +27,14 @@ const EXTRACTION_COMPLETE_FLAG = ".extraction_complete"
  */
 async function setupCacheDir(cacheDirName) {
   const projectRoot = process.cwd()
-  const cacheDirPath = path.join(projectRoot, "example", "frontend", "e2e", ".cache", cacheDirName)
+  const cacheDirPath = path.join(
+    projectRoot,
+    "example",
+    "frontend",
+    "e2e",
+    ".cache",
+    cacheDirName,
+  )
 
   // Ensure the cache directory exists
   await fs.ensureDir(cacheDirPath)
@@ -53,7 +60,7 @@ async function setupPhantomExtraction() {
   // Check if zip file exists
   if (!(await fs.pathExists(zipPath))) {
     throw new Error(
-      `Phantom wallet zip file not found at ${zipPath}. Please ensure the zip file is placed in the cache directory.`
+      `Phantom wallet zip file not found at ${zipPath}. Please ensure the zip file is placed in the cache directory.`,
     )
   }
 
@@ -61,7 +68,7 @@ async function setupPhantomExtraction() {
   const stats = await fs.stat(zipPath)
   if (stats.size === 0) {
     throw new Error(
-      `Phantom wallet zip file at ${zipPath} is empty. Please provide a valid zip file.`
+      `Phantom wallet zip file at ${zipPath} is empty. Please provide a valid zip file.`,
     )
   }
 
@@ -82,19 +89,21 @@ async function setupPhantomExtraction() {
     const manifestPath = path.join(extractionPath, "manifest.json")
     if (!(await fs.pathExists(manifestPath))) {
       throw new Error(
-        `Extraction failed: manifest.json not found at ${manifestPath}`
+        `Extraction failed: manifest.json not found at ${manifestPath}`,
       )
     }
 
     // Read and validate manifest
     const manifest = await fs.readJson(manifestPath)
-    console.log(`Extracted Phantom extension: ${manifest.name} v${manifest.version}`)
+    console.log(
+      `Extracted Phantom extension: ${manifest.name} v${manifest.version}`,
+    )
 
     // Create flag file to indicate successful extraction
     await fs.writeFile(flagPath, new Date().toISOString())
 
     console.log(
-      `Phantom Wallet extension successfully prepared at: ${extractionPath}`
+      `Phantom Wallet extension successfully prepared at: ${extractionPath}`,
     )
     return extractionPath
   } catch (error) {
@@ -117,7 +126,7 @@ async function main() {
     // Run the setup function
     const extensionPath = await setupPhantomExtraction()
     console.log(
-      `Phantom Wallet extension prepared successfully at: ${extensionPath}`
+      `Phantom Wallet extension prepared successfully at: ${extensionPath}`,
     )
     console.log("You can now run the tests!")
 
@@ -133,4 +142,4 @@ async function main() {
 main().catch(error => {
   console.error("Unhandled error in main function:", error)
   process.exit(1)
-}) 
+})

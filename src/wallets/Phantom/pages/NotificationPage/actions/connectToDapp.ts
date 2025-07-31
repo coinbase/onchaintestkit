@@ -14,12 +14,12 @@ export async function connectToDapp(page: Page): Promise<void> {
   // 1. Wait for the connection popup to load
   // 2. Click the appropriate connect/approve button
   // 3. Handle any additional confirmation steps
-  
+
   // Phantom may have different button selectors than Coinbase
   // Implementation will depend on Phantom's specific UI
-  
+
   console.log("Connect to dapp for Phantom not yet implemented")
-  
+
   // For now, just wait a bit to simulate the action
   await page.waitForTimeout(1000)
-} 
+}

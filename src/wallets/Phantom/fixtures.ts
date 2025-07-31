@@ -1,4 +1,4 @@
-import { BrowserContext, Page, test as base } from "@playwright/test"
+import { BrowserContext, test as base } from "@playwright/test"
 import { PhantomWallet } from "."
 import { LocalNodeManager } from "../../node/LocalNodeManager"
 import { NodeConfig } from "../../node/types"
@@ -47,30 +47,37 @@ export function PhantomFixturesBuilder(
       await removeTempDir(contextPath)
     },
     phantom: async ({ _contextPath }, use) => {
-      const { phantomPage, phantomContext } = await PhantomWallet.initialize(
-        // @ts-ignore
-        null,
-        _contextPath,
-        walletConfig,
-      )
-
-      const extensionId = await getExtensionId(phantomContext, "Phantom")
-      console.log(`Phantom extension ID: ${extensionId}`)
-
-      const phantom = new PhantomWallet(
-        walletConfig,
-        phantomContext,
-        phantomPage,
-        extensionId,
-      )
-
-      await use(phantom)
-      
-      // Cleanup
+      let phantomContext: BrowserContext | undefined
       try {
-        await phantomContext.close()
-      } catch (error) {
-        console.warn("Error closing phantom context:", error)
+        const { phantomPage, phantomContext: newContext } =
+          await PhantomWallet.initialize(
+            // @ts-ignore
+            null,
+            _contextPath,
+            walletConfig,
+          )
+        phantomContext = newContext
+
+        const extensionId = await getExtensionId(phantomContext, "Phantom")
+        console.log(`Phantom extension ID: ${extensionId}`)
+
+        const phantom = new PhantomWallet(
+          walletConfig,
+          phantomContext,
+          phantomPage,
+          extensionId,
+        )
+
+        await use(phantom)
+      } finally {
+        // Cleanup
+        if (phantomContext) {
+          try {
+            await phantomContext.close()
+          } catch (error) {
+            console.warn("Error closing phantom context:", error)
+          }
+        }
       }
     },
     setupWallet: [
@@ -97,4 +104,4 @@ export function PhantomFixturesBuilder(
       { scope: "test", auto: true },
     ],
   })
-} 
+}

@@ -47,8 +47,6 @@ export type BaseWalletConfig = {
   ) => Promise<void>
 }
 
-
-
 export abstract class BaseWallet {
   // Method to handle actions with combined options
   abstract handleAction(

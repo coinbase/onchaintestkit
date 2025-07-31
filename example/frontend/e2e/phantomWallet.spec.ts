@@ -1,14 +1,10 @@
 import { expect } from "@playwright/test"
-import { Page } from "@playwright/test"
 import { createOnchainTest } from "../../../src/createOnchainTest"
-import {
-  ActionApprovalType,
-  BaseActionType,
-} from "../../../src/wallets/BaseWallet"
+import { createOnchainTest } from "../../../src/createOnchainTest"
+import { BaseActionType } from "../../../src/wallets/BaseWallet"
 import { PhantomSpecificActionType } from "../../../src/wallets/Phantom"
 import { connectPhantomWallet } from "./appSession"
 import { phantomWalletConfig } from "./walletConfig/phantomWalletConfig"
-
 
 const test = createOnchainTest(phantomWalletConfig)
 
@@ -72,7 +68,9 @@ test.describe("Phantom Wallet Setup", () => {
     })
   })
 
-  test("should handle blockchain switching (Solana/Ethereum)", async ({ phantom }) => {
+  test("should handle blockchain switching (Solana/Ethereum)", async ({
+    phantom,
+  }) => {
     if (!phantom) {
       throw new Error("Phantom wallet is not defined")
     }
@@ -83,4 +81,3 @@ test.describe("Phantom Wallet Setup", () => {
     })
   })
 })
-

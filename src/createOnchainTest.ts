@@ -119,9 +119,7 @@ export function createOnchainTest(
         walletBuilders.coinbase(walletConfig as CoinbaseConfig),
       )
     } else if (walletName === "phantom") {
-      walletFixtures.push(
-        walletBuilders.phantom(walletConfig as PhantomConfig),
-      )
+      walletFixtures.push(walletBuilders.phantom(walletConfig as PhantomConfig))
     }
   })
 
