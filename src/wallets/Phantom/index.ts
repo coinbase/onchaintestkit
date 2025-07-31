@@ -178,7 +178,10 @@ export class PhantomWallet extends BaseWallet {
     try {
       const popupUrl = `chrome-extension://${this.extensionId}/popup.html`
       try {
-        await this.page.goto(popupUrl, { waitUntil: "domcontentloaded", timeout: 15000 })
+        await this.page.goto(popupUrl, {
+          waitUntil: "domcontentloaded",
+          timeout: 15000,
+        })
         await this.page.waitForLoadState("networkidle", { timeout: 15000 })
         return
       } catch (_navigationError) {
@@ -186,23 +189,34 @@ export class PhantomWallet extends BaseWallet {
       }
 
       // Only try to create a new page if not in CI
-      const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
-      if (!isCI) {
+      const isCI =
+        process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
+      if (isCI) {
+        console.log(
+          "Skipping new tab creation in CI environment; using current page as fallback.",
+        )
+      } else {
         const newPage = await this.context.newPage()
-        await newPage.goto(popupUrl, { waitUntil: "domcontentloaded", timeout: 15000 })
+        await newPage.goto(popupUrl, {
+          waitUntil: "domcontentloaded",
+          timeout: 15000,
+        })
         await newPage.waitForLoadState("networkidle", { timeout: 15000 })
         this.page = newPage
         this.homePage = new HomePage(newPage)
         this.onboardingPage = new OnboardingPage(newPage)
         this.notificationPage = new NotificationPage(newPage)
         return
-      } else {
-        console.log("Skipping new tab creation in CI environment; using current page as fallback.")
       }
     } catch (error) {
-      console.error("Failed to navigate to main popup, but continuing in CI:", error)
+      console.error(
+        "Failed to navigate to main popup, but continuing in CI:",
+        error,
+      )
       // Do not throw in CI, just log and continue
-      if (!(process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true")) {
+      if (
+        !(process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true")
+      ) {
         throw new Error(`Could not navigate to Phantom main popup: ${error}`)
       }
     }
