@@ -183,9 +183,9 @@ export class PhantomWallet extends BaseWallet {
       try {
         await this.page.goto(popupUrl, {
           waitUntil: "domcontentloaded",
-          timeout: 5000,
+          timeout: 15000,
         })
-        await this.page.waitForLoadState("networkidle", { timeout: 5000 })
+        await this.page.waitForLoadState("networkidle", { timeout: 15000 })
         return
       } catch (_navigationError) {
         console.log("Current page navigation failed, creating new page...")
@@ -195,9 +195,9 @@ export class PhantomWallet extends BaseWallet {
       const newPage = await this.context.newPage()
       await newPage.goto(popupUrl, {
         waitUntil: "domcontentloaded",
-        timeout: 5000,
+        timeout: 15000,
       })
-      await newPage.waitForLoadState("networkidle", { timeout: 5000 })
+      await newPage.waitForLoadState("networkidle", { timeout: 15000 })
 
       // Update the phantom page reference
       this.page = newPage
