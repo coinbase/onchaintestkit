@@ -55,7 +55,6 @@ export async function enableTestMode(page: Page): Promise<void> {
     await page.click('button:has-text("Base Sepolia")')
     await page.waitForLoadState("networkidle")
 
-
     // Short delay to allow UI to stabilize
     await page.waitForTimeout(2000)
   } catch (error) {
