@@ -9,6 +9,7 @@
     "lint": "next lint",
     "e2e:metamask:prepare": "prepare-metamask",
     "prepare-coinbase": "prepare-coinbase",
+    "prepare-phantom": "prepare-phantom",
     "test:e2e": "npx dotenv-cli -- yarn playwright test",
     "test:e2e:ui": "npx dotenv-cli -- yarn playwright test --ui"
   },

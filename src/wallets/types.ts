@@ -1,5 +1,6 @@
 import type { CoinbaseWallet } from "./Coinbase"
 import type { MetaMask } from "./MetaMask"
+import type { PhantomWallet } from "./Phantom"
 
 export type NetworkConfig = {
   name: string
@@ -11,7 +12,9 @@ export type NetworkConfig = {
 
 export type BaseWalletConfig = {
   network?: NetworkConfig
-  walletSetup: (wallet: MetaMask | CoinbaseWallet) => Promise<void>
+  walletSetup: (
+    wallet: MetaMask | CoinbaseWallet | PhantomWallet,
+  ) => Promise<void>
 }
 
 export type MetaMaskConfig = {
@@ -30,6 +33,13 @@ export type CoinbaseConfig = {
   ) => Promise<void>
 } & BaseWalletConfig
 
-export type WalletSetupFn<T extends MetaMask | CoinbaseWallet> = (
-  wallet: T,
-) => Promise<void>
+export type PhantomConfig = {
+  password: string
+  walletSetup: (
+    wallet: PhantomWallet,
+    context: { localNodePort: number },
+  ) => Promise<void>
+} & BaseWalletConfig
+
+export type WalletSetupFn<T extends MetaMask | CoinbaseWallet | PhantomWallet> =
+  (wallet: T) => Promise<void>

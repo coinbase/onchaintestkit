@@ -9,7 +9,8 @@
   ],
   "bin": {
     "prepare-coinbase": "./src/cli/prepare-coinbase.mjs",
-    "prepare-metamask": "./src/cli/prepare-metamask.mjs"
+    "prepare-metamask": "./src/cli/prepare-metamask.mjs",
+    "prepare-phantom": "./src/cli/prepare-phantom.mjs"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -22,6 +23,7 @@
     "test": "playwright test",
     "prepare-metamask": "node src/cli/prepare-metamask.mjs",
     "prepare-coinbase": "node src/cli/prepare-coinbase.mjs",
+    "prepare-phantom": "node src/cli/prepare-phantom.mjs",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
