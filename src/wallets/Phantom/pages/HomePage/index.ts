@@ -4,7 +4,6 @@ import type { SupportedChain } from "../../types"
 import { importPrivateKey } from "../OnboardingPage/actions/importPrivateKey"
 import { addNetwork } from "./actions/addNetwork"
 import { enableTestMode } from "./actions/enableTestMode"
-import { importPrivateKey } from "./actions/importPrivateKey"
 
 export class HomePage {
   private readonly page: Page
