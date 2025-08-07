@@ -249,6 +249,10 @@ export class PhantomWallet extends BaseWallet {
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
+        // Check if running in CI environment
+        const isCI =
+          process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
+
         // Get phantom extension path (assumes prepare-phantom.mjs was run first)
         const cacheDir = path.join(
           process.cwd(),
@@ -257,6 +261,22 @@ export class PhantomWallet extends BaseWallet {
           "phantom-extension",
         )
         const phantomPath = path.join(cacheDir, `phantom-${PHANTOM_VERSION}`)
+
+        // Verify extension files exist
+        const fs = await import("fs")
+        if (!fs.existsSync(phantomPath)) {
+          throw new Error(
+            `Phantom extension not found at ${phantomPath}. Run 'node src/cli/prepare-phantom.mjs' first.`,
+          )
+        }
+
+        // Log extension path for debugging
+        if (isCI) {
+          console.log(`[Phantom CI] Extension path: ${phantomPath}`)
+          console.log(
+            `[Phantom CI] Extension exists: ${fs.existsSync(phantomPath)}`,
+          )
+        }
 
         const browserArgs = [
           `--disable-extensions-except=${phantomPath}`,
@@ -276,6 +296,24 @@ export class PhantomWallet extends BaseWallet {
           "--disable-web-security", // Help with extension loading
           "--disable-features=VizDisplayCompositor", // Reduce resource usage
         ]
+
+        // Add CI-specific arguments
+        if (isCI) {
+          browserArgs.push(
+            "--disable-backgrounding-occluded-windows",
+            "--disable-ipc-flooding-protection",
+            "--disable-hang-monitor",
+            "--disable-prompt-on-repost",
+            "--disable-domain-reliability",
+            "--disable-background-networking",
+            "--metrics-recording-only",
+            "--no-default-browser-check",
+            "--disable-sync",
+            "--disable-translate",
+            "--disable-features=TranslateUI,BlinkGenPropertyTrees",
+            "--remote-debugging-port=0", // Let Chrome assign a port
+          )
+        }
 
         const context = await chromium.launchPersistentContext(contextPath, {
           headless: false,
