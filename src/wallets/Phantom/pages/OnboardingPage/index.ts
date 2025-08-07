@@ -1,4 +1,6 @@
 import { Page } from "@playwright/test"
+import type { SupportedChain } from "../../types"
+import { importPrivateKey as importPrivateKeyAction } from "./actions/importPrivateKey"
 import { importWallet as importWalletAction } from "./actions/importWallet"
 
 export class OnboardingPage {
@@ -20,5 +22,21 @@ export class OnboardingPage {
     username?: string,
   ): Promise<void> {
     await importWalletAction(this.page, seedPhrase, password, username)
+  }
+
+  /**
+   * Imports a wallet using a private key
+   * @param privateKey - The private key to import
+   * @param password - The password to set for the wallet
+   * @param chain - The blockchain to use (defaults to "base")
+   * @param name - The name for the private key
+   */
+  async importPrivateKey(
+    privateKey: string,
+    password: string,
+    chain: SupportedChain = "base",
+    name?: string,
+  ): Promise<void> {
+    await importPrivateKeyAction(this.page, privateKey, password, chain, name)
   }
 }
