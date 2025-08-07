@@ -97,17 +97,15 @@ export async function importPrivateKey(
     await privateKeyTextarea.waitFor({ state: "visible" })
     await privateKeyTextarea.fill(privateKey)
 
-    console.log("Private key entered successfully")
-
     // Step 6: Click the Import button to continue
-    console.log("Clicking Import button...")
+    await page.waitForTimeout(1000)
 
     const importButton = page.getByTestId("onboarding-form-submit-button")
     await importButton.waitFor({ state: "visible" })
     await importButton.click()
 
-    console.log("Import button clicked")
     await page.waitForLoadState("networkidle")
+    await page.waitForTimeout(3000)
 
     // Step 6: Wait for and enter password
     const passwordInput = page.getByTestId("onboarding-form-password-input")
