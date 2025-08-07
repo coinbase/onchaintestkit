@@ -342,7 +342,7 @@ export class PhantomWallet extends BaseWallet {
         break
 
       case BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY:
-        await this.homePage.importPrivateKey(
+        await this.onboardingPage.importPrivateKey(
           additionalOptions.privateKey as string,
           this.config.password as string,
           (additionalOptions.chain as SupportedChain) || "base",
