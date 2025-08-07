@@ -50,6 +50,28 @@ import { PhantomSpecificActionType, PhantomWallet } from "./wallets/Phantom"
  *     .build()
  * );
  * ```
+ *
+ * @example Using Private Key
+ * ```typescript
+ * const test = createOnchainTest(
+ *   configure()
+ *     .withLocalNode({ chainId: 1337 })
+ *     .withPhantom()
+ *     .withNetwork({
+ *       name: 'Base Sepolia',
+ *       rpcUrl: 'https://sepolia.base.org',
+ *       chainId: 84532,
+ *       symbol: 'ETH',
+ *     })
+ *     .withPrivateKey({
+ *       privateKey: 'your-private-key-here',
+ *       password: 'your password',
+ *       name: 'Test Account', // Optional name for the private key
+ *       // chain defaults to 'base', or specify: chain: 'ethereum'
+ *     })
+ *     .build()
+ * );
+ * ```
  */
 import { NetworkConfig } from "./wallets/types"
 
@@ -112,6 +134,31 @@ abstract class BaseWalletBuilder<T extends WalletType> {
         seedPhrase,
         password,
         username,
+      })
+    })
+    return this
+  }
+
+  /**
+   * Configure wallet with a private key and optional password
+   * @param privateKey - The wallet's private key
+   * @param password - Optional password for the wallet
+   * @param chain - Optional blockchain to use (for Phantom wallet: solana, ethereum, base, sui, polygon, bitcoin). Defaults to "base".
+   * @param name - Optional name for the private key (for organization purposes)
+   */
+  withPrivateKey({
+    privateKey,
+    password,
+    chain,
+    name,
+  }: { privateKey: string; password?: string; chain?: string; name?: string }) {
+    this.config.password = password
+    this.chainSetup(async wallet => {
+      await wallet.handleAction(BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY, {
+        privateKey,
+        password,
+        chain,
+        name,
       })
     })
     return this

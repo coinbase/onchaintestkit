@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test"
 import { NetworkConfig } from "../../../types"
 import { addNetwork } from "./actions/addNetwork"
-import { importPrivateKey } from "./actions/importPrivateKey"
+import { addWithPrivateKey } from "./actions/addWithPrivateKey"
 
 export class HomePage {
   private readonly page: Page
@@ -14,8 +14,8 @@ export class HomePage {
     await addNetwork(this.page, network)
   }
 
-  async importPrivateKey(privateKey: string, password: string): Promise<void> {
-    await importPrivateKey(this.page, privateKey, password)
+  async addWithPrivateKey(privateKey: string, password: string): Promise<void> {
+    await addWithPrivateKey(this.page, privateKey, password)
   }
 
   async switchNetwork(networkName: string, isTestnet: boolean): Promise<void> {

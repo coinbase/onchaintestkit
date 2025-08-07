@@ -1,5 +1,5 @@
+import { Agent } from "http"
 import { expect } from "@playwright/test"
-import { Page } from "@playwright/test"
 import { ethers } from "ethers"
 import { createOnchainTest } from "../../../src/createOnchainTest"
 import {
@@ -8,22 +8,8 @@ import {
 } from "../../../src/wallets/BaseWallet"
 import { CoinbaseSpecificActionType } from "../../../src/wallets/Coinbase"
 import { connectCoinbaseWallet } from "./appSession"
+import { inputTransactionDetails } from "./testUtils"
 import { coinbaseWalletConfig } from "./walletConfig/coinbaseWalletConfig"
-
-async function inputTransactionDetails(page: Page) {
-  // Try to send a transaction
-  await page.getByTestId("switch-to-base-sepolia").click()
-  //input transaction address
-  await page
-    .getByTestId("send-address-input")
-    .fill("0x83C2bbef5a09C4B46E049917a41E05fAf74b6275")
-
-  //input transaction amount
-  await page.getByTestId("send-amount-input").fill("0.0001")
-
-  //send transaction button
-  await page.getByTestId("send-transaction-button").click()
-}
 
 const test = createOnchainTest(coinbaseWalletConfig)
 
@@ -56,7 +42,7 @@ test.describe("Coinbase Wallet Setup", () => {
     const privateKey = wallet.privateKey
 
     // Import wallet from private key
-    await coinbase.handleAction(BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY, {
+    await coinbase.handleAction(CoinbaseSpecificActionType.ADD_WALLET_WITH_PRIVATE_KEY, {
       privateKey,
     })
 

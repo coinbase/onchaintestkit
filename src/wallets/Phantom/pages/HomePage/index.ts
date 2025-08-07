@@ -1,8 +1,9 @@
 import { Page } from "@playwright/test"
 import { NetworkConfig } from "../../../types"
+import type { SupportedChain } from "../../types"
+import { importPrivateKey } from "../OnboardingPage/actions/importPrivateKey"
 import { addNetwork } from "./actions/addNetwork"
 import { enableTestMode } from "./actions/enableTestMode"
-import { importPrivateKey } from "./actions/importPrivateKey"
 
 export class HomePage {
   private readonly page: Page
@@ -15,8 +16,13 @@ export class HomePage {
     await addNetwork(this.page, network)
   }
 
-  async importPrivateKey(privateKey: string, password: string): Promise<void> {
-    await importPrivateKey(this.page, privateKey, password)
+  async importPrivateKey(
+    privateKey: string,
+    password: string,
+    chain: SupportedChain = "base",
+    name?: string,
+  ): Promise<void> {
+    await importPrivateKey(this.page, privateKey, password, chain, name)
   }
 
   async switchNetwork(networkName: string, isTestnet: boolean): Promise<void> {

@@ -22,7 +22,7 @@ export async function addNetwork(page: Page, network: NetworkConfig) {
   if (isTestnet) {
     await page.getByTestId("custom-network-testnet-checkbox").click()
   }
-
+  await page.waitForTimeout(500)
   // Fill in network details
   await page.getByTestId("custom-network-name-input").fill(name)
   if (rpcUrl) {

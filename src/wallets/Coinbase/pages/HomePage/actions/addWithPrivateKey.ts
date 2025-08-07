@@ -1,11 +1,11 @@
 import type { Page } from "@playwright/test"
 
-export async function importPrivateKey(
+export async function addWithPrivateKey(
   page: Page,
   privateKey: string,
   password: string,
 ): Promise<void> {
-  console.log("Starting private key import process...")
+  console.log("Starting private key wallet addition process...")
 
   // Click settings button
   await page.getByTestId("settings-navigation-link").click()

@@ -58,6 +58,7 @@ jobs:
           echo "E2E_CONTRACT_PROJECT_ROOT=../smart-contracts" >> .env
           echo "E2E_TEST_FORK_URL=${{ secrets.E2E_TEST_FORK_URL }}" >> .env
           echo "E2E_TEST_FORK_BLOCK_NUMBER=23850654" >> .env
+          echo "PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS=1" >> .env
 
       # Install frontend workspace dependencies (Ensures its own deps are available)
       - name: Install frontend dependencies

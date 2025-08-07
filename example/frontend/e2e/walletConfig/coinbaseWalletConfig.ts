@@ -17,6 +17,10 @@ const baseConfig = configure()
     seedPhrase: DEFAULT_SEED_PHRASE ?? "",
     password: DEFAULT_PASSWORD,
   })
+  // .withPrivateKey({
+  //   privateKey: process.env.E2E_TEST_PRIVATE_KEY ?? "",
+  //   password: DEFAULT_PASSWORD,
+  // })
   // Add the network with the actual port in a custom setup
   .withNetwork({
     name: "Base Sepolia",

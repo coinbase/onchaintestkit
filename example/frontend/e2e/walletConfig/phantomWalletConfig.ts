@@ -15,12 +15,21 @@ const baseConfig = configure()
     hardfork: "cancun",
   })
   .withPhantom()
-  .withSeedPhrase({
-    seedPhrase: DEFAULT_SEED_PHRASE ?? "",
+  //   .withSeedPhrase({
+  //     seedPhrase: DEFAULT_SEED_PHRASE ?? "",
+  //     password: DEFAULT_PASSWORD,
+  //     username: USERNAME,
+  //   })
+  .withPrivateKey({
+    privateKey: process.env.E2E_TEST_PRIVATE_KEY ?? "",
     password: DEFAULT_PASSWORD,
-    username: USERNAME,
+    chain: "base",
+    name: "OTKTESTWALLET",
   })
   .withCustomSetup(async wallet => {
+    // Small delay to ensure the main popup is fully ready after private key import
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
     // Enable test mode to support testnets like Base Sepolia
     await wallet.handleAction(PhantomSpecificActionType.ENABLE_TEST_MODE)
   })

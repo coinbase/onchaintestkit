@@ -11,6 +11,7 @@ import {
 import { PhantomConfig } from "../types"
 import { NetworkConfig } from "../types"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
+import type { SupportedChain } from "./types"
 
 // Extend BaseActionType with Phantom-specific actions
 export enum PhantomSpecificActionType {
@@ -46,6 +47,10 @@ export class PhantomWallet extends BaseWallet {
   private homePage: HomePage
 
   private notificationPage: NotificationPage
+
+  get browserContext(): BrowserContext {
+    return this.context
+  }
 
   constructor(
     walletConfig: PhantomConfig,
@@ -178,10 +183,20 @@ export class PhantomWallet extends BaseWallet {
     try {
       const popupUrl = `chrome-extension://${this.extensionId}/popup.html`
       try {
+        if (this.page.isClosed()) {
+          console.log("Phantom main popup already closed, skipping navigation.")
+          return
+        }
         await this.page.goto(popupUrl, {
           waitUntil: "domcontentloaded",
           timeout: 15000,
         })
+        if (this.page.isClosed()) {
+          console.log(
+            "Phantom main popup closed after goto, skipping waitForLoadState.",
+          )
+          return
+        }
         await this.page.waitForLoadState("networkidle", { timeout: 15000 })
         return
       } catch (_navigationError) {
@@ -201,6 +216,12 @@ export class PhantomWallet extends BaseWallet {
           waitUntil: "domcontentloaded",
           timeout: 15000,
         })
+        if (newPage.isClosed()) {
+          console.log(
+            "Phantom main popup closed after newPage.goto, skipping waitForLoadState.",
+          )
+          return
+        }
         await newPage.waitForLoadState("networkidle", { timeout: 15000 })
         this.page = newPage
         this.homePage = new HomePage(newPage)
@@ -209,16 +230,9 @@ export class PhantomWallet extends BaseWallet {
         return
       }
     } catch (error) {
-      console.error(
-        "Failed to navigate to main popup, but continuing in CI:",
-        error,
-      )
-      // Do not throw in CI, just log and continue
-      if (
-        !(process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true")
-      ) {
-        throw new Error(`Could not navigate to Phantom main popup: ${error}`)
-      }
+      console.error("Failed to navigate to main popup, but continuing:", error)
+      // Never throw, just log and continue
+      return
     }
   }
 
@@ -328,7 +342,10 @@ export class PhantomWallet extends BaseWallet {
         await this.homePage.importPrivateKey(
           additionalOptions.privateKey as string,
           this.config.password as string,
+          (additionalOptions.chain as SupportedChain) || "base",
+          additionalOptions.name as string,
         )
+        await this.navigateToMainPopup()
         break
 
       // Network actions
