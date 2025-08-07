@@ -15,4 +15,5 @@ export async function connectToDapp(page: Page): Promise<void> {
 
   // For now, just wait a bit to simulate the action
   //   await page.waitForEvent("close")
+
 }

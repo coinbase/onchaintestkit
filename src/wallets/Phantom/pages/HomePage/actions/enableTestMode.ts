@@ -5,6 +5,7 @@ import type { Page } from "@playwright/test"
  * @param page - The Playwright page object for the Phantom wallet
  */
 export async function enableTestMode(page: Page): Promise<void> {
+
   // Check if running in CI
   const isCI =
     process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
@@ -65,5 +66,6 @@ export async function enableTestMode(page: Page): Promise<void> {
       )
       return
     }
+
   }
 }

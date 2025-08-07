@@ -13,6 +13,7 @@ export async function importWallet(
   password: string,
   _username?: string,
 ): Promise<void> {
+
   try {
     // Wait for the extension UI to be ready
     await page.waitForLoadState("networkidle")
@@ -34,12 +35,14 @@ export async function importWallet(
     // Step 3: Enter seed phrase (split into individual words for each input)
     const words = seedPhrase.trim().split(/\s+/)
 
+
     // Fill each word into its respective input box
     for (let i = 0; i < words.length; i++) {
       const input = page.getByTestId(`secret-recovery-phrase-word-input-${i}`)
       // Wait for each input to be available before filling
       await input.waitFor({ state: "visible" })
       await input.fill(words[i])
+
     }
 
     // Wait for all inputs to be properly filled and Continue button to be enabled
@@ -113,6 +116,7 @@ export async function importWallet(
       // Expected: Page closes after transitioning to main extension UI
       console.log("Onboarding page closed (expected behavior)")
     }
+
   } catch (error) {
     console.error("Error during Phantom wallet import:", error)
     throw new Error(`Failed to import Phantom wallet: ${error}`)

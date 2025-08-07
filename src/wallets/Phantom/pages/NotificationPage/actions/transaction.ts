@@ -16,6 +16,7 @@ export const confirmTransaction = async (page: Page): Promise<void> => {
   await confirmButton.waitFor({ state: "visible", timeout: 10000 })
   await confirmButton.click()
 
+
 }
 
 /**
@@ -34,4 +35,5 @@ export const rejectTransaction = async (page: Page): Promise<void> => {
   await rejectButton.waitFor({ state: "visible", timeout: 10000 })
   await page.waitForTimeout(1000)
   await rejectButton.click()
+
 }

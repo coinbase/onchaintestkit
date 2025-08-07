@@ -13,6 +13,7 @@ import { NetworkConfig } from "../types"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
 import type { SupportedChain } from "./types"
 
+
 // Extend BaseActionType with Phantom-specific actions
 export enum PhantomSpecificActionType {
   LOCK = "lock",
@@ -51,6 +52,7 @@ export class PhantomWallet extends BaseWallet {
   get browserContext(): BrowserContext {
     return this.context
   }
+
 
   constructor(
     walletConfig: PhantomConfig,
@@ -187,6 +189,7 @@ export class PhantomWallet extends BaseWallet {
           console.log("Phantom main popup already closed, skipping navigation.")
           return
         }
+
         await this.page.goto(popupUrl, {
           waitUntil: "domcontentloaded",
           timeout: 15000,
@@ -197,6 +200,7 @@ export class PhantomWallet extends BaseWallet {
           )
           return
         }
+
         await this.page.waitForLoadState("networkidle", { timeout: 15000 })
         return
       } catch (_navigationError) {
@@ -222,6 +226,7 @@ export class PhantomWallet extends BaseWallet {
           )
           return
         }
+
         await newPage.waitForLoadState("networkidle", { timeout: 15000 })
         this.page = newPage
         this.homePage = new HomePage(newPage)
@@ -233,6 +238,7 @@ export class PhantomWallet extends BaseWallet {
       console.error("Failed to navigate to main popup, but continuing:", error)
       // Never throw, just log and continue
       return
+
     }
   }
 
@@ -346,6 +352,7 @@ export class PhantomWallet extends BaseWallet {
           additionalOptions.name as string,
         )
         await this.navigateToMainPopup()
+
         break
 
       // Network actions

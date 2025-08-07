@@ -159,6 +159,7 @@ abstract class BaseWalletBuilder<T extends WalletType> {
         password,
         chain,
         name,
+
       })
     })
     return this

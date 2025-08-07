@@ -6,6 +6,7 @@ import {
 } from "../../../src/wallets/BaseWallet"
 import { connectPhantomWallet } from "./appSession"
 import { inputTransactionDetails } from "./testUtils"
+
 import { phantomWalletConfig } from "./walletConfig/phantomWalletConfig"
 
 const test = createOnchainTest(phantomWalletConfig)
@@ -47,5 +48,6 @@ test.describe("Phantom Wallet Setup", () => {
       approvalType: ActionApprovalType.APPROVE,
     })
     await page.getByText("Transaction confirmed!").waitFor()
+
   })
 })

@@ -1,4 +1,5 @@
 import { BrowserContext, Page, test as base } from "@playwright/test"
+
 import { PhantomWallet } from "."
 import { LocalNodeManager } from "../../node/LocalNodeManager"
 import { NodeConfig } from "../../node/types"
@@ -12,6 +13,7 @@ type PhantomFixturesType = {
   phantom: PhantomWallet
   extensionId: string
   phantomPage: Page
+
   setupWallet: null
   node: LocalNodeManager
 }
@@ -197,6 +199,7 @@ export function PhantomFixturesBuilder(
           console.log("Phantom wallet setup complete")
 
           await use(null)
+
         } catch (error) {
           console.error("Error during wallet setup:", error)
           throw error
@@ -213,5 +216,6 @@ export function PhantomFixturesBuilder(
         throw error
       }
     },
+
   })
 }

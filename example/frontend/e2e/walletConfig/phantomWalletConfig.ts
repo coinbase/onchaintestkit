@@ -30,6 +30,7 @@ const baseConfig = configure()
     // Small delay to ensure the main popup is fully ready after private key import
     await new Promise(resolve => setTimeout(resolve, 2000))
 
+
     // Enable test mode to support testnets like Base Sepolia
     await wallet.handleAction(PhantomSpecificActionType.ENABLE_TEST_MODE)
   })

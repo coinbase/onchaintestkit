@@ -5,6 +5,7 @@ import { importPrivateKey } from "../OnboardingPage/actions/importPrivateKey"
 import { addNetwork } from "./actions/addNetwork"
 import { enableTestMode } from "./actions/enableTestMode"
 
+
 export class HomePage {
   private readonly page: Page
 
@@ -23,6 +24,7 @@ export class HomePage {
     name?: string,
   ): Promise<void> {
     await importPrivateKey(this.page, privateKey, password, chain, name)
+
   }
 
   async switchNetwork(networkName: string, isTestnet: boolean): Promise<void> {
