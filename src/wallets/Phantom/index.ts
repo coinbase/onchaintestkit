@@ -13,7 +13,6 @@ import { NetworkConfig } from "../types"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
 import type { SupportedChain } from "./types"
 
-
 // Extend BaseActionType with Phantom-specific actions
 export enum PhantomSpecificActionType {
   LOCK = "lock",
@@ -52,7 +51,6 @@ export class PhantomWallet extends BaseWallet {
   get browserContext(): BrowserContext {
     return this.context
   }
-
 
   constructor(
     walletConfig: PhantomConfig,
@@ -238,7 +236,6 @@ export class PhantomWallet extends BaseWallet {
       console.error("Failed to navigate to main popup, but continuing:", error)
       // Never throw, just log and continue
       return
-
     }
   }
 

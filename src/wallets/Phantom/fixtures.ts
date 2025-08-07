@@ -199,7 +199,6 @@ export function PhantomFixturesBuilder(
           console.log("Phantom wallet setup complete")
 
           await use(null)
-
         } catch (error) {
           console.error("Error during wallet setup:", error)
           throw error
@@ -216,6 +215,5 @@ export function PhantomFixturesBuilder(
         throw error
       }
     },
-
   })
 }

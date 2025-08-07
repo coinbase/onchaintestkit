@@ -13,4 +13,3 @@ export type SupportedChain =
   | "sui"
   | "polygon"
   | "bitcoin"
-

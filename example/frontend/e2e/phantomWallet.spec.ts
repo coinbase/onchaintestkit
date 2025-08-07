@@ -48,6 +48,5 @@ test.describe("Phantom Wallet Setup", () => {
       approvalType: ActionApprovalType.APPROVE,
     })
     await page.getByText("Transaction confirmed!").waitFor()
-
   })
 })
