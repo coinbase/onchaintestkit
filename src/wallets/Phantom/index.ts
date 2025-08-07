@@ -87,8 +87,12 @@ export class PhantomWallet extends BaseWallet {
     // Wait for extension page to load and get extension ID
     const extensionId = await getExtensionId(context, "Phantom")
 
-    // Wait a bit more for extension to initialize
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const isCI =
+      process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
+
+    // Wait longer for extension to initialize in CI
+    const initDelay = isCI ? 3000 : 1000
+    await new Promise(resolve => setTimeout(resolve, initDelay))
 
     // Check if there's already a page with the extension loaded
     let phantomPage = context
@@ -98,11 +102,17 @@ export class PhantomWallet extends BaseWallet {
     if (!phantomPage) {
       phantomPage = await context.newPage()
       // Wait for page to be ready
-      await phantomPage.waitForLoadState("domcontentloaded")
+      await phantomPage.waitForLoadState("domcontentloaded", { timeout: 15000 })
+    }
+
+    // Validate page is still open before proceeding
+    if (phantomPage.isClosed()) {
+      throw new Error("Phantom extension page was closed during initialization")
     }
 
     // Check current URL to determine the state
     const currentUrl = phantomPage.url()
+    console.log(`[Phantom Init] Current URL: ${currentUrl}`)
 
     // If we're on onboarding.html or about:blank, or no extension URL, try different approaches
     if (
@@ -114,11 +124,18 @@ export class PhantomWallet extends BaseWallet {
       const onboardingUrl = `chrome-extension://${extensionId}/onboarding.html`
 
       try {
-        await phantomPage.goto(onboardingUrl, {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
-        })
-        await phantomPage.waitForLoadState("networkidle", { timeout: 10000 })
+        if (!phantomPage.isClosed()) {
+          await phantomPage.goto(onboardingUrl, {
+            waitUntil: "domcontentloaded",
+            timeout: 15000,
+          })
+
+          if (!phantomPage.isClosed()) {
+            await phantomPage.waitForLoadState("networkidle", {
+              timeout: 15000,
+            })
+          }
+        }
       } catch (error) {
         console.error("Failed to load onboarding page:", error)
 
@@ -131,15 +148,22 @@ export class PhantomWallet extends BaseWallet {
         let loaded = false
         for (const altUrl of altUrls) {
           try {
+            if (phantomPage.isClosed()) {
+              phantomPage = await context.newPage()
+            }
+
             await phantomPage.goto(altUrl, {
               waitUntil: "domcontentloaded",
-              timeout: 10000,
+              timeout: 15000,
             })
-            await phantomPage.waitForLoadState("networkidle", {
-              timeout: 10000,
-            })
-            loaded = true
-            break
+
+            if (!phantomPage.isClosed()) {
+              await phantomPage.waitForLoadState("networkidle", {
+                timeout: 15000,
+              })
+              loaded = true
+              break
+            }
           } catch (altError) {
             const errorMessage =
               altError instanceof Error ? altError.message : String(altError)
@@ -156,7 +180,9 @@ export class PhantomWallet extends BaseWallet {
     } else {
       // Already on a phantom extension page, just wait for it to be ready
       try {
-        await phantomPage.waitForLoadState("networkidle", { timeout: 10000 })
+        if (!phantomPage.isClosed()) {
+          await phantomPage.waitForLoadState("networkidle", { timeout: 15000 })
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error)
@@ -165,14 +191,24 @@ export class PhantomWallet extends BaseWallet {
       }
     }
 
+    // Final validation that page is still open
+    if (phantomPage.isClosed()) {
+      throw new Error("Phantom extension page was closed after initialization")
+    }
+
     // Close any other pages
     const pages = context.pages()
     for (const page of pages) {
-      if (page !== phantomPage) {
-        await page.close()
+      if (page !== phantomPage && !page.isClosed()) {
+        try {
+          await page.close()
+        } catch (_error) {
+          // Ignore errors when closing pages
+        }
       }
     }
 
+    console.log(`[Phantom Init] Final URL: ${phantomPage.url()}`)
     return { phantomPage, phantomContext: context }
   }
 
