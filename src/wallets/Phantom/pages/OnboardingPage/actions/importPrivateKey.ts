@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test"
+import { expect } from "@playwright/test"
 import type { SupportedChain } from "../../../types"
 
 const CHAIN_DATA_VALUES: Record<SupportedChain, string> = {
@@ -98,10 +99,15 @@ export async function importPrivateKey(
     await privateKeyTextarea.fill(privateKey)
 
     // Step 6: Click the Import button to continue
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(10src/wallets/Phantom/pages/OnboardingPage/actions/importPrivateKey.ts 000)
 
     const importButton = page.getByTestId("onboarding-form-submit-button")
     await importButton.waitFor({ state: "visible" })
+    
+    // Wait for the button to become enabled (form validation must pass)
+    await importButton.waitFor({ state: "attached" })
+    await expect(importButton).toBeEnabled({ timeout: 10000 })
+    
     await importButton.click()
 
     await page.waitForLoadState("networkidle")

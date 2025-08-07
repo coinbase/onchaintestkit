@@ -210,8 +210,32 @@ export class PhantomWallet extends BaseWallet {
         process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
       if (isCI) {
         console.log(
-          "Skipping new tab creation in CI environment; using current page as fallback.",
+          "In CI environment - checking if we need to create a new page...",
         )
+        // In CI, we still need a new page if the current one is closed
+        if (this.page.isClosed()) {
+          console.log("Current page is closed, creating new page even in CI...")
+          const newPage = await this.context.newPage()
+          await newPage.goto(popupUrl, {
+            waitUntil: "domcontentloaded",
+            timeout: 15000,
+          })
+          if (newPage.isClosed()) {
+            console.log(
+              "Phantom main popup closed after newPage.goto, skipping waitForLoadState.",
+            )
+            return
+          }
+
+          await newPage.waitForLoadState("networkidle", { timeout: 15000 })
+          this.page = newPage
+          this.homePage = new HomePage(newPage)
+          this.onboardingPage = new OnboardingPage(newPage)
+          this.notificationPage = new NotificationPage(newPage)
+          return
+        } else {
+          console.log("Current page still open in CI, using it as fallback.")
+        }
       } else {
         const newPage = await this.context.newPage()
         await newPage.goto(popupUrl, {

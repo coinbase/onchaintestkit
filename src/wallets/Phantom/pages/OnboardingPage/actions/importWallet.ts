@@ -43,15 +43,15 @@ export async function importWallet(
     }
 
     // Wait for all inputs to be properly filled and Continue button to be enabled
-    await page.waitForTimeout(1000) // Short wait for validation to complete
+    await page.waitForTimeout(3000) // Short wait for validation to complete
 
     // Step 4: Wait for and click Continue button (after seed phrase)
     const firstContinueBtn = page.getByTestId("onboarding-form-submit-button")
     await firstContinueBtn.waitFor({ state: "visible" })
     await firstContinueBtn.click()
     await page.waitForLoadState("networkidle")
-
-    await page.waitForTimeout(3000)
+    
+    await page.waitForTimeout(10000)
 
     // Step 5: Wait for and click Continue button again (second Continue button)
     const secondContinueBtn = page.getByTestId("onboarding-form-submit-button")
