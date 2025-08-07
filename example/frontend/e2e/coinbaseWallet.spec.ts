@@ -42,9 +42,12 @@ test.describe("Coinbase Wallet Setup", () => {
     const privateKey = wallet.privateKey
 
     // Import wallet from private key
-    await coinbase.handleAction(CoinbaseSpecificActionType.ADD_WALLET_WITH_PRIVATE_KEY, {
-      privateKey,
-    })
+    await coinbase.handleAction(
+      CoinbaseSpecificActionType.ADD_WALLET_WITH_PRIVATE_KEY,
+      {
+        privateKey,
+      },
+    )
 
     // Note: The password is already configured in the wallet config
     // and will be used automatically during the import process

@@ -15,8 +15,6 @@ export const confirmTransaction = async (page: Page): Promise<void> => {
   const confirmButton = page.getByTestId("primary-button")
   await confirmButton.waitFor({ state: "visible", timeout: 10000 })
   await confirmButton.click()
-
-
 }
 
 /**
