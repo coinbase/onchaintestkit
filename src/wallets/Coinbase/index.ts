@@ -26,6 +26,7 @@ export enum CoinbaseSpecificActionType {
   ADD_NETWORK = "addNetwork",
   SEND_TOKENS = "sendTokens",
   HANDLE_PASSKEY_POPUP = "handlePasskeyPopup",
+  ADD_WALLET_WITH_PRIVATE_KEY = "addWalletWithPrivateKey",
 }
 
 type CoinbaseActionType = BaseActionType | CoinbaseSpecificActionType
@@ -557,7 +558,7 @@ export class CoinbaseWallet extends BaseWallet {
         break
 
       case BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY:
-        await this.homePage.importPrivateKey(
+        await this.onboardingPage.importPrivateKey(
           additionalOptions.privateKey as string,
           this.config.password as string,
         )
@@ -639,6 +640,13 @@ export class CoinbaseWallet extends BaseWallet {
         //   additionalOptions.tokenSymbol as string | undefined,
         // )
         throw new Error("sendTokens not implemented for Coinbase Wallet")
+
+      case CoinbaseSpecificActionType.ADD_WALLET_WITH_PRIVATE_KEY:
+        await this.homePage.addWithPrivateKey(
+          additionalOptions.privateKey as string,
+          this.config.password as string,
+        )
+        break
 
       default:
         throw new Error(`Unsupported action: ${action}`)
