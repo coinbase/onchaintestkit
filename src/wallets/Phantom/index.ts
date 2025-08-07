@@ -209,50 +209,18 @@ export class PhantomWallet extends BaseWallet {
       const isCI =
         process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
       if (isCI) {
-        console.log(
-          "In CI environment - checking if we need to create a new page...",
+        // In CI, find the remaining extension page after onboarding closes the old one
+        const pages = this.context.pages()
+        const extensionPage = pages.find(p =>
+          p.url().includes(`chrome-extension://${this.extensionId}/popup.html`),
         )
-        // In CI, we still need a new page if the current one is closed
-        if (this.page.isClosed()) {
-          console.log("Current page is closed, creating new page even in CI...")
-          const newPage = await this.context.newPage()
-          await newPage.goto(popupUrl, {
-            waitUntil: "domcontentloaded",
-            timeout: 15000,
-          })
-          if (newPage.isClosed()) {
-            console.log(
-              "Phantom main popup closed after newPage.goto, skipping waitForLoadState.",
-            )
-            return
-          }
-
-          await newPage.waitForLoadState("networkidle", { timeout: 15000 })
-          this.page = newPage
-          this.homePage = new HomePage(newPage)
-          this.onboardingPage = new OnboardingPage(newPage)
-          this.notificationPage = new NotificationPage(newPage)
+        if (extensionPage && !extensionPage.isClosed()) {
+          this.page = extensionPage
+          this.homePage = new HomePage(extensionPage)
+          this.onboardingPage = new OnboardingPage(extensionPage)
+          this.notificationPage = new NotificationPage(extensionPage)
           return
         }
-      } else {
-        const newPage = await this.context.newPage()
-        await newPage.goto(popupUrl, {
-          waitUntil: "domcontentloaded",
-          timeout: 15000,
-        })
-        if (newPage.isClosed()) {
-          console.log(
-            "Phantom main popup closed after newPage.goto, skipping waitForLoadState.",
-          )
-          return
-        }
-
-        await newPage.waitForLoadState("networkidle", { timeout: 15000 })
-        this.page = newPage
-        this.homePage = new HomePage(newPage)
-        this.onboardingPage = new OnboardingPage(newPage)
-        this.notificationPage = new NotificationPage(newPage)
-        return
       }
     } catch (error) {
       console.error("Failed to navigate to main popup, but continuing:", error)
