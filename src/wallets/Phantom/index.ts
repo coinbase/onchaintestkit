@@ -233,8 +233,6 @@ export class PhantomWallet extends BaseWallet {
           this.onboardingPage = new OnboardingPage(newPage)
           this.notificationPage = new NotificationPage(newPage)
           return
-        } else {
-          console.log("Current page still open in CI, using it as fallback.")
         }
       } else {
         const newPage = await this.context.newPage()

@@ -50,7 +50,7 @@ export async function importWallet(
     await firstContinueBtn.waitFor({ state: "visible" })
     await firstContinueBtn.click()
     await page.waitForLoadState("networkidle")
-    
+
     await page.waitForTimeout(10000)
 
     // Step 5: Wait for and click Continue button again (second Continue button)
