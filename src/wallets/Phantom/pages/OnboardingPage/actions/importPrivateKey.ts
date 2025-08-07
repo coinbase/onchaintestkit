@@ -135,7 +135,7 @@ export async function importPrivateKey(
     // Wait for the checkbox state to update
     try {
       await page.waitForTimeout(500)
-    } catch (error) {
+    } catch (_error) {
       console.log("Page context changed during checkbox wait (expected)")
     }
 

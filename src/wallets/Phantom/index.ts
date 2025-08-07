@@ -182,38 +182,34 @@ export class PhantomWallet extends BaseWallet {
   private async navigateToMainPopup(): Promise<void> {
     try {
       const popupUrl = `chrome-extension://${this.extensionId}/popup.html`
+
+      // First, try to navigate the current page if it's still open
       try {
-        if (this.page.isClosed()) {
-          console.log("Phantom main popup already closed, skipping navigation.")
-          return
+        if (!this.page.isClosed()) {
+          await this.page.goto(popupUrl, {
+            waitUntil: "domcontentloaded",
+            timeout: 15000,
+          })
+          if (!this.page.isClosed()) {
+            await this.page.waitForLoadState("networkidle", { timeout: 15000 })
+            return
+          }
         }
-
-        await this.page.goto(popupUrl, {
-          waitUntil: "domcontentloaded",
-          timeout: 15000,
-        })
-        if (this.page.isClosed()) {
-          console.log(
-            "Phantom main popup closed after goto, skipping waitForLoadState.",
-          )
-          return
-        }
-
-        await this.page.waitForLoadState("networkidle", { timeout: 15000 })
-        return
       } catch (_navigationError) {
         console.log("Current page navigation failed.")
       }
 
-      // Only try to create a new page if not in CI
+      // If current page is closed or navigation failed, find or create a new page
       const isCI =
         process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true"
+
       if (isCI) {
         // In CI, find the remaining extension page after onboarding closes the old one
         const pages = this.context.pages()
         const extensionPage = pages.find(p =>
           p.url().includes(`chrome-extension://${this.extensionId}/popup.html`),
         )
+
         if (extensionPage && !extensionPage.isClosed()) {
           this.page = extensionPage
           this.homePage = new HomePage(extensionPage)
@@ -221,11 +217,65 @@ export class PhantomWallet extends BaseWallet {
           this.notificationPage = new NotificationPage(extensionPage)
           return
         }
+
+        // If no popup.html page exists, look for any extension page
+        const anyExtensionPage = pages.find(
+          p =>
+            p.url().includes(`chrome-extension://${this.extensionId}`) &&
+            !p.isClosed(),
+        )
+
+        if (anyExtensionPage) {
+          // Navigate this page to popup.html
+          await anyExtensionPage.goto(popupUrl, {
+            waitUntil: "domcontentloaded",
+            timeout: 15000,
+          })
+          await anyExtensionPage.waitForLoadState("networkidle", {
+            timeout: 15000,
+          })
+
+          this.page = anyExtensionPage
+          this.homePage = new HomePage(anyExtensionPage)
+          this.onboardingPage = new OnboardingPage(anyExtensionPage)
+          this.notificationPage = new NotificationPage(anyExtensionPage)
+          return
+        }
+
+        throw new Error(
+          "Could not find open Phantom extension page after onboarding in CI.",
+        )
       }
-    } catch (error) {
-      console.error("Failed to navigate to main popup, but continuing:", error)
-      // Never throw, just log and continue
+
+      // Only in local/dev: create a new page
+      const newPage = await this.context.newPage()
+      await newPage.goto(popupUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 15000,
+      })
+      if (newPage.isClosed()) {
+        console.log(
+          "Phantom main popup closed after newPage.goto, skipping waitForLoadState.",
+        )
+        return
+      }
+      await newPage.waitForLoadState("networkidle", { timeout: 15000 })
+      this.page = newPage
+      this.homePage = new HomePage(newPage)
+      this.onboardingPage = new OnboardingPage(newPage)
+      this.notificationPage = new NotificationPage(newPage)
       return
+    } catch (error) {
+      console.error(
+        "Failed to navigate to main popup, but continuing in CI:",
+        error,
+      )
+      // Do not throw in CI, just log and continue
+      if (
+        !(process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true")
+      ) {
+        throw new Error(`Could not navigate to Phantom main popup: ${error}`)
+      }
     }
   }
 

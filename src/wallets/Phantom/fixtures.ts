@@ -20,23 +20,6 @@ type PhantomFixturesType = {
 
 let sharedPhantomPage: Page
 
-/**
- * Interface for JSON-RPC request structure
- */
-type JsonRpcRequest = {
-  jsonrpc: string
-  id: number
-  method: string
-  params: [
-    {
-      to: string
-      data: string
-      [key: string]: unknown
-    },
-    string,
-  ]
-}
-
 // EXPERIMENTAL: Service Worker network interception (requires PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS=1)
 // See: https://playwright.dev/docs/network#service-worker-network-events
 // To enable: set environment variable PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS=1
