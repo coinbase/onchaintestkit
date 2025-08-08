@@ -20,6 +20,10 @@ type PhantomFixturesType = {
 
 let sharedPhantomPage: Page
 
+// Constants
+const PHANTOM_API_URL = "https://api.phantom.app/portal/v1/public-apps**"
+const PHANTOM_NODE_PROXY = "node-proxy.phantom.app"
+
 // EXPERIMENTAL: Service Worker network interception (requires PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS=1)
 // See: https://playwright.dev/docs/network#service-worker-network-events
 // To enable: set environment variable PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS=1
@@ -35,7 +39,7 @@ async function setupPhantomNetworkInterception(
     if (request.serviceWorker()) {
       const postData = request.postData()
       // Optionally, reroute to local node if it's a node-proxy call
-      if (request.url().includes("node-proxy.phantom.app")) {
+      if (request.url().includes(PHANTOM_NODE_PROXY)) {
         try {
           const localUrl = `http://localhost:${localNodePort}`
           const response = await context.request.post(localUrl, {
@@ -62,21 +66,18 @@ async function setupPhantomNetworkInterception(
   })
 
   // Mock Phantom's domain validation API to allow localhost
-  await context.route(
-    "https://api.phantom.app/portal/v1/public-apps**",
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            apps: [{ domain: "localhost", verified: true }],
-            domains: ["localhost"],
-          },
-        }),
-      })
-    },
-  )
+  await context.route(PHANTOM_API_URL, async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        data: {
+          apps: [{ domain: "localhost", verified: true }],
+          domains: ["localhost"],
+        },
+      }),
+    })
+  })
 
   console.log(
     "[Phantom Network] Service worker interception enabled (experimental)",

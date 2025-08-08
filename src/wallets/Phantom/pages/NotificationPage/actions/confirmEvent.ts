@@ -4,7 +4,7 @@ import type { Page } from "@playwright/test"
  * Confirms a transaction in the Phantom Wallet notification popup
  * @param page - The notification page
  */
-export const confirmTransaction = async (page: Page): Promise<void> => {
+export const confirmEvent = async (page: Page): Promise<void> => {
   // Wait for the transaction confirmation page to load
   await page.waitForLoadState("domcontentloaded")
   await page.waitForLoadState("networkidle")
@@ -21,7 +21,7 @@ export const confirmTransaction = async (page: Page): Promise<void> => {
  * Rejects a transaction in the Phantom Wallet notification popup
  * @param page - The notification page
  */
-export const rejectTransaction = async (page: Page): Promise<void> => {
+export const rejectEvent = async (page: Page): Promise<void> => {
   // Wait for the transaction confirmation page to load
   await page.waitForLoadState("domcontentloaded")
   await page.waitForLoadState("networkidle")
