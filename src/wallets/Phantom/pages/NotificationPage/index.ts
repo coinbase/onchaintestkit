@@ -1,7 +1,7 @@
 import { type ViewportSize, waitForPage } from "../../../../utils"
 import { BasePage } from "../BasePage"
 import { connectToDapp } from "./actions"
-import { confirmTransaction, rejectTransaction } from "./actions/transaction"
+import { confirmEvent, rejectEvent } from "./actions/confirmEvent"
 
 /**
  * Types of notifications that can appear in the Phantom Wallet
@@ -59,7 +59,7 @@ export class NotificationPage extends BasePage {
    */
   async confirmTransaction(extensionId: string): Promise<void> {
     const notificationPage = await this.getNotificationPage(extensionId)
-    await confirmTransaction(notificationPage)
+    await confirmEvent(notificationPage)
   }
 
   /**
@@ -67,7 +67,15 @@ export class NotificationPage extends BasePage {
    */
   async rejectTransaction(extensionId: string): Promise<void> {
     const notificationPage = await this.getNotificationPage(extensionId)
-    await rejectTransaction(notificationPage)
+    await rejectEvent(notificationPage)
+  }
+
+  /**
+   * Signs a message
+   */
+  async signMessage(extensionId: string): Promise<void> {
+    const notificationPage = await this.getNotificationPage(extensionId)
+    await confirmEvent(notificationPage)
   }
 
   // TODO: Implement other notification methods for Phantom

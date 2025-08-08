@@ -7,6 +7,7 @@ import {
 import { connectPhantomWallet } from "./appSession"
 import { inputTransactionDetails } from "./testUtils"
 
+import { PhantomSpecificActionType } from "@coinbase/onchaintestkit"
 import { phantomWalletConfig } from "./walletConfig/phantomWalletConfig"
 
 const test = createOnchainTest(phantomWalletConfig)
@@ -48,5 +49,41 @@ test.describe("Phantom Wallet Setup", () => {
       approvalType: ActionApprovalType.APPROVE,
     })
     await page.getByText("Transaction confirmed!").waitFor()
+  })
+
+  test("otk playground", async ({ page, phantom }) => {
+    if (!phantom) {
+      throw new Error("Phantom wallet is not defined")
+    }
+    await page.goto("https://onchainkit.xyz/playground")
+    await page.waitForLoadState("networkidle")
+    await page.click("#wallet-type-eoa")
+
+    await phantom.handleAction(BaseActionType.CONNECT_TO_DAPP)
+
+    await page.click('button[role="combobox"]')
+
+    // Step 2: Select "Signature" option
+    await page.selectOption("select", "signature")
+
+    await page.keyboard.press("Escape")
+
+    // Step 3: Click personal_sign button (appears after selection)
+    await page.waitForSelector('button:has-text("personal_sign")', {
+      state: "visible",
+    })
+    await page.click('button:has-text("personal_sign")')
+
+    await phantom.handleAction(PhantomSpecificActionType.SIGN_MESSAGE, {
+      approvalType: ActionApprovalType.APPROVE,
+    })
+
+    await page.waitForSelector(
+      '[data-testid="ockSignatureLabel"]:has-text("Success")',
+      {
+        state: "visible",
+        timeout: 30000, // Give it time for the signing process
+      },
+    )
   })
 })

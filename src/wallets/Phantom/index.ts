@@ -24,6 +24,7 @@ export enum PhantomSpecificActionType {
   SEND_TOKENS = "sendTokens",
   SWITCH_BLOCKCHAIN = "switchBlockchain",
   ENABLE_TEST_MODE = "enableTestMode",
+  SIGN_MESSAGE = "signMessage",
 }
 
 type PhantomActionType = BaseActionType | PhantomSpecificActionType
@@ -540,6 +541,10 @@ export class PhantomWallet extends BaseWallet {
 
       case PhantomSpecificActionType.ENABLE_TEST_MODE:
         await this.homePage.enableTestMode()
+        break
+
+      case PhantomSpecificActionType.SIGN_MESSAGE:
+        await this.notificationPage.signMessage(this.extensionId)
         break
 
       default:
