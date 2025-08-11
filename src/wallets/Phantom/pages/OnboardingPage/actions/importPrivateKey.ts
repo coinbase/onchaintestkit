@@ -139,6 +139,7 @@ export async function importPrivateKey(
       console.log("Page context changed during checkbox wait (expected)")
     }
 
+    await page.waitForTimeout(5000)
     // Step 9: Wait for and click final Continue button to complete setup
     const finalContinueBtn = page.getByTestId("onboarding-form-submit-button")
     await finalContinueBtn.waitFor({ state: "visible" })
