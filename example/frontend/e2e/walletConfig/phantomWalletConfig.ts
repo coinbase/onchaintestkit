@@ -15,17 +15,11 @@ const baseConfig = configure()
     hardfork: "cancun",
   })
   .withPhantom()
-    .withSeedPhrase({
-      seedPhrase: DEFAULT_SEED_PHRASE ?? "",
-      password: DEFAULT_PASSWORD,
-      username: USERNAME,
-    })
-//   .withPrivateKey({
-//     privateKey: process.env.E2E_TEST_PRIVATE_KEY ?? "",
-//     password: DEFAULT_PASSWORD,
-//     chain: "base",
-//     name: "OTKTESTWALLET",
-//   })
+  .withSeedPhrase({
+    seedPhrase: DEFAULT_SEED_PHRASE ?? "",
+    password: DEFAULT_PASSWORD,
+    username: USERNAME,
+  })
   //   .withPrivateKey({
   //     privateKey: process.env.E2E_TEST_PRIVATE_KEY ?? "",
   //     password: DEFAULT_PASSWORD,
