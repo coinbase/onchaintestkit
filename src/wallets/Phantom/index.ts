@@ -197,14 +197,31 @@ export class PhantomWallet extends BaseWallet {
       throw new Error("Phantom extension page was closed after initialization")
     }
 
-    // Close any other pages
-    const pages = context.pages()
-    for (const page of pages) {
-      if (page !== phantomPage && !page.isClosed()) {
-        try {
-          await page.close()
-        } catch (_error) {
-          // Ignore errors when closing pages
+    // In CI, keep a "keeper" page open so the context never has zero pages
+    // which can lead to context/browser shutdowns when the last page closes.
+    if (isCI) {
+      try {
+        const hasNonExtensionPage = context
+          .pages()
+          .some(p => !p.url().startsWith("chrome-extension://"))
+        if (!hasNonExtensionPage) {
+          await context.newPage() // about:blank
+        }
+      } catch (e) {
+        console.warn("[Phantom CI] Failed to create keeper page:", e)
+      }
+    }
+
+    // Close any other pages (skip this cleanup in CI to keep keeper page alive)
+    if (!isCI) {
+      const pages = context.pages()
+      for (const page of pages) {
+        if (page !== phantomPage && !page.isClosed()) {
+          try {
+            await page.close()
+          } catch (_error) {
+            // Ignore errors when closing pages
+          }
         }
       }
     }
@@ -279,20 +296,31 @@ export class PhantomWallet extends BaseWallet {
           return
         }
 
-        // FINAL CI FALLBACK: open a fresh page to the popup
-        const newPage = await this.context.newPage()
-        await newPage.goto(popupUrl, {
-          waitUntil: "domcontentloaded",
-          timeout: 15000,
-        })
-        if (!newPage.isClosed()) {
-          await newPage.waitForLoadState("networkidle", { timeout: 15000 })
+        // FINAL CI FALLBACK: open a fresh page to the popup with retries
+        const maxAttempts = 3
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            const newPage = await this.context.newPage()
+            await newPage.goto(popupUrl, {
+              waitUntil: "domcontentloaded",
+              timeout: 15000,
+            })
+            if (!newPage.isClosed()) {
+              await newPage.waitForLoadState("networkidle", { timeout: 15000 })
+            }
+            this.page = newPage
+            this.homePage = new HomePage(newPage)
+            this.onboardingPage = new OnboardingPage(newPage)
+            this.notificationPage = new NotificationPage(newPage)
+            return
+          } catch (err) {
+            console.warn(
+              `[Phantom CI] Popup open attempt ${attempt} failed:`,
+              err,
+            )
+            await new Promise(r => setTimeout(r, 1000 * attempt))
+          }
         }
-        this.page = newPage
-        this.homePage = new HomePage(newPage)
-        this.onboardingPage = new OnboardingPage(newPage)
-        this.notificationPage = new NotificationPage(newPage)
-        return
       }
 
       // Only in local/dev: create a new page
