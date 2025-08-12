@@ -279,9 +279,20 @@ export class PhantomWallet extends BaseWallet {
           return
         }
 
-        throw new Error(
-          "Could not find open Phantom extension page after onboarding in CI.",
-        )
+        // FINAL CI FALLBACK: open a fresh page to the popup
+        const newPage = await this.context.newPage()
+        await newPage.goto(popupUrl, {
+          waitUntil: "domcontentloaded",
+          timeout: 15000,
+        })
+        if (!newPage.isClosed()) {
+          await newPage.waitForLoadState("networkidle", { timeout: 15000 })
+        }
+        this.page = newPage
+        this.homePage = new HomePage(newPage)
+        this.onboardingPage = new OnboardingPage(newPage)
+        this.notificationPage = new NotificationPage(newPage)
+        return
       }
 
       // Only in local/dev: create a new page
