@@ -55,13 +55,11 @@ export class NotificationPage extends BasePage {
 
   async confirmTransaction(extensionId: string): Promise<void> {
     const notificationPage = await this.getNotificationPage(extensionId)
-    // TODO: Implement transaction confirmation
     await confirmTransaction(notificationPage)
   }
 
   async rejectTransaction(extensionId: string): Promise<void> {
     const notificationPage = await this.getNotificationPage(extensionId)
-    // TODO: Implement transaction rejection
     await rejectTransaction(notificationPage)
   }
 

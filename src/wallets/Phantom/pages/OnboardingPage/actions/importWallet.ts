@@ -117,20 +117,7 @@ export async function importWallet(
     await finalContinueBtn.click()
     await page.waitForLoadState("networkidle")
 
-    // Step 10: Enter username (if provided)
-    // if (username) {
-    //   const usernameInput = page.locator('input[placeholder="username"]')
-    //   await usernameInput.waitFor({ state: 'visible' })
-    //   await usernameInput.fill(username)
-
-    //   const usernameContinueBtn = page.locator('button:has-text("Continue")')
-    //   await usernameContinueBtn.waitFor({ state: 'visible' })
-    //   await usernameContinueBtn.click()
-    //   await page.waitForLoadState("networkidle")
-    //   console.log(`Username "${username}" entered successfully`)
-    // }
-
-    // Step 11: Wait for and click "Get Started" to finish setup
+    // Step 10: Wait for and click "Get Started" to finish setup
     console.log("[Phantom Import] Looking for 'Get Started' button...")
 
     // Validate page is still open before final step

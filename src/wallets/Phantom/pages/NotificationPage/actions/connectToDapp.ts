@@ -12,7 +12,4 @@ export async function connectToDapp(page: Page): Promise<void> {
   await page.reload()
   await page.waitForTimeout(1500)
   await page.getByTestId("primary-button").click()
-
-  // For now, just wait a bit to simulate the action
-  //   await page.waitForEvent("close")
 }

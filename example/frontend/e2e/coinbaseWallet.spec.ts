@@ -1,4 +1,3 @@
-import { Agent } from "http"
 import { expect } from "@playwright/test"
 import { ethers } from "ethers"
 import { createOnchainTest } from "../../../src/createOnchainTest"

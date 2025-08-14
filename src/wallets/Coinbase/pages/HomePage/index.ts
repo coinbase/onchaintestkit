@@ -18,14 +18,6 @@ export class HomePage {
     await addWithPrivateKey(this.page, privateKey, password)
   }
 
-  async switchNetwork(networkName: string, isTestnet: boolean): Promise<void> {
-    // TODO: Implement network switching for Coinbase
-    // This should:
-    // 1. Open network dropdown
-    // 2. Select the network
-    console.log(`Switching to network: ${networkName} (testnet: ${isTestnet})`)
-  }
-
   async switchAccount(accountName: string): Promise<void> {
     // TODO: Implement account switching for Coinbase
     // This should:

@@ -9,7 +9,6 @@ import {
   BaseWallet,
 } from "../BaseWallet"
 import { PhantomConfig } from "../types"
-import { NetworkConfig } from "../types"
 import { HomePage, NotificationPage, OnboardingPage } from "./pages"
 import type { SupportedChain } from "./types"
 
@@ -506,27 +505,12 @@ export class PhantomWallet extends BaseWallet {
 
         break
 
-      // Network actions
-      case PhantomSpecificActionType.ADD_NETWORK:
-        if (!additionalOptions.network) {
-          throw new Error("Network options not provided for ADD_NETWORK action")
-        }
-        await this.homePage.addNetwork(
-          additionalOptions.network as NetworkConfig,
-        )
-        break
-
-      case BaseActionType.SWITCH_NETWORK:
-        await this.homePage.switchNetwork(
-          additionalOptions.networkName as string,
-          additionalOptions.isTestnet as boolean,
-        )
-        break
-
       // Account actions
       case PhantomSpecificActionType.ADD_ACCOUNT:
         await this.homePage.addNewAccount(
           additionalOptions.accountName as string,
+          additionalOptions.privateKey as string,
+          additionalOptions.chain as SupportedChain,
         )
         break
 
@@ -567,15 +551,6 @@ export class PhantomWallet extends BaseWallet {
         } else {
           await this.notificationPage.rejectSpendingCapRemoval(this.extensionId)
         }
-        break
-
-      case PhantomSpecificActionType.SEND_TOKENS:
-        // TODO: Implement token sending for Phantom
-        throw new Error("sendTokens not implemented for Phantom Wallet")
-
-      case PhantomSpecificActionType.SWITCH_BLOCKCHAIN:
-        // TODO: Implement blockchain switching for Phantom (Solana/Ethereum)
-        console.log("Blockchain switching for Phantom not yet implemented")
         break
 
       case PhantomSpecificActionType.ENABLE_TEST_MODE:

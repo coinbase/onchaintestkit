@@ -574,13 +574,6 @@ export class CoinbaseWallet extends BaseWallet {
         )
         break
 
-      case BaseActionType.SWITCH_NETWORK:
-        await this.homePage.switchNetwork(
-          additionalOptions.networkName as string,
-          additionalOptions.isTestnet as boolean,
-        )
-        break
-
       // Account actions
       case CoinbaseSpecificActionType.ADD_ACCOUNT:
         await this.homePage.addNewAccount(
@@ -626,20 +619,6 @@ export class CoinbaseWallet extends BaseWallet {
           await this.notificationPage.rejectSpendingCapRemoval(this.extensionId)
         }
         break
-
-      case CoinbaseSpecificActionType.SEND_TOKENS:
-        // TODO: Implement token sending
-        // if (!additionalOptions.recipientAddress || !additionalOptions.amount) {
-        //   throw new Error(
-        //     "Recipient address and amount are required for sending tokens",
-        //   )
-        // }
-        // await this.homePage.sendTokens(
-        //   additionalOptions.recipientAddress as string,
-        //   additionalOptions.amount as string,
-        //   additionalOptions.tokenSymbol as string | undefined,
-        // )
-        throw new Error("sendTokens not implemented for Coinbase Wallet")
 
       case CoinbaseSpecificActionType.ADD_WALLET_WITH_PRIVATE_KEY:
         await this.homePage.addWithPrivateKey(
