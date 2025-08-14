@@ -19,7 +19,6 @@ export enum PhantomSpecificActionType {
   ADD_TOKEN = "addToken",
   ADD_ACCOUNT = "addAccount",
   SWITCH_ACCOUNT = "switchAccount",
-  ADD_NETWORK = "addNetwork",
   SEND_TOKENS = "sendTokens",
   SWITCH_BLOCKCHAIN = "switchBlockchain",
   ENABLE_TEST_MODE = "enableTestMode",

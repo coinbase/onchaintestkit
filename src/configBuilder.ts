@@ -262,12 +262,6 @@ class PhantomConfigBuilder extends BaseWalletBuilder<PhantomWallet> {
         network.rpcUrl = `http://localhost:${context.localNodePort}`
       }
       console.log(`Adding network with RPC URL: ${network.rpcUrl}`)
-
-      // Add the network with the possibly modified URL
-      await wallet.handleAction(PhantomSpecificActionType.ADD_NETWORK, {
-        network,
-        isTestnet: isTestNetwork(network),
-      })
     })
     return this
   }
