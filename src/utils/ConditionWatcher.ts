@@ -108,11 +108,15 @@ export class ConditionWatcher<T> {
           }
         }
       } catch (error) {
-        // Log error but continue trying unless it's a critical error
-        console.warn(
-          `Condition check failed on attempt ${this.attempts}:`,
-          error,
-        )
+        // If the page/context/browser has been closed, stop retrying immediately.
+        // Retrying on a destroyed target is futile and wastes time (especially on CI).
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        if (errorMessage.includes("Target page, context or browser has been closed")) {
+          throw error
+        }
+
+        // Log error but continue trying for transient errors
+        console.warn(`Condition check failed on attempt ${this.attempts}:`, error)
       }
 
       // Don't delay after the last attempt or if we're about to timeout
@@ -214,7 +218,7 @@ export class ConditionWatcher<T> {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   /**

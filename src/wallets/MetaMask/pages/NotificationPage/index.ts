@@ -23,6 +23,11 @@ const DEFAULT_VIEWPORT: ViewportSize = { width: 360, height: 580 }
 export class NotificationPage {
   readonly page: Page
 
+  // Cached notification page from identifyNotificationType so the
+  // immediately-following action handler can reuse it instead of doing
+  // a second waitForPage lookup (which risks grabbing a stale page on CI).
+  private cachedNotificationPage: Page | null = null
+
   constructor(page: Page) {
     this.page = page
   }
@@ -35,9 +40,21 @@ export class NotificationPage {
   }
 
   /**
-   * Helper method to wait for notification page
+   * Helper method to wait for notification page.
+   * Reuses the cached page from identifyNotificationType if still alive.
    */
   private async getNotificationPage(extensionId: string): Promise<Page> {
+    if (this.cachedNotificationPage && !this.cachedNotificationPage.isClosed()) {
+      try {
+        await this.cachedNotificationPage.evaluate(() => document.readyState)
+        const cached = this.cachedNotificationPage
+        this.cachedNotificationPage = null
+        return cached
+      } catch {
+        this.cachedNotificationPage = null
+      }
+    }
+
     return waitForPage(
       this.page.context(),
       this.getNotificationUrl(extensionId),
@@ -118,15 +135,21 @@ export class NotificationPage {
   async identifyNotificationType(
     extensionId: string,
     globalTimeout = 15000,
-    checkTimeout = 10000,
+    pollInterval = 500,
   ): Promise<NotificationPageType> {
-    // Get the notification page and wait for it to load fully
-    const notificationPage = await this.getNotificationPage(extensionId)
+    // Get the notification page via a fresh waitForPage lookup (bypass cache)
+    // so we always get the latest notification popup, then cache it for the
+    // action handler that runs immediately after this returns.
+    const notificationPage = await waitForPage(
+      this.page.context(),
+      this.getNotificationUrl(extensionId),
+      DEFAULT_VIEWPORT,
+    )
+    this.cachedNotificationPage = notificationPage
 
     // Give the page an extra moment to fully render and stabilize
     await notificationPage.waitForTimeout(500)
 
-    // Simple checks that should work
     const checks = [
       { type: NotificationPageType.SpendingCap, text: "Spending cap request" },
       { type: NotificationPageType.Signature, text: "Signature request" },
@@ -134,141 +157,65 @@ export class NotificationPage {
       { type: NotificationPageType.RemoveSpendCap, text: "Remove Permission" },
     ]
 
-    // Immediately log the full page content for comparison
-    void (async () => {
-      try {
-        const pageContent =
-          (await notificationPage.textContent("body"))?.substring(0, 100) ?? ""
-        console.log("Page content at start of detection:", pageContent)
-
-        // For each check, log if its text is present in the content
-        checks.forEach(({ type, text }) => {
-          const isPresent = pageContent.includes(text)
-          console.log(
-            `Check for "${text}" (${type}): ${
-              isPresent ? "FOUND in content" : "NOT FOUND in content"
-            }`,
-          )
-        })
-      } catch (error) {
-        console.error("Error capturing initial page content:", error)
-      }
-    })()
-
-    // Create timeout ID for cleanup
-    let timeoutId: NodeJS.Timeout | undefined
-
-    // Create a promise that will reject after the global timeout
-    const timeoutPromise = new Promise<NotificationPageType>((_, reject) => {
-      timeoutId = setTimeout(() => {
-        // Use an IIFE to capture page content, but properly void the promise
-        void (function captureDebugInfo() {
-          const capturePromise = (async () => {
-            try {
-              // Only capture info if page is still available
-              if (notificationPage.isClosed()) {
-                console.log("Page already closed, skipping debug capture")
-                return
-              }
-
-              // When timeout occurs, log the entire page content to help debugging
-              const pageContent =
-                (await notificationPage.textContent("body"))?.substring(
-                  0,
-                  100,
-                ) ?? ""
-              console.log("Global timeout reached. Page content:", pageContent)
-
-              // Take a screenshot for visual debugging
-              await notificationPage.screenshot({
-                path: "notification-timeout.png",
-              })
-              console.log("Screenshot saved as notification-timeout.png")
-
-              // Debug each selector specifically
-              for (const { type, text } of checks) {
-                try {
-                  // Try to get the element even if not visible
-                  const element = notificationPage.getByText(text, {
-                    exact: false,
-                  })
-                  const count = await element.count()
-                  const isVisible =
-                    count > 0
-                      ? await element.isVisible().catch(() => false)
-                      : false
-                  console.log(
-                    `Selector debug for "${text}" (${type}): count=${count}, visible=${isVisible}`,
-                  )
-                } catch (error) {
-                  console.error(`Error checking selector for "${text}":`, error)
-                }
-              }
-            } catch (error) {
-              console.error("Error capturing page content on timeout:", error)
-            }
-          })()
-
-          // Explicitly void the promise to satisfy linter
-          void capturePromise
-        })()
-
-        reject(new Error("Timeout waiting for notification type"))
-      }, globalTimeout)
-    })
-
-    // Create a promise that resolves with the first matching notification type
-    const checkTypePromise = new Promise<NotificationPageType>(
-      (resolve, _reject) => {
-        // Check each notification type with debug logging
-        checks.forEach(({ type, text }) => {
-          void (async () => {
-            try {
-              const selector = notificationPage.getByText(text, {
-                exact: false,
-              })
-
-              // Log when we start checking each selector
-              console.log(`Starting check for "${text}" (${type})`)
-
-              // Wait for the text to be visible with individual timeout
-              const isVisible = await selector
-                .isVisible({ timeout: checkTimeout })
-                .catch((error: Error) => {
-                  console.log(
-                    `Selector for "${text}" timed out with error:`,
-                    error.message,
-                  )
-                  return false
-                })
-
-              if (isVisible) {
-                console.log(
-                  `Found notification type: ${type} with text: "${text}"`,
-                )
-                resolve(type)
-              } else {
-                console.log(
-                  `Selector for "${text}" didn't match any visible elements`,
-                )
-              }
-            } catch (error) {
-              console.error(`Error checking type ${type}:`, error)
-            }
-          })()
-        })
-      },
-    )
-
+    // Log the initial page content for debugging
     try {
-      // Race between finding a match and the global timeout
-      const result = await Promise.race([checkTypePromise, timeoutPromise])
-      return result
-    } finally {
-      // Always clear the timeout to prevent it from running after page is closed
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
+      const pageContent =
+        (await notificationPage.textContent("body"))?.substring(0, 200) ?? ""
+      console.log(
+        "Page content at start of detection:",
+        pageContent.substring(0, 100),
+      )
+    } catch (error) {
+      console.error("Error capturing initial page content:", error)
     }
+
+    // Poll synchronously until a notification type is found or we time out.
+    // isVisible() is an instant check in Playwright (not a poller). The old
+    // fire-and-forget approach ran all 4 checks once — if the page hadn't
+    // rendered yet, all returned false and the 15s timeout was the only
+    // fallback. This polling loop retries every pollInterval ms.
+    const deadline = Date.now() + globalTimeout
+
+    while (Date.now() < deadline) {
+      if (notificationPage.isClosed()) {
+        throw new Error(
+          "Notification page closed before type could be identified",
+        )
+      }
+
+      for (const { type, text } of checks) {
+        try {
+          const selector = notificationPage.getByText(text, { exact: false })
+          const isVisible = await selector.isVisible()
+          if (isVisible) {
+            console.log(
+              `Found notification type: ${type} with text: "${text}"`,
+            )
+            return type
+          }
+        } catch {
+          // Page might have closed mid-check — catch at top of loop
+        }
+      }
+
+      // Short pause before the next poll to avoid busy-waiting
+      await notificationPage.waitForTimeout(pollInterval)
+    }
+
+    // Timeout — capture debug info before throwing
+    try {
+      if (!notificationPage.isClosed()) {
+        const pageContent =
+          (await notificationPage.textContent("body"))?.substring(0, 200) ?? ""
+        console.log("Global timeout reached. Page content:", pageContent)
+        await notificationPage
+          .screenshot({ path: "notification-timeout.png" })
+          .catch(() => {})
+      }
+    } catch {
+      // Best-effort debug capture
+    }
+
+    throw new Error("Timeout waiting for notification type")
   }
 }

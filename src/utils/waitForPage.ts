@@ -36,8 +36,13 @@ export async function waitForPage(
     await targetPage.setViewportSize(viewport)
   }
 
-  // Wait for loading indicators to disappear
-  await LoadingStateDetector.waitForPageLoadingComplete(targetPage, 10000)
+  // Only run loading detection if the page is still open. Extension popup
+  // pages (like MetaMask notifications) can close at any time, and running
+  // expensive selector checks on a closed page wastes time and causes
+  // cascading "Target page closed" errors on CI.
+  if (!targetPage.isClosed()) {
+    await LoadingStateDetector.waitForPageLoadingComplete(targetPage, 10000)
+  }
 
   return targetPage
 }
