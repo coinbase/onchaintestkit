@@ -1,35 +1,45 @@
-import type { CoinbaseWallet } from './Coinbase';
-import type { MetaMask } from './MetaMask';
-import type { PhantomWallet } from './Phantom';
+import type { CoinbaseWallet } from "./Coinbase"
+import type { MetaMask } from "./MetaMask"
+import type { PhantomWallet } from "./Phantom"
 
 export type NetworkConfig = {
-  name: string;
-  chainId: number;
-  rpcUrl: string;
-  symbol: string;
-  blockExplorerUrl?: string;
-};
+  name: string
+  chainId: number
+  rpcUrl: string
+  symbol: string
+  blockExplorerUrl?: string
+}
 
 export type BaseWalletConfig = {
-  network?: NetworkConfig;
-  walletSetup: (wallet: MetaMask | CoinbaseWallet | PhantomWallet) => Promise<void>;
-};
+  network?: NetworkConfig
+  walletSetup: (
+    wallet: MetaMask | CoinbaseWallet | PhantomWallet,
+  ) => Promise<void>
+}
 
 export type MetaMaskConfig = {
-  password: string;
-  walletSetup: (wallet: MetaMask, context: { localNodePort: number }) => Promise<void>;
-} & BaseWalletConfig;
+  password: string
+  walletSetup: (
+    wallet: MetaMask,
+    context: { localNodePort: number },
+  ) => Promise<void>
+} & BaseWalletConfig
 
 export type CoinbaseConfig = {
-  password: string;
-  walletSetup: (wallet: CoinbaseWallet, context: { localNodePort: number }) => Promise<void>;
-} & BaseWalletConfig;
+  password: string
+  walletSetup: (
+    wallet: CoinbaseWallet,
+    context: { localNodePort: number },
+  ) => Promise<void>
+} & BaseWalletConfig
 
 export type PhantomConfig = {
-  password: string;
-  walletSetup: (wallet: PhantomWallet, context: { localNodePort: number }) => Promise<void>;
-} & BaseWalletConfig;
+  password: string
+  walletSetup: (
+    wallet: PhantomWallet,
+    context: { localNodePort: number },
+  ) => Promise<void>
+} & BaseWalletConfig
 
-export type WalletSetupFn<T extends MetaMask | CoinbaseWallet | PhantomWallet> = (
-  wallet: T,
-) => Promise<void>;
+export type WalletSetupFn<T extends MetaMask | CoinbaseWallet | PhantomWallet> =
+  (wallet: T) => Promise<void>

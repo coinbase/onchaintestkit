@@ -1,1 +1,1 @@
-export { connectToDapp } from './connectToDapp';
+export { connectToDapp } from "./connectToDapp"

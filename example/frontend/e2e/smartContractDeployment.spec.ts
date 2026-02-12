@@ -20,7 +20,7 @@ test.describe("Smart Contract Deployment with CREATE2", () => {
   })
 
   test("should deploy SimpleToken contract using CREATE2", async ({
-    page,
+    page: _page,
     smartContractManager,
     node,
   }) => {
@@ -59,7 +59,7 @@ test.describe("Smart Contract Deployment with CREATE2", () => {
   })
 
   test("should deploy at deterministic address with same salt", async ({
-    page,
+    page: _page,
     smartContractManager,
     node,
   }) => {
@@ -97,7 +97,7 @@ test.describe("Smart Contract Deployment with CREATE2", () => {
   })
 
   test("should interact with deployed contract", async ({
-    page,
+    page: _page,
     smartContractManager,
     node,
   }) => {
@@ -209,7 +209,7 @@ test.describe("Smart Contract Deployment with CREATE2", () => {
   })
 
   test("should perform batch operations", async ({
-    page,
+    page: _page,
     smartContractManager,
     node,
   }) => {
@@ -249,7 +249,7 @@ test.describe("Smart Contract Deployment with CREATE2", () => {
   })
 
   test("should handle contract with constructor arguments", async ({
-    page,
+    page: _page,
     smartContractManager,
     node,
   }) => {
@@ -283,7 +283,7 @@ test.describe("Smart Contract Deployment with CREATE2", () => {
     page,
     metamask,
     smartContractManager,
-    node,
+    node: _node,
   }) => {
     if (!metamask) {
       throw new Error("MetaMask is not defined")
@@ -321,7 +321,7 @@ test.describe("Smart Contract Deployment with CREATE2", () => {
   })
 
   test("should test contract state persistence across snapshots", async ({
-    page,
+    page: _page,
     smartContractManager,
     node,
   }) => {

@@ -1,14 +1,13 @@
-import type { Page } from '@playwright/test';
-import { expect } from '@playwright/test';
-import type { SupportedChain } from '../../../types';
-const CHAIN_DATA_VALUES: Record<SupportedChain, string> = {
-  solana: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', // Solana mainnet
-  ethereum: 'eip155:1', // Ethereum mainnet
-  base: 'eip155:8453', // Base mainnet
-  sui: 'sui:mainnet', // Sui mainnet
-  polygon: 'eip155:137', // Polygon mainnet
-  bitcoin: 'bip122:000000000019d6689c085ae165831e93', // Bitcoin mainnet
-};
+import type { Page } from "@playwright/test"
+import type { SupportedChain } from "../../../types"
+const _CHAIN_DATA_VALUES: Record<SupportedChain, string> = {
+  solana: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", // Solana mainnet
+  ethereum: "eip155:1", // Ethereum mainnet
+  base: "eip155:8453", // Base mainnet
+  sui: "sui:mainnet", // Sui mainnet
+  polygon: "eip155:137", // Polygon mainnet
+  bitcoin: "bip122:000000000019d6689c085ae165831e93", // Bitcoin mainnet
+}
 /**
  * Imports a new single-chain account via private key on the Phantom Home page
  * @param page - The Phantom extension page
@@ -17,12 +16,12 @@ const CHAIN_DATA_VALUES: Record<SupportedChain, string> = {
  * @param privateKey - The private key to import
  */
 export const addNewAccount = async (
-  page: Page,
-  name: string,
-  chain: SupportedChain,
-  privateKey: string,
+  _page: Page,
+  _name: string,
+  _chain: SupportedChain,
+  _privateKey: string,
 ): Promise<void> => {
-  console.log('Implemented but not tested, code is commented');
+  console.log("Implemented but not tested, code is commented")
   // Ensure UI is ready
   //   await page.waitForLoadState("domcontentloaded")
   //   await page.waitForLoadState("networkidle")
@@ -103,4 +102,4 @@ export const addNewAccount = async (
 
   //   // Small settle time
   //   await page.waitForLoadState("networkidle")
-};
+}

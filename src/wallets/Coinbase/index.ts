@@ -1,59 +1,69 @@
-import path from 'node:path';
-import type { BrowserContext, Page } from '@playwright/test';
-import { chromium } from '@playwright/test';
-import { getExtensionId } from '../../utils/extensionManager';
-import { ActionApprovalType, ActionOptions, BaseActionType, BaseWallet } from '../BaseWallet';
-import { CoinbaseConfig } from '../types';
-import { NetworkConfig } from '../types';
-import { PasskeyAuthenticator, WebAuthnCredential } from './PasskeyAuthenticator';
-import { HomePage, NotificationPage, OnboardingPage } from './pages';
+import path from "node:path"
+import type { BrowserContext, Page } from "@playwright/test"
+import { chromium } from "@playwright/test"
+import { getExtensionId } from "../../utils/extensionManager"
+import {
+  ActionApprovalType,
+  ActionOptions,
+  BaseActionType,
+  BaseWallet,
+} from "../BaseWallet"
+import { CoinbaseConfig } from "../types"
+import { NetworkConfig } from "../types"
+import {
+  PasskeyAuthenticator,
+  WebAuthnCredential,
+} from "./PasskeyAuthenticator"
+import { HomePage, NotificationPage, OnboardingPage } from "./pages"
 
 // Extend BaseActionType with Coinbase-specific actions
 export enum CoinbaseSpecificActionType {
-  LOCK = 'lock',
-  UNLOCK = 'unlock',
-  ADD_TOKEN = 'addToken',
-  ADD_ACCOUNT = 'addAccount',
-  SWITCH_ACCOUNT = 'switchAccount',
-  ADD_NETWORK = 'addNetwork',
-  SEND_TOKENS = 'sendTokens',
-  HANDLE_PASSKEY_POPUP = 'handlePasskeyPopup',
-  ADD_WALLET_WITH_PRIVATE_KEY = 'addWalletWithPrivateKey',
+  LOCK = "lock",
+  UNLOCK = "unlock",
+  ADD_TOKEN = "addToken",
+  ADD_ACCOUNT = "addAccount",
+  SWITCH_ACCOUNT = "switchAccount",
+  ADD_NETWORK = "addNetwork",
+  SEND_TOKENS = "sendTokens",
+  HANDLE_PASSKEY_POPUP = "handlePasskeyPopup",
+  ADD_WALLET_WITH_PRIVATE_KEY = "addWalletWithPrivateKey",
 }
 
-type CoinbaseActionType = BaseActionType | CoinbaseSpecificActionType;
+type CoinbaseActionType = BaseActionType | CoinbaseSpecificActionType
 
-const WALLET_CONNECTION_ERROR = new Error('Coinbase Wallet extension connection not established');
-const COINBASE_VERSION = '3.117.1';
+const WALLET_CONNECTION_ERROR = new Error(
+  "Coinbase Wallet extension connection not established",
+)
+const COINBASE_VERSION = "3.117.1"
 
 export type PasskeyConfig = {
-  name: string;
-  rpId: string;
-  rpName: string;
-  userId: string;
-  isUserVerified?: boolean;
-};
+  name: string
+  rpId: string
+  rpName: string
+  userId: string
+  isUserVerified?: boolean
+}
 
 export class CoinbaseWallet extends BaseWallet {
-  private readonly context: BrowserContext;
+  private readonly context: BrowserContext
 
-  private readonly extensionId?: string;
+  private readonly extensionId?: string
 
-  public readonly config: CoinbaseConfig;
+  public readonly config: CoinbaseConfig
 
-  private readonly page: Page;
+  private readonly page: Page
 
-  readonly onboardingPage: OnboardingPage;
+  readonly onboardingPage: OnboardingPage
 
-  readonly homePage: HomePage;
+  readonly homePage: HomePage
 
-  readonly notificationPage: NotificationPage;
+  readonly notificationPage: NotificationPage
 
   // Passkey authenticator state
-  public passkeyAuthenticator: PasskeyAuthenticator | null = null;
-  public passkeyCredentials: WebAuthnCredential[] = [];
+  public passkeyAuthenticator: PasskeyAuthenticator | null = null
+  public passkeyCredentials: WebAuthnCredential[] = []
   public get authenticator(): PasskeyAuthenticator | null {
-    return this.passkeyAuthenticator;
+    return this.passkeyAuthenticator
   }
 
   constructor(
@@ -62,14 +72,14 @@ export class CoinbaseWallet extends BaseWallet {
     page: Page,
     extensionId?: string,
   ) {
-    super();
-    this.context = context;
-    this.extensionId = extensionId;
-    this.config = walletConfig;
-    this.page = page;
-    this.onboardingPage = new OnboardingPage(page);
-    this.homePage = new HomePage(page);
-    this.notificationPage = new NotificationPage(page);
+    super()
+    this.context = context
+    this.extensionId = extensionId
+    this.config = walletConfig
+    this.page = page
+    this.onboardingPage = new OnboardingPage(page)
+    this.homePage = new HomePage(page)
+    this.notificationPage = new NotificationPage(page)
   }
 
   static async initialize(
@@ -78,72 +88,87 @@ export class CoinbaseWallet extends BaseWallet {
     _walletConfig: CoinbaseConfig,
   ): Promise<{ coinbasePage: Page; coinbaseContext: BrowserContext }> {
     // Create browser context with Coinbase extension
-    const context = await CoinbaseWallet.createContext(contextPath);
+    const context = await CoinbaseWallet.createContext(contextPath)
 
     // Handle cookie and storage transfer if currentContext exists
     if (currentContext) {
-      const { cookies } = await currentContext.storageState();
+      const { cookies } = await currentContext.storageState()
       if (cookies) {
-        await context.addCookies(cookies);
+        await context.addCookies(cookies)
       }
     }
 
     // Wait for extension page to load and get extension ID
-    const extensionId = await getExtensionId(context, 'Coinbase Wallet extension');
+    const extensionId = await getExtensionId(
+      context,
+      "Coinbase Wallet extension",
+    )
 
     // Get the extension page using the correct path from manifest.json
-    const extensionUrl = `chrome-extension://${extensionId}/index.html?inPageRequest=false`;
+    const extensionUrl = `chrome-extension://${extensionId}/index.html?inPageRequest=false`
 
-    const coinbasePage = await context.newPage();
-    await coinbasePage.goto(extensionUrl, { waitUntil: 'domcontentloaded' });
+    const coinbasePage = await context.newPage()
+    await coinbasePage.goto(extensionUrl, { waitUntil: "domcontentloaded" })
 
     // Wait for extension to be ready
-    await coinbasePage.waitForLoadState('networkidle');
+    await coinbasePage.waitForLoadState("networkidle")
 
     // Close any other pages
-    const pages = context.pages();
+    const pages = context.pages()
     for (const page of pages) {
       if (page !== coinbasePage) {
-        await page.close();
+        await page.close()
       }
     }
 
-    return { coinbasePage, coinbaseContext: context };
+    return { coinbasePage, coinbaseContext: context }
   }
 
-  static async createContext(contextPath: string, slowMo = 0): Promise<BrowserContext> {
+  static async createContext(
+    contextPath: string,
+    slowMo = 0,
+  ): Promise<BrowserContext> {
     // Use retry logic to handle potential race conditions when setting up extension
-    const MAX_RETRIES = 3;
-    let lastError: Error | null = null;
+    const MAX_RETRIES = 3
+    let lastError: Error | null = null
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         if (attempt > 0) {
-          console.log(`Retrying Coinbase setup (attempt ${attempt + 1}/${MAX_RETRIES})...`);
+          console.log(
+            `Retrying Coinbase setup (attempt ${
+              attempt + 1
+            }/${MAX_RETRIES})...`,
+          )
         }
 
         // Get coinbase extension path (assumes prepare-coinbase.mjs was run first)
-        const cacheDir = path.join(process.cwd(), 'e2e', '.cache', 'coinbase-extension');
-        const coinbasePath = path.join(cacheDir, `coinbase-${COINBASE_VERSION}`);
+        const cacheDir = path.join(
+          process.cwd(),
+          "e2e",
+          ".cache",
+          "coinbase-extension",
+        )
+        const coinbasePath = path.join(cacheDir, `coinbase-${COINBASE_VERSION}`)
 
-        console.log('Coinbase extension prepared at:', coinbasePath);
+        console.log("Coinbase extension prepared at:", coinbasePath)
 
         const browserArgs = [
           `--disable-extensions-except=${coinbasePath}`,
-          '--enable-extensions',
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--force-gpu-mem-available-mb=1024',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding',
-          '--disable-features=IsolateOrigins,site-per-process', // Allow cross-origin iframes
-        ];
+          "--enable-extensions",
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--no-zygote",
+          "--disable-gpu",
+          "--force-gpu-mem-available-mb=1024",
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-renderer-backgrounding",
+          "--disable-features=IsolateOrigins,site-per-process", // Allow cross-origin iframes
+        ]
 
         const context = await chromium.launchPersistentContext(contextPath, {
           headless: false,
@@ -152,28 +177,29 @@ export class CoinbaseWallet extends BaseWallet {
           viewport: { width: 1280, height: 800 },
           ignoreHTTPSErrors: true,
           acceptDownloads: true,
-        });
+        })
 
         // Wait for extension to be ready
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        return context;
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        return context
       } catch (error) {
         // If we failed at the setup stage
         if (attempt === MAX_RETRIES - 1) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`Failed to setup Coinbase: ${errorMessage}`);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error)
+          throw new Error(`Failed to setup Coinbase: ${errorMessage}`)
         }
 
         // Save error for potential retry
-        lastError = error instanceof Error ? error : new Error(String(error));
+        lastError = error instanceof Error ? error : new Error(String(error))
 
         // Short delay before retry
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2000))
       }
     }
 
     // If we reach here, all attempts failed
-    throw lastError ?? new Error('Failed to create context after all retries');
+    throw lastError ?? new Error("Failed to create context after all retries")
   }
 
   /**
@@ -189,294 +215,337 @@ export class CoinbaseWallet extends BaseWallet {
     mainPageOrPopup: Page,
     popup: Page,
     action:
-      | 'registerWithCBExtension'
-      | 'registerWithSmartWalletSDK'
-      | 'signMessage'
-      | 'approve'
-      | 'grantSpendPermission'
-      | 'signIn'
-      | 'signInWithCBExtension',
+      | "registerWithCBExtension"
+      | "registerWithSmartWalletSDK"
+      | "signMessage"
+      | "approve"
+      | "grantSpendPermission"
+      | "signIn"
+      | "signInWithCBExtension",
     config?: PasskeyConfig,
   ): Promise<void> {
-    if (action === 'registerWithCBExtension') {
-      const firstPopup = popup;
+    if (action === "registerWithCBExtension") {
+      const firstPopup = popup
       const [secondPopup] = await Promise.all([
-        mainPageOrPopup.context().waitForEvent('page'),
+        mainPageOrPopup.context().waitForEvent("page"),
         firstPopup.click('[data-testid="switch-to-scw-link"]'),
-      ]);
-      await secondPopup.waitForLoadState('domcontentloaded');
-      await secondPopup.waitForSelector('button:has-text("Create an account")', {
-        timeout: 10000,
-      });
+      ])
+      await secondPopup.waitForLoadState("domcontentloaded")
+      await secondPopup.waitForSelector(
+        'button:has-text("Create an account")',
+        {
+          timeout: 10000,
+        },
+      )
       if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(secondPopup);
+        await this.passkeyAuthenticator.setPage(secondPopup)
       } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(secondPopup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(secondPopup)
       }
-      if (!config) throw new Error('PasskeyConfig required for registration');
+      if (!config) throw new Error("PasskeyConfig required for registration")
       await this.passkeyAuthenticator.initialize({
-        protocol: 'ctap2',
-        transport: 'internal',
+        protocol: "ctap2",
+        transport: "internal",
         hasResidentKey: true,
         hasUserVerification: true,
         isUserVerified: config.isUserVerified ?? true,
         automaticPresenceSimulation: true,
-      });
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await secondPopup.locator('button:has-text("Create an account")').click();
-        await secondPopup.locator('[data-testid="passkey-name-input"]').fill(config.name);
-        await secondPopup.locator('[data-testid="continue-button"]').click();
-      });
-      this.passkeyCredentials = await this.passkeyAuthenticator.exportCredentials();
-    } else if (action === 'registerWithSmartWalletSDK') {
-      const sdkPopup = popup;
-      await sdkPopup.waitForLoadState('domcontentloaded');
+      })
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await secondPopup
+            .locator('button:has-text("Create an account")')
+            .click()
+          await secondPopup
+            .locator('[data-testid="passkey-name-input"]')
+            .fill(config.name)
+          await secondPopup.locator('[data-testid="continue-button"]').click()
+        },
+      )
+      this.passkeyCredentials =
+        await this.passkeyAuthenticator.exportCredentials()
+    } else if (action === "registerWithSmartWalletSDK") {
+      const sdkPopup = popup
+      await sdkPopup.waitForLoadState("domcontentloaded")
       await sdkPopup.waitForSelector('button:has-text("Create an account")', {
         timeout: 10000,
-      });
+      })
       if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(sdkPopup);
+        await this.passkeyAuthenticator.setPage(sdkPopup)
       } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup)
       }
-      if (!config) throw new Error('PasskeyConfig required for registration');
+      if (!config) throw new Error("PasskeyConfig required for registration")
       await this.passkeyAuthenticator.initialize({
-        protocol: 'ctap2',
-        transport: 'internal',
+        protocol: "ctap2",
+        transport: "internal",
         hasResidentKey: true,
         hasUserVerification: true,
         isUserVerified: config.isUserVerified ?? true,
         automaticPresenceSimulation: true,
-      });
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await sdkPopup.locator('button:has-text("Create an account")').click();
-        await sdkPopup.locator('[data-testid="passkey-name-input"]').fill(config.name);
-        await sdkPopup.locator('[data-testid="continue-button"]').click();
-      });
+      })
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await sdkPopup.locator('button:has-text("Create an account")').click()
+          await sdkPopup
+            .locator('[data-testid="passkey-name-input"]')
+            .fill(config.name)
+          await sdkPopup.locator('[data-testid="continue-button"]').click()
+        },
+      )
 
-      const creds = await this.passkeyAuthenticator.exportCredentials();
-      this.passkeyCredentials = creds;
-    } else if (action === 'signMessage') {
-      const signPopup = popup;
-      await signPopup.waitForLoadState('domcontentloaded');
+      const creds = await this.passkeyAuthenticator.exportCredentials()
+      this.passkeyCredentials = creds
+    } else if (action === "signMessage") {
+      const signPopup = popup
+      await signPopup.waitForLoadState("domcontentloaded")
 
       // Wait for the popup to reach the expected URL
-      const expectedUrl = 'https://keys.coinbase.com/sign/personal-sign';
-      let currentUrl = await signPopup.url();
+      const expectedUrl = "https://keys.coinbase.com/sign/personal-sign"
+      let currentUrl = await signPopup.url()
       if (!String(currentUrl).startsWith(expectedUrl)) {
-        await signPopup.waitForURL((url) => String(url).startsWith(expectedUrl), {
+        await signPopup.waitForURL(url => String(url).startsWith(expectedUrl), {
           timeout: 15000,
-        });
-        currentUrl = await signPopup.url();
+        })
+        currentUrl = await signPopup.url()
       }
 
       if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(signPopup);
+        await this.passkeyAuthenticator.setPage(signPopup)
       } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(signPopup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(signPopup)
       }
-      if (!config) throw new Error('PasskeyConfig required for signMessage');
+      if (!config) throw new Error("PasskeyConfig required for signMessage")
       await this.passkeyAuthenticator.initialize({
-        protocol: 'ctap2',
-        transport: 'internal',
+        protocol: "ctap2",
+        transport: "internal",
         hasResidentKey: true,
         hasUserVerification: true,
         isUserVerified: config.isUserVerified ?? true,
         automaticPresenceSimulation: true,
-      });
+      })
       for (const cred of this.passkeyCredentials) {
-        await this.passkeyAuthenticator.importCredential(cred);
+        await this.passkeyAuthenticator.importCredential(cred)
       }
-      await popup.waitForLoadState('domcontentloaded');
-      await popup.waitForLoadState('networkidle');
+      await popup.waitForLoadState("domcontentloaded")
+      await popup.waitForLoadState("networkidle")
 
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await signPopup.waitForLoadState('domcontentloaded');
-        await signPopup.locator('[data-testid="button-1"]').click();
-      });
-    } else if (action === 'grantSpendPermission') {
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await signPopup.waitForLoadState("domcontentloaded")
+          await signPopup.locator('[data-testid="button-1"]').click()
+        },
+      )
+    } else if (action === "grantSpendPermission") {
       // Handle grant spend permission popup
       if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(popup);
+        await this.passkeyAuthenticator.setPage(popup)
       } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(popup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(popup)
       }
 
       await popup.waitForURL(
-        (url) => String(url).startsWith('https://keys-dev.coinbase.com/sign/grant-permission'),
+        url =>
+          String(url).startsWith(
+            "https://keys-dev.coinbase.com/sign/grant-permission",
+          ),
         { timeout: 15000 },
-      );
+      )
       await this.passkeyAuthenticator.initialize({
-        protocol: 'ctap2',
-        transport: 'internal',
+        protocol: "ctap2",
+        transport: "internal",
         hasResidentKey: true,
         hasUserVerification: true,
         isUserVerified: true,
         automaticPresenceSimulation: true,
-      });
+      })
 
       const hardcodedCredential = {
-        credentialId: 'LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=',
+        credentialId: "LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=",
         isResidentCredential: true,
-        rpId: 'keys-dev.coinbase.com',
+        rpId: "keys-dev.coinbase.com",
         privateKey:
-          'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS',
-        userHandle: 'MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0',
+          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS",
+        userHandle: "MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0",
         signCount: 1,
-      };
-      await this.passkeyAuthenticator.importCredential(hardcodedCredential);
-      await popup.waitForLoadState('domcontentloaded');
-      await popup.waitForLoadState('networkidle');
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await popup.getByTestId('grant-permissions-approve-button').click();
-      });
-    } else if (action === 'approve') {
+      }
+      await this.passkeyAuthenticator.importCredential(hardcodedCredential)
+      await popup.waitForLoadState("domcontentloaded")
+      await popup.waitForLoadState("networkidle")
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await popup.getByTestId("grant-permissions-approve-button").click()
+        },
+      )
+    } else if (action === "approve") {
       if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(popup);
+        await this.passkeyAuthenticator.setPage(popup)
       } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(popup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(popup)
       }
       // Wait for the popup to reach the expected URL
       const expectedUrls = [
-        'https://keys.coinbase.com/sign/wallet-send-calls',
-        'https://keys.coinbase.com/sign/eth-send-transaction',
-      ];
-      let currentUrl = await popup.url();
-      if (!expectedUrls.some((prefix) => String(currentUrl).startsWith(prefix))) {
+        "https://keys.coinbase.com/sign/wallet-send-calls",
+        "https://keys.coinbase.com/sign/eth-send-transaction",
+      ]
+      let currentUrl = await popup.url()
+      if (!expectedUrls.some(prefix => String(currentUrl).startsWith(prefix))) {
         await popup.waitForURL(
-          (url) => expectedUrls.some((prefix) => String(url).startsWith(prefix)),
+          url => expectedUrls.some(prefix => String(url).startsWith(prefix)),
           { timeout: 15000 },
-        );
+        )
 
-        currentUrl = await popup.url();
+        currentUrl = await popup.url()
       }
       await this.passkeyAuthenticator.initialize({
-        protocol: 'ctap2',
-        transport: 'internal',
+        protocol: "ctap2",
+        transport: "internal",
         hasResidentKey: true,
         hasUserVerification: true,
         isUserVerified: true,
         automaticPresenceSimulation: true,
-      });
+      })
       // Import credentials from registration
       for (const cred of this.passkeyCredentials) {
-        await this.passkeyAuthenticator.importCredential(cred);
+        await this.passkeyAuthenticator.importCredential(cred)
       }
-      await popup.waitForLoadState('domcontentloaded');
-      await popup.waitForLoadState('networkidle');
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await popup.locator('[data-testid="approve-transaction-button"]').click();
-      });
-    } else if (action === 'signIn') {
-      const sdkPopup = popup;
-      await sdkPopup.waitForLoadState('domcontentloaded');
+      await popup.waitForLoadState("domcontentloaded")
+      await popup.waitForLoadState("networkidle")
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await popup
+            .locator('[data-testid="approve-transaction-button"]')
+            .click()
+        },
+      )
+    } else if (action === "signIn") {
+      const sdkPopup = popup
+      await sdkPopup.waitForLoadState("domcontentloaded")
 
       await sdkPopup.waitForSelector('button:has-text("Sign in")', {
         timeout: 10000,
-      });
+      })
       if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(sdkPopup);
+        await this.passkeyAuthenticator.setPage(sdkPopup)
       } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup)
       }
       await this.passkeyAuthenticator.initialize({
-        protocol: 'ctap2',
-        transport: 'internal',
+        protocol: "ctap2",
+        transport: "internal",
         hasResidentKey: true,
         hasUserVerification: true,
         isUserVerified: true,
         automaticPresenceSimulation: true,
-      });
+      })
 
       const hardcodedCredential = {
-        credentialId: 'LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=',
+        credentialId: "LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=",
         isResidentCredential: true,
-        rpId: 'keys-dev.coinbase.com',
+        rpId: "keys-dev.coinbase.com",
         privateKey:
-          'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS',
-        userHandle: 'MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0',
+          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS",
+        userHandle: "MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0",
         signCount: 1,
-      };
+      }
 
-      await this.passkeyAuthenticator.importCredential(hardcodedCredential);
-      await sdkPopup.waitForLoadState('domcontentloaded');
-      await sdkPopup.waitForLoadState('networkidle');
+      await this.passkeyAuthenticator.importCredential(hardcodedCredential)
+      await sdkPopup.waitForLoadState("domcontentloaded")
+      await sdkPopup.waitForLoadState("networkidle")
 
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await sdkPopup.locator('button:has-text("Sign in")').click();
-      });
-      await sdkPopup.getByRole('button', { name: 'Continue', exact: true }).click();
-    } else if (action === 'signInWithCBExtension') {
-      const firstPopup = popup;
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await sdkPopup.locator('button:has-text("Sign in")').click()
+        },
+      )
+      await sdkPopup
+        .getByRole("button", { name: "Continue", exact: true })
+        .click()
+    } else if (action === "signInWithCBExtension") {
+      const firstPopup = popup
       const [sdkPopup] = await Promise.all([
-        mainPageOrPopup.context().waitForEvent('page'),
+        mainPageOrPopup.context().waitForEvent("page"),
         firstPopup.click('[data-testid="switch-to-scw-link"]'),
-      ]);
-      await sdkPopup.waitForLoadState('domcontentloaded');
+      ])
+      await sdkPopup.waitForLoadState("domcontentloaded")
 
       await sdkPopup.waitForSelector('button:has-text("Sign in")', {
         timeout: 10000,
-      });
+      })
       if (this.passkeyAuthenticator) {
-        await this.passkeyAuthenticator.setPage(sdkPopup);
+        await this.passkeyAuthenticator.setPage(sdkPopup)
       } else {
-        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup);
+        this.passkeyAuthenticator = new PasskeyAuthenticator(sdkPopup)
       }
       await this.passkeyAuthenticator.initialize({
-        protocol: 'ctap2',
-        transport: 'internal',
+        protocol: "ctap2",
+        transport: "internal",
         hasResidentKey: true,
         hasUserVerification: true,
         isUserVerified: true,
         automaticPresenceSimulation: true,
-      });
+      })
 
       const hardcodedCredential = {
-        credentialId: 'LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=',
+        credentialId: "LWE8QFe2si8y58AgG8o6DLJs4ZIKNnpD0/7NEsuBQnw=",
         isResidentCredential: true,
-        rpId: config?.rpId ?? 'keys-dev.coinbase.com',
+        rpId: config?.rpId ?? "keys-dev.coinbase.com",
         privateKey:
-          'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS',
-        userHandle: 'MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0',
+          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgTEa+O0Uztk3hi65nPXaaL4idLccOOlqCzBSiv+COKAuhRANCAAT2fO9Pi6ZnTi7LY2zUnHbyCuJFq/wMn+C864QzQcwwqFj7W++4QLMubCeKqZXAjs3q3F4hr2Q1arqpmNW75uwS",
+        userHandle: "MTNjNzc3NjgtMmZlMC00NGZjLTk1MGMtMWViMjdjOWNmNmI0",
         signCount: 1,
-      };
+      }
 
-      await this.passkeyAuthenticator.importCredential(hardcodedCredential);
-      await sdkPopup.waitForLoadState('domcontentloaded');
-      await sdkPopup.waitForLoadState('networkidle');
+      await this.passkeyAuthenticator.importCredential(hardcodedCredential)
+      await sdkPopup.waitForLoadState("domcontentloaded")
+      await sdkPopup.waitForLoadState("networkidle")
 
-      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(async () => {
-        await sdkPopup.locator('button:has-text("Sign in")').click();
-      });
-      await sdkPopup.getByRole('button', { name: 'Continue', exact: true }).click();
+      await this.passkeyAuthenticator.simulateSuccessfulPasskeyInput(
+        async () => {
+          await sdkPopup.locator('button:has-text("Sign in")').click()
+        },
+      )
+      await sdkPopup
+        .getByRole("button", { name: "Continue", exact: true })
+        .click()
     } else {
-      throw new Error(`Unknown passkey popup action: ${action}`);
+      throw new Error(`Unknown passkey popup action: ${action}`)
     }
   }
 
-  async handleAction(action: CoinbaseActionType, options?: ActionOptions): Promise<void> {
-    const { approvalType, ...additionalOptions } = options ?? {};
+  async handleAction(
+    action: CoinbaseActionType,
+    options?: ActionOptions,
+  ): Promise<void> {
+    const { approvalType, ...additionalOptions } = options ?? {}
 
     if (!this.extensionId) {
-      throw WALLET_CONNECTION_ERROR;
+      throw WALLET_CONNECTION_ERROR
     }
 
     // Passkey popup handling
     if (action === CoinbaseSpecificActionType.HANDLE_PASSKEY_POPUP) {
       // expects: options.mainPage, options.popup, options.passkeyAction, options.passkeyConfig
-      const mainPage = additionalOptions.mainPage as Page;
-      const popup = additionalOptions.popup as Page;
+      const mainPage = additionalOptions.mainPage as Page
+      const popup = additionalOptions.popup as Page
       const passkeyAction = additionalOptions.passkeyAction as
-        | 'registerWithCBExtension'
-        | 'registerWithSmartWalletSDK'
-        | 'signMessage'
-        | 'approve'
-        | 'grantSpendPermission'
-        | 'signIn'
-        | 'signInWithCBExtension';
-      const passkeyConfig = additionalOptions.passkeyConfig as PasskeyConfig | undefined;
-      await this.handlePasskeyPopup(mainPage, popup, passkeyAction, passkeyConfig);
-      return;
+        | "registerWithCBExtension"
+        | "registerWithSmartWalletSDK"
+        | "signMessage"
+        | "approve"
+        | "grantSpendPermission"
+        | "signIn"
+        | "signInWithCBExtension"
+      const passkeyConfig = additionalOptions.passkeyConfig as
+        | PasskeyConfig
+        | undefined
+      await this.handlePasskeyPopup(
+        mainPage,
+        popup,
+        passkeyAction,
+        passkeyConfig,
+      )
+      return
     }
 
     switch (action) {
@@ -485,88 +554,96 @@ export class CoinbaseWallet extends BaseWallet {
         await this.onboardingPage.importWallet(
           additionalOptions.seedPhrase as string,
           additionalOptions.password as string,
-        );
-        break;
+        )
+        break
 
       case BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY:
         await this.onboardingPage.importPrivateKey(
           additionalOptions.privateKey as string,
           this.config.password as string,
-        );
-        break;
+        )
+        break
 
       // Network actions
       case CoinbaseSpecificActionType.ADD_NETWORK:
         if (!additionalOptions.network) {
-          throw new Error('Network options not provided for ADD_NETWORK action');
+          throw new Error("Network options not provided for ADD_NETWORK action")
         }
-        await this.homePage.addNetwork(additionalOptions.network as NetworkConfig);
-        break;
+        await this.homePage.addNetwork(
+          additionalOptions.network as NetworkConfig,
+        )
+        break
 
       // Account actions
       case CoinbaseSpecificActionType.ADD_ACCOUNT:
-        await this.homePage.addNewAccount(additionalOptions.accountName as string);
-        break;
+        await this.homePage.addNewAccount(
+          additionalOptions.accountName as string,
+        )
+        break
 
       case CoinbaseSpecificActionType.SWITCH_ACCOUNT:
-        await this.homePage.switchAccount(additionalOptions.accountName as string);
-        break;
+        await this.homePage.switchAccount(
+          additionalOptions.accountName as string,
+        )
+        break
 
       // Dapp actions
       case BaseActionType.CONNECT_TO_DAPP:
-        await this.notificationPage.connectToDapp(this.extensionId);
-        break;
+        await this.notificationPage.connectToDapp(this.extensionId)
+        break
 
       // Transaction actions
       case BaseActionType.HANDLE_TRANSACTION:
         if (approvalType === ActionApprovalType.APPROVE) {
-          await this.notificationPage.confirmTransaction(this.extensionId);
+          await this.notificationPage.confirmTransaction(this.extensionId)
         } else {
-          await this.notificationPage.rejectTransaction(this.extensionId);
+          await this.notificationPage.rejectTransaction(this.extensionId)
         }
-        break;
+        break
 
       // Token permission actions
       case BaseActionType.CHANGE_SPENDING_CAP:
         if (approvalType === ActionApprovalType.APPROVE) {
-          await this.notificationPage.approveTokenPermission(this.extensionId);
+          await this.notificationPage.approveTokenPermission(this.extensionId)
         } else {
-          await this.notificationPage.rejectTokenPermission(this.extensionId);
+          await this.notificationPage.rejectTokenPermission(this.extensionId)
         }
-        break;
+        break
 
       case BaseActionType.REMOVE_SPENDING_CAP:
         if (approvalType === ActionApprovalType.APPROVE) {
-          await this.notificationPage.confirmSpendingCapRemoval(this.extensionId);
+          await this.notificationPage.confirmSpendingCapRemoval(
+            this.extensionId,
+          )
         } else {
-          await this.notificationPage.rejectSpendingCapRemoval(this.extensionId);
+          await this.notificationPage.rejectSpendingCapRemoval(this.extensionId)
         }
-        break;
+        break
 
       case CoinbaseSpecificActionType.ADD_WALLET_WITH_PRIVATE_KEY:
         await this.homePage.addWithPrivateKey(
           additionalOptions.privateKey as string,
           this.config.password as string,
-        );
-        break;
+        )
+        break
 
       default:
-        throw new Error(`Unsupported action: ${action}`);
+        throw new Error(`Unsupported action: ${action}`)
     }
   }
 
   // Public getters for SmartWallet integration
   get walletContext(): BrowserContext {
-    return this.context;
+    return this.context
   }
 
   get walletPage(): Page {
-    return this.page;
+    return this.page
   }
 
   get walletExtensionId(): string | undefined {
-    return this.extensionId;
+    return this.extensionId
   }
 }
 
-export * from './fixtures';
+export * from "./fixtures"

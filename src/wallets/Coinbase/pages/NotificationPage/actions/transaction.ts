@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page } from "@playwright/test"
 
 /**
  * Confirms a transaction in the Coinbase Wallet notification popup
@@ -6,8 +6,8 @@ import type { Page } from '@playwright/test';
  */
 export const confirmTransaction = async (page: Page): Promise<void> => {
   // Click the confirm/approve button
-  await page.getByTestId('request-confirm-button').click();
-};
+  await page.getByTestId("request-confirm-button").click()
+}
 
 /**
  * Rejects a transaction in the Coinbase Wallet notification popup
@@ -15,5 +15,5 @@ export const confirmTransaction = async (page: Page): Promise<void> => {
  */
 export const rejectTransaction = async (page: Page): Promise<void> => {
   // Click the reject/cancel button
-  await page.getByTestId('request-cancel-button').click();
-};
+  await page.getByTestId("request-cancel-button").click()
+}

@@ -1,11 +1,11 @@
-import { test as base } from '@playwright/test';
-import { mergeTests } from '@playwright/test';
-import { setupRpcPortInterceptor } from './node/NetworkInterceptor';
-import { OnchainFixtures, WalletFixtureOptions } from './types';
-import { CoinbaseFixturesBuilder } from './wallets/Coinbase';
-import { MetaMaskFixturesBuilder } from './wallets/MetaMask';
-import { PhantomFixturesBuilder } from './wallets/Phantom';
-import { CoinbaseConfig, MetaMaskConfig, PhantomConfig } from './wallets/types';
+import { test as base } from "@playwright/test"
+import { mergeTests } from "@playwright/test"
+import { setupRpcPortInterceptor } from "./node/NetworkInterceptor"
+import { OnchainFixtures, WalletFixtureOptions } from "./types"
+import { CoinbaseFixturesBuilder } from "./wallets/Coinbase"
+import { MetaMaskFixturesBuilder } from "./wallets/MetaMask"
+import { PhantomFixturesBuilder } from "./wallets/Phantom"
+import { CoinbaseConfig, MetaMaskConfig, PhantomConfig } from "./wallets/types"
 
 /**
  * Map of wallet names to their corresponding fixture builders.
@@ -15,7 +15,7 @@ const fixtureBuilderMap = {
   metamask: MetaMaskFixturesBuilder,
   coinbase: CoinbaseFixturesBuilder,
   phantom: PhantomFixturesBuilder,
-} as const;
+} as const
 
 /**
  * Creates network interceptor fixture that redirects localhost:8545 requests
@@ -28,19 +28,22 @@ const createNetworkInterceptorFixture = () => {
   return base.extend<OnchainFixtures>({
     context: async ({ context, node }, use) => {
       // Get the dynamic port from the node fixture
-      const localNodePort = node && 'port' in node ? (node as { port: number }).port : null;
+      const localNodePort =
+        node && "port" in node ? (node as { port: number }).port : null
 
       if (localNodePort) {
         // Apply interception at the context level so it works for all pages
-        await setupRpcPortInterceptor(context, localNodePort);
+        await setupRpcPortInterceptor(context, localNodePort)
       } else {
-        console.warn('Local node port not available. RPC URL interception not set up.');
+        console.warn(
+          "Local node port not available. RPC URL interception not set up.",
+        )
       }
 
-      await use(context);
+      await use(context)
     },
-  });
-};
+  })
+}
 
 /**
  * Creates a Playwright test instance with wallet-specific fixtures based on provided options.
@@ -84,7 +87,7 @@ export function createOnchainTest(
   options: WalletFixtureOptions,
 ): ReturnType<typeof base.extend<OnchainFixtures>> {
   if (!options.wallets) {
-    throw new Error('Wallet configuration is required');
+    throw new Error("Wallet configuration is required")
   }
 
   const walletBuilders = {
@@ -94,41 +97,50 @@ export function createOnchainTest(
       fixtureBuilderMap.coinbase(walletConfig, options.nodeConfig),
     phantom: (walletConfig: PhantomConfig) =>
       fixtureBuilderMap.phantom(walletConfig, options.nodeConfig),
-  };
+  }
 
   // Start with the base test - no node fixture from createOnchainTest
   // Node fixture is now created in the wallet fixtures
-  const baseTest = base;
+  const baseTest = base
 
   // Create wallet fixtures array
-  const walletFixtures: ReturnType<typeof base.extend<OnchainFixtures>>[] = [];
+  const walletFixtures: ReturnType<typeof base.extend<OnchainFixtures>>[] = []
 
   // Add wallet fixtures
   Object.entries(options.wallets).forEach(([walletName, walletConfig]) => {
-    if (!walletConfig) return;
+    if (!walletConfig) return
 
-    if (walletName === 'metamask') {
-      walletFixtures.push(walletBuilders.metamask(walletConfig as MetaMaskConfig));
-    } else if (walletName === 'coinbase') {
-      walletFixtures.push(walletBuilders.coinbase(walletConfig as CoinbaseConfig));
-    } else if (walletName === 'phantom') {
-      walletFixtures.push(walletBuilders.phantom(walletConfig as PhantomConfig));
+    if (walletName === "metamask") {
+      walletFixtures.push(
+        walletBuilders.metamask(walletConfig as MetaMaskConfig),
+      )
+    } else if (walletName === "coinbase") {
+      walletFixtures.push(
+        walletBuilders.coinbase(walletConfig as CoinbaseConfig),
+      )
+    } else if (walletName === "phantom") {
+      walletFixtures.push(walletBuilders.phantom(walletConfig as PhantomConfig))
     }
-  });
+  })
 
   if (!walletFixtures.length) {
-    throw new Error('No fixtures found');
+    throw new Error("No fixtures found")
   }
 
   // Merge wallet fixtures into the base test
-  let test = walletFixtures.reduce((acc, fixture) => mergeTests(acc, fixture), baseTest);
+  let test = walletFixtures.reduce(
+    (acc, fixture) => mergeTests(acc, fixture),
+    baseTest,
+  )
 
   // If a local node is configured, add the network interceptor fixture
   if (options.nodeConfig) {
-    console.log('Local node config detected, adding network interception fixture');
-    const networkInterceptorFixture = createNetworkInterceptorFixture();
-    test = mergeTests(test, networkInterceptorFixture);
+    console.log(
+      "Local node config detected, adding network interception fixture",
+    )
+    const networkInterceptorFixture = createNetworkInterceptorFixture()
+    test = mergeTests(test, networkInterceptorFixture)
   }
 
-  return test;
+  return test
 }

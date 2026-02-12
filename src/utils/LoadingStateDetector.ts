@@ -1,83 +1,83 @@
-import type { Page } from '@playwright/test';
-import { ConditionWatcher } from './ConditionWatcher';
+import type { Page } from "@playwright/test"
+import { ConditionWatcher } from "./ConditionWatcher"
 
 export type LoadingElement = {
-  selector: string;
-  description?: string;
-};
+  selector: string
+  description?: string
+}
 
 export type LoadingDetectionOptions = {
-  timeout: number;
-  customLoadingSelectors?: LoadingElement[];
-};
+  timeout: number
+  customLoadingSelectors?: LoadingElement[]
+}
 
 /**
  * Simple loading state detector that waits for loading indicators to disappear
  */
 export class LoadingStateDetector {
-  private page: Page;
+  private page: Page
 
-  private options: LoadingDetectionOptions;
+  private options: LoadingDetectionOptions
 
   // Common loading element patterns that should disappear when loading is complete
   private static readonly COMMON_LOADING_SELECTORS: LoadingElement[] = [
     // Spinners
     {
       selector: '[data-testid*="loading"], [data-testid*="spinner"]',
-      description: 'loading/spinner elements',
+      description: "loading/spinner elements",
     },
     {
-      selector: '.loading, .spinner, .rotating',
-      description: 'loading classes',
+      selector: ".loading, .spinner, .rotating",
+      description: "loading classes",
     },
     {
       selector: '[class*="loading"], [class*="spinner"], [class*="rotating"]',
-      description: 'loading class patterns',
+      description: "loading class patterns",
     },
 
     // Skeleton loaders
     {
       selector: '.skeleton, [class*="skeleton"]',
-      description: 'skeleton loaders',
+      description: "skeleton loaders",
     },
     {
       selector: '[data-testid*="skeleton"]',
-      description: 'skeleton test elements',
+      description: "skeleton test elements",
     },
 
     // Progress indicators
     {
       selector: '.progress, [class*="progress"]',
-      description: 'progress indicators',
+      description: "progress indicators",
     },
     {
       selector: 'progress, [role="progressbar"]',
-      description: 'progress bars',
+      description: "progress bars",
     },
 
     // Text-based loading
-    { selector: 'text=Loading', description: 'loading text' },
-    { selector: 'text=Please wait', description: 'wait text' },
-    { selector: 'text=Processing', description: 'processing text' },
+    { selector: "text=Loading", description: "loading text" },
+    { selector: "text=Please wait", description: "wait text" },
+    { selector: "text=Processing", description: "processing text" },
     {
       selector: '[aria-label*="loading"], [aria-label*="Loading"]',
-      description: 'loading aria labels',
+      description: "loading aria labels",
     },
 
     // Generic busy states
-    { selector: '[aria-busy="true"]', description: 'busy elements' },
+    { selector: '[aria-busy="true"]', description: "busy elements" },
     {
       selector: '[data-loading="true"]',
-      description: 'loading data attributes',
+      description: "loading data attributes",
     },
-  ];
+  ]
 
   constructor(page: Page, options: Partial<LoadingDetectionOptions> = {}) {
-    this.page = page;
+    this.page = page
     this.options = {
       timeout: 30000,
       ...options,
-    };
+    }
   }
 
   /**
@@ -87,51 +87,60 @@ export class LoadingStateDetector {
     const allSelectors = [
       ...LoadingStateDetector.COMMON_LOADING_SELECTORS,
       ...(this.options.customLoadingSelectors ?? []),
-    ];
+    ]
 
     // Wait for each loading indicator to disappear
     for (const element of allSelectors) {
       // Bail out early if the page has already been closed (e.g., MetaMask closed
       // the notification popup faster than we could finish checking selectors).
       if (this.page.isClosed()) {
-        console.warn('Page was closed before all loading checks completed - aborting');
-        return;
+        console.warn(
+          "Page was closed before all loading checks completed - aborting",
+        )
+        return
       }
 
       try {
         await ConditionWatcher.waitForCondition(
           async () => {
-            const locator = this.page.locator(element.selector);
-            const count = await locator.count();
+            const locator = this.page.locator(element.selector)
+            const count = await locator.count()
 
             if (count === 0) {
-              return true; // No loading elements found - good!
+              return true // No loading elements found - good!
             }
 
             // Check if any are visible
-            const visibleCount = await locator.locator('visible=true').count();
+            const visibleCount = await locator.locator("visible=true").count()
             if (visibleCount === 0) {
-              return true; // All are hidden - good!
+              return true // All are hidden - good!
             }
 
-            return null; // Still have visible loading elements
+            return null // Still have visible loading elements
           },
           this.options.timeout,
           `${element.description} to disappear`,
-        );
+        )
       } catch (_error) {
         // If the page/context/browser has been closed, stop the entire check loop.
         // Continuing to check more selectors on a destroyed page wastes time.
-        const errorMessage = _error instanceof Error ? _error.message : String(_error);
-        if (errorMessage.includes('Target page, context or browser has been closed')) {
+        const errorMessage =
+          _error instanceof Error ? _error.message : String(_error)
+        if (
+          errorMessage.includes(
+            "Target page, context or browser has been closed",
+          )
+        ) {
           console.warn(
             `Page was closed during loading check for "${element.description}" - aborting remaining checks`,
-          );
-          return;
+          )
+          return
         }
 
         // If we can't find the selector, that's actually good - it means no loading elements
-        console.log(`Loading check for "${element.description}" completed (${element.selector})`);
+        console.log(
+          `Loading check for "${element.description}" completed (${element.selector})`,
+        )
       }
     }
   }
@@ -147,7 +156,7 @@ export class LoadingStateDetector {
     const detector = new LoadingStateDetector(page, {
       timeout,
       customLoadingSelectors: customSelectors,
-    });
-    await detector.waitForLoadingComplete();
+    })
+    await detector.waitForLoadingComplete()
   }
 }
