@@ -1,9 +1,9 @@
-import type { BrowserContext, Page } from "@playwright/test"
-import { LoadingStateDetector } from "./LoadingStateDetector"
+import type { BrowserContext, Page } from '@playwright/test';
+import { LoadingStateDetector } from './LoadingStateDetector';
 
 export interface ViewportSize {
-  width: number
-  height: number
+  width: number;
+  height: number;
 }
 
 /**
@@ -19,21 +19,21 @@ export async function waitForPage(
   pageUrl: string,
   viewport?: ViewportSize,
 ): Promise<Page> {
-  const isTargetPage = (page: Page) => page.url().includes(pageUrl)
+  const isTargetPage = (page: Page) => page.url().includes(pageUrl);
 
-  let targetPage = context.pages().find(isTargetPage)
+  let targetPage = context.pages().find(isTargetPage);
 
   if (!targetPage) {
-    targetPage = await context.waitForEvent("page", {
+    targetPage = await context.waitForEvent('page', {
       predicate: isTargetPage,
-    })
+    });
   }
 
   // Wait for DOM content to load
-  await targetPage.waitForLoadState("domcontentloaded")
+  await targetPage.waitForLoadState('domcontentloaded');
 
   if (viewport) {
-    await targetPage.setViewportSize(viewport)
+    await targetPage.setViewportSize(viewport);
   }
 
   // Only run loading detection if the page is still open. Extension popup
@@ -41,8 +41,8 @@ export async function waitForPage(
   // expensive selector checks on a closed page wastes time and causes
   // cascading "Target page closed" errors on CI.
   if (!targetPage.isClosed()) {
-    await LoadingStateDetector.waitForPageLoadingComplete(targetPage, 10000)
+    await LoadingStateDetector.waitForPageLoadingComplete(targetPage, 10000);
   }
 
-  return targetPage
+  return targetPage;
 }

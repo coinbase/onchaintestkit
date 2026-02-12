@@ -1,31 +1,29 @@
-import { RetryOptions, createDelayFunction } from "./RetryStrategy"
+import { RetryOptions, createDelayFunction } from './RetryStrategy';
 
 export interface WatchOptions {
-  timeout: number
-  retryOptions?: RetryOptions
-  signal?: AbortSignal
-  description?: string
+  timeout: number;
+  retryOptions?: RetryOptions;
+  signal?: AbortSignal;
+  description?: string;
 }
 
 export interface ConditionResult<T> {
-  value: T
-  timestamp: number
-  attempts: number
+  value: T;
+  timestamp: number;
+  attempts: number;
 }
 
 export class WatchTimeoutError extends Error {
   constructor(description: string, timeout: number, attempts: number) {
-    super(
-      `Condition "${description}" timed out after ${timeout}ms (${attempts} attempts)`,
-    )
-    this.name = "WatchTimeoutError"
+    super(`Condition "${description}" timed out after ${timeout}ms (${attempts} attempts)`);
+    this.name = 'WatchTimeoutError';
   }
 }
 
 export class WatchAbortedError extends Error {
   constructor(description: string) {
-    super(`Condition "${description}" was aborted`)
-    this.name = "WatchAbortedError"
+    super(`Condition "${description}" was aborted`);
+    this.name = 'WatchAbortedError';
   }
 }
 
@@ -33,19 +31,16 @@ export class WatchAbortedError extends Error {
  * Observable-like condition watcher for replacing simple polling patterns
  */
 export class ConditionWatcher<T> {
-  private condition: () => Promise<T | null>
-  private options: WatchOptions
-  private startTime = 0
-  private attempts = 0
+  private condition: () => Promise<T | null>;
+  private options: WatchOptions;
+  private startTime = 0;
+  private attempts = 0;
 
-  private constructor(
-    condition: () => Promise<T | null>,
-    options: WatchOptions,
-  ) {
-    this.condition = condition
+  private constructor(condition: () => Promise<T | null>, options: WatchOptions) {
+    this.condition = condition;
     this.options = {
       retryOptions: {
-        strategy: "exponential",
+        strategy: 'exponential',
         config: {
           baseDelay: 50,
           maxDelay: 1000,
@@ -55,29 +50,26 @@ export class ConditionWatcher<T> {
         },
       },
       ...options,
-    }
+    };
   }
 
   /**
    * Create a new condition watcher
    */
-  static watch<T>(
-    condition: () => Promise<T | null>,
-    options: WatchOptions,
-  ): ConditionWatcher<T> {
-    return new ConditionWatcher(condition, options)
+  static watch<T>(condition: () => Promise<T | null>, options: WatchOptions): ConditionWatcher<T> {
+    return new ConditionWatcher(condition, options);
   }
 
   /**
    * Wait until the condition returns a non-null value
    */
   async waitUntil(): Promise<ConditionResult<T>> {
-    this.startTime = Date.now()
-    this.attempts = 0
+    this.startTime = Date.now();
+    this.attempts = 0;
 
     const delayFn = createDelayFunction(
       this.options.retryOptions ?? {
-        strategy: "exponential",
+        strategy: 'exponential',
         config: {
           baseDelay: 50,
           maxDelay: 1000,
@@ -86,96 +78,92 @@ export class ConditionWatcher<T> {
           maxAttempts: 50,
         },
       },
-    )
+    );
 
     while (this.shouldContinue()) {
-      this.attempts++
+      this.attempts++;
 
       // Check for abortion
       if (this.options.signal?.aborted) {
-        throw new WatchAbortedError(
-          this.options.description || "unknown condition",
-        )
+        throw new WatchAbortedError(this.options.description || 'unknown condition');
       }
 
       try {
-        const result = await this.condition()
+        const result = await this.condition();
         if (result !== null) {
           return {
             value: result,
             timestamp: Date.now(),
             attempts: this.attempts,
-          }
+          };
         }
       } catch (error) {
         // If the page/context/browser has been closed, stop retrying immediately.
         // Retrying on a destroyed target is futile and wastes time (especially on CI).
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        if (errorMessage.includes("Target page, context or browser has been closed")) {
-          throw error
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('Target page, context or browser has been closed')) {
+          throw error;
         }
 
         // Log error but continue trying for transient errors
-        console.warn(`Condition check failed on attempt ${this.attempts}:`, error)
+        console.warn(`Condition check failed on attempt ${this.attempts}:`, error);
       }
 
       // Don't delay after the last attempt or if we're about to timeout
-      const maxAttempts = this.options.retryOptions?.config.maxAttempts ?? 50
+      const maxAttempts = this.options.retryOptions?.config.maxAttempts ?? 50;
       if (this.shouldContinue() && this.attempts < maxAttempts) {
-        const delay = delayFn(this.attempts - 1)
-        await this.sleep(delay)
+        const delay = delayFn(this.attempts - 1);
+        await this.sleep(delay);
       }
     }
 
     throw new WatchTimeoutError(
-      this.options.description || "unknown condition",
+      this.options.description || 'unknown condition',
       this.options.timeout,
       this.attempts,
-    )
+    );
   }
 
   /**
    * Wait until the condition returns a value that matches the predicate
    */
-  async waitUntilMatches(
-    predicate: (value: T) => boolean,
-  ): Promise<ConditionResult<T>> {
-    const originalCondition = this.condition
+  async waitUntilMatches(predicate: (value: T) => boolean): Promise<ConditionResult<T>> {
+    const originalCondition = this.condition;
     this.condition = async () => {
-      const result = await originalCondition()
+      const result = await originalCondition();
       if (result !== null && predicate(result)) {
-        return result
+        return result;
       }
-      return null
-    }
+      return null;
+    };
 
-    return this.waitUntil()
+    return this.waitUntil();
   }
 
   /**
    * Transform the watched value before returning
    */
   map<U>(transform: (value: T) => U): ConditionWatcher<U> {
-    const originalCondition = this.condition
+    const originalCondition = this.condition;
     const mappedCondition = async () => {
-      const result = await originalCondition()
-      return result !== null ? transform(result) : null
-    }
+      const result = await originalCondition();
+      return result !== null ? transform(result) : null;
+    };
 
-    return new ConditionWatcher(mappedCondition, this.options)
+    return new ConditionWatcher(mappedCondition, this.options);
   }
 
   /**
    * Add a filter to the condition
    */
   filter(predicate: (value: T) => boolean): ConditionWatcher<T> {
-    const originalCondition = this.condition
+    const originalCondition = this.condition;
     const filteredCondition = async () => {
-      const result = await originalCondition()
-      return result !== null && predicate(result) ? result : null
-    }
+      const result = await originalCondition();
+      return result !== null && predicate(result) ? result : null;
+    };
 
-    return new ConditionWatcher(filteredCondition, this.options)
+    return new ConditionWatcher(filteredCondition, this.options);
   }
 
   /**
@@ -185,7 +173,7 @@ export class ConditionWatcher<T> {
     return new ConditionWatcher(this.condition, {
       ...this.options,
       timeout: ms,
-    })
+    });
   }
 
   /**
@@ -195,7 +183,7 @@ export class ConditionWatcher<T> {
     return new ConditionWatcher(this.condition, {
       ...this.options,
       retryOptions,
-    })
+    });
   }
 
   /**
@@ -205,20 +193,20 @@ export class ConditionWatcher<T> {
     return new ConditionWatcher(this.condition, {
       ...this.options,
       description,
-    })
+    });
   }
 
   private shouldContinue(): boolean {
-    const elapsed = Date.now() - this.startTime
-    const withinTimeout = elapsed < this.options.timeout
-    const maxAttempts = this.options.retryOptions?.config.maxAttempts ?? 50
-    const withinAttempts = this.attempts < maxAttempts
+    const elapsed = Date.now() - this.startTime;
+    const withinTimeout = elapsed < this.options.timeout;
+    const maxAttempts = this.options.retryOptions?.config.maxAttempts ?? 50;
+    const withinAttempts = this.attempts < maxAttempts;
 
-    return withinTimeout && withinAttempts
+    return withinTimeout && withinAttempts;
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -229,20 +217,16 @@ export class ConditionWatcher<T> {
     timeout: number,
     description?: string,
   ): Promise<T> {
-    const watcher = ConditionWatcher.watch(condition, { timeout, description })
-    const result = await watcher.waitUntil()
-    return result.value
+    const watcher = ConditionWatcher.watch(condition, { timeout, description });
+    const result = await watcher.waitUntil();
+    return result.value;
   }
 
   static async waitForElement(
     locator: () => Promise<Element | null>,
     timeout = 5000,
   ): Promise<Element> {
-    return ConditionWatcher.waitForCondition(
-      locator,
-      timeout,
-      "element to appear",
-    )
+    return ConditionWatcher.waitForCondition(locator, timeout, 'element to appear');
   }
 
   static async waitForValue<T>(
@@ -252,11 +236,11 @@ export class ConditionWatcher<T> {
   ): Promise<T> {
     return ConditionWatcher.waitForCondition(
       async () => {
-        const value = await getter()
-        return value !== null && value !== undefined ? value : null
+        const value = await getter();
+        return value !== null && value !== undefined ? value : null;
       },
       timeout,
-      description || "value to be available",
-    )
+      description || 'value to be available',
+    );
   }
 }

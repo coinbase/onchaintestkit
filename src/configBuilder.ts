@@ -1,13 +1,9 @@
-import { NodeConfig } from "./node/types"
-import { WalletFixtureOptions } from "./types"
-import {
-  BaseActionType,
-  BaseWalletConfig,
-  WalletSetupContext,
-} from "./wallets/BaseWallet"
-import { CoinbaseSpecificActionType, CoinbaseWallet } from "./wallets/Coinbase"
-import { MetaMask, MetaMaskSpecificActionType } from "./wallets/MetaMask"
-import { PhantomSpecificActionType, PhantomWallet } from "./wallets/Phantom"
+import { NodeConfig } from './node/types';
+import { WalletFixtureOptions } from './types';
+import { BaseActionType, BaseWalletConfig, WalletSetupContext } from './wallets/BaseWallet';
+import { CoinbaseSpecificActionType, CoinbaseWallet } from './wallets/Coinbase';
+import { MetaMask, MetaMaskSpecificActionType } from './wallets/MetaMask';
+import { PhantomSpecificActionType, PhantomWallet } from './wallets/Phantom';
 /**
  * Configuration builder for E2E testing with different wallet types.
  * Provides a fluent interface for configuring wallet behavior and setup.
@@ -73,9 +69,9 @@ import { PhantomSpecificActionType, PhantomWallet } from "./wallets/Phantom"
  * );
  * ```
  */
-import { NetworkConfig } from "./wallets/types"
+import { NetworkConfig } from './wallets/types';
 
-type WalletType = MetaMask | CoinbaseWallet | PhantomWallet
+type WalletType = MetaMask | CoinbaseWallet | PhantomWallet;
 
 /**
  * Helper function to determine if a network is a testnet
@@ -84,38 +80,36 @@ type WalletType = MetaMask | CoinbaseWallet | PhantomWallet
  */
 function isTestNetwork(network: NetworkConfig): boolean {
   return (
-    network.name.toLowerCase().includes("test") ||
-    network.name.toLowerCase().includes("sepolia") ||
-    network.name.toLowerCase().includes("goerli")
-  )
+    network.name.toLowerCase().includes('test') ||
+    network.name.toLowerCase().includes('sepolia') ||
+    network.name.toLowerCase().includes('goerli')
+  );
 }
 
 /**
  * Base configuration builder that handles common wallet setup
  */
 abstract class BaseWalletBuilder<T extends WalletType> {
-  protected nodeConfig?: NodeConfig
+  protected nodeConfig?: NodeConfig;
 
-  protected config: Partial<BaseWalletConfig>
+  protected config: Partial<BaseWalletConfig>;
 
   constructor(config: Partial<BaseWalletConfig>) {
-    this.config = config
+    this.config = config;
   }
 
   /**
    * Helper method to chain multiple setup functions together.
    * Ensures setup functions are executed in the order they were added.
    */
-  protected chainSetup(
-    newSetup: (wallet: T, context: WalletSetupContext) => Promise<void>,
-  ): void {
-    const existingSetup = this.config.walletSetup
+  protected chainSetup(newSetup: (wallet: T, context: WalletSetupContext) => Promise<void>): void {
+    const existingSetup = this.config.walletSetup;
     this.config.walletSetup = async (wallet: WalletType, context) => {
       if (existingSetup) {
-        await existingSetup(wallet as T, context)
+        await existingSetup(wallet as T, context);
       }
-      await newSetup(wallet as T, context)
-    }
+      await newSetup(wallet as T, context);
+    };
   }
 
   /**
@@ -127,16 +121,20 @@ abstract class BaseWalletBuilder<T extends WalletType> {
     seedPhrase,
     password,
     username,
-  }: { seedPhrase: string; password?: string; username?: string }) {
-    this.config.password = password
-    this.chainSetup(async wallet => {
+  }: {
+    seedPhrase: string;
+    password?: string;
+    username?: string;
+  }) {
+    this.config.password = password;
+    this.chainSetup(async (wallet) => {
       await wallet.handleAction(BaseActionType.IMPORT_WALLET_FROM_SEED, {
         seedPhrase,
         password,
         username,
-      })
-    })
-    return this
+      });
+    });
+    return this;
   }
 
   /**
@@ -151,17 +149,22 @@ abstract class BaseWalletBuilder<T extends WalletType> {
     password,
     chain,
     name,
-  }: { privateKey: string; password?: string; chain?: string; name?: string }) {
-    this.config.password = password
-    this.chainSetup(async wallet => {
+  }: {
+    privateKey: string;
+    password?: string;
+    chain?: string;
+    name?: string;
+  }) {
+    this.config.password = password;
+    this.chainSetup(async (wallet) => {
       await wallet.handleAction(BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY, {
         privateKey,
         password,
         chain,
         name,
-      })
-    })
-    return this
+      });
+    });
+    return this;
   }
 
   /**
@@ -169,12 +172,12 @@ abstract class BaseWalletBuilder<T extends WalletType> {
    * @param setupFn - Custom function to perform additional wallet setup
    */
   withCustomSetup(setupFn: (wallet: T) => Promise<void>) {
-    this.chainSetup(setupFn)
-    return this
+    this.chainSetup(setupFn);
+    return this;
   }
 
   setNodeConfig(config?: NodeConfig) {
-    this.nodeConfig = config
+    this.nodeConfig = config;
   }
 
   /**
@@ -183,14 +186,14 @@ abstract class BaseWalletBuilder<T extends WalletType> {
    */
   build(): WalletFixtureOptions {
     if (!this.config.type) {
-      throw new Error("Wallet type must be specified")
+      throw new Error('Wallet type must be specified');
     }
 
     const wallets = {
       [this.config.type]: this.config,
-    }
+    };
 
-    return { wallets, nodeConfig: this.nodeConfig } as WalletFixtureOptions
+    return { wallets, nodeConfig: this.nodeConfig } as WalletFixtureOptions;
   }
 }
 
@@ -205,23 +208,23 @@ class MetaMaskConfigBuilder extends BaseWalletBuilder<MetaMask> {
     this.chainSetup(async (wallet, context) => {
       if (context?.localNodePort) {
         // if the context has a localNodePort, use it to connect to the local node
-        network.rpcUrl = `http://localhost:${context.localNodePort}`
+        network.rpcUrl = `http://localhost:${context.localNodePort}`;
       }
-      console.log(`Adding network with RPC URL: ${network.rpcUrl}`)
+      console.log(`Adding network with RPC URL: ${network.rpcUrl}`);
 
       // Add the network with the possibly modified URL
       await wallet.handleAction(MetaMaskSpecificActionType.ADD_NETWORK, {
         network,
         isTestnet: isTestNetwork(network),
-      })
+      });
 
       // Switch to the network
       await wallet.handleAction(BaseActionType.SWITCH_NETWORK, {
         networkName: network.name,
         isTestnet: isTestNetwork(network),
-      })
-    })
-    return this
+      });
+    });
+    return this;
   }
 }
 
@@ -235,17 +238,17 @@ class CoinbaseConfigBuilder extends BaseWalletBuilder<CoinbaseWallet> {
     this.chainSetup(async (wallet, context) => {
       if (context?.localNodePort) {
         // if the context has a localNodePort, use it to connect to the local node
-        network.rpcUrl = `http://localhost:${context.localNodePort}`
+        network.rpcUrl = `http://localhost:${context.localNodePort}`;
       }
-      console.log(`Adding network with RPC URL: ${network.rpcUrl}`)
+      console.log(`Adding network with RPC URL: ${network.rpcUrl}`);
 
       // Add the network with the possibly modified URL
       await wallet.handleAction(CoinbaseSpecificActionType.ADD_NETWORK, {
         network,
         isTestnet: isTestNetwork(network),
-      })
-    })
-    return this
+      });
+    });
+    return this;
   }
 }
 
@@ -259,11 +262,11 @@ class PhantomConfigBuilder extends BaseWalletBuilder<PhantomWallet> {
     this.chainSetup(async (wallet, context) => {
       if (context?.localNodePort) {
         // if the context has a localNodePort, use it to connect to the local node
-        network.rpcUrl = `http://localhost:${context.localNodePort}`
+        network.rpcUrl = `http://localhost:${context.localNodePort}`;
       }
-      console.log(`Adding network with RPC URL: ${network.rpcUrl}`)
-    })
-    return this
+      console.log(`Adding network with RPC URL: ${network.rpcUrl}`);
+    });
+    return this;
   }
 }
 
@@ -271,21 +274,21 @@ class PhantomConfigBuilder extends BaseWalletBuilder<PhantomWallet> {
  * Main configuration builder that initializes wallet-specific builders
  */
 export class ConfigBuilder {
-  private config: Partial<BaseWalletConfig> = {}
+  private config: Partial<BaseWalletConfig> = {};
 
-  private nodeConfig?: NodeConfig
+  private nodeConfig?: NodeConfig;
 
   /**
    * Initialize MetaMask configuration
    * @returns MetaMask-specific builder
    */
   withMetaMask() {
-    this.config = { type: "metamask" }
-    const builder = new MetaMaskConfigBuilder(this.config)
+    this.config = { type: 'metamask' };
+    const builder = new MetaMaskConfigBuilder(this.config);
     if (this.nodeConfig) {
-      builder.setNodeConfig(this.nodeConfig)
+      builder.setNodeConfig(this.nodeConfig);
     }
-    return builder
+    return builder;
   }
 
   /**
@@ -293,12 +296,12 @@ export class ConfigBuilder {
    * @returns Coinbase-specific builder
    */
   withCoinbase() {
-    this.config = { type: "coinbase" }
-    const builder = new CoinbaseConfigBuilder(this.config)
+    this.config = { type: 'coinbase' };
+    const builder = new CoinbaseConfigBuilder(this.config);
     if (this.nodeConfig) {
-      builder.setNodeConfig(this.nodeConfig)
+      builder.setNodeConfig(this.nodeConfig);
     }
-    return builder
+    return builder;
   }
 
   /**
@@ -306,12 +309,12 @@ export class ConfigBuilder {
    * @returns Phantom-specific builder
    */
   withPhantom() {
-    this.config = { type: "phantom" }
-    const builder = new PhantomConfigBuilder(this.config)
+    this.config = { type: 'phantom' };
+    const builder = new PhantomConfigBuilder(this.config);
     if (this.nodeConfig) {
-      builder.setNodeConfig(this.nodeConfig)
+      builder.setNodeConfig(this.nodeConfig);
     }
-    return builder
+    return builder;
   }
 
   /**
@@ -320,8 +323,8 @@ export class ConfigBuilder {
    * @returns This builder for chaining
    */
   withLocalNode(config: NodeConfig = {}) {
-    this.nodeConfig = config
-    return this
+    this.nodeConfig = config;
+    return this;
   }
 
   /**
@@ -330,16 +333,16 @@ export class ConfigBuilder {
    */
   build(): { options: WalletFixtureOptions } {
     if (!this.config.type) {
-      throw new Error("Wallet type must be specified")
+      throw new Error('Wallet type must be specified');
     }
 
     const wallets = {
       [this.config.type]: this.config,
-    }
+    };
 
     return {
       options: { wallets } as WalletFixtureOptions,
-    }
+    };
   }
 }
 
@@ -348,5 +351,5 @@ export class ConfigBuilder {
  * @returns ConfigBuilder instance
  */
 export function configure() {
-  return new ConfigBuilder()
+  return new ConfigBuilder();
 }

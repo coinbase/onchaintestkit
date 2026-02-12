@@ -1,1 +1,1 @@
-export * from "./connectToDapp"
+export * from './connectToDapp';

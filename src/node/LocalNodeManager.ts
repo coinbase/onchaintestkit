@@ -1,7 +1,7 @@
-import { ChildProcess, spawn } from "child_process"
-import * as net from "net"
-import { ethers } from "ethers"
-import { NodeConfig } from "./types"
+import { ChildProcess, spawn } from 'child_process';
+import * as net from 'net';
+import { ethers } from 'ethers';
+import { NodeConfig } from './types';
 
 /**
  * LocalNodeManager provides a comprehensive interface for managing a local Anvil Ethereum node.
@@ -30,19 +30,19 @@ import { NodeConfig } from "./types"
  * ```
  */
 export class LocalNodeManager {
-  private process: ChildProcess | null = null
+  private process: ChildProcess | null = null;
 
-  private provider: ethers.providers.JsonRpcProvider | null = null
+  private provider: ethers.providers.JsonRpcProvider | null = null;
 
-  private config: NodeConfig
+  private config: NodeConfig;
 
-  private allocatedPort: number | null = null
+  private allocatedPort: number | null = null;
 
   // Using a much larger port range to minimize allocation conflicts
-  private static DEFAULT_PORT_RANGE: [number, number] = [10000, 20000]
+  private static DEFAULT_PORT_RANGE: [number, number] = [10000, 20000];
 
   // Maximum retries for port allocation
-  private static MAX_PORT_ALLOCATION_RETRIES = 5
+  private static MAX_PORT_ALLOCATION_RETRIES = 5;
 
   /**
    * Creates a new LocalNodeManager instance with the specified configuration
@@ -56,7 +56,7 @@ export class LocalNodeManager {
       // Use port range if specified, otherwise use default range
       portRange: config.portRange ?? LocalNodeManager.DEFAULT_PORT_RANGE,
       ...config,
-    }
+    };
   }
 
   /**
@@ -67,31 +67,31 @@ export class LocalNodeManager {
    */
   private async isPortAvailable(port: number): Promise<boolean> {
     // Store the result for logging purposes if needed
-    let result = false
+    let result = false;
 
-    return new Promise(resolve => {
-      const server = net.createServer()
+    return new Promise((resolve) => {
+      const server = net.createServer();
 
       // Handle connection errors (likely port in use)
-      server.once("error", err => {
-        const e = err as NodeJS.ErrnoException
-        if (e.code === "EADDRINUSE") {
-          server.close()
-          result = false
-          resolve(result)
+      server.once('error', (err) => {
+        const e = err as NodeJS.ErrnoException;
+        if (e.code === 'EADDRINUSE') {
+          server.close();
+          result = false;
+          resolve(result);
         }
-      })
+      });
 
       // Handle successful binding (port is available)
-      server.once("listening", () => {
-        server.close()
-        result = true
-        resolve(result)
-      })
+      server.once('listening', () => {
+        server.close();
+        result = true;
+        resolve(result);
+      });
 
       // Try to bind to the port
-      server.listen(port, "127.0.0.1")
-    })
+      server.listen(port, '127.0.0.1');
+    });
   }
 
   /**
@@ -102,35 +102,32 @@ export class LocalNodeManager {
   private async findAvailablePort(): Promise<number> {
     // If a specific port was requested, check if it's available
     if (this.config.port) {
-      const isAvailable = await this.isPortAvailable(this.config.port)
+      const isAvailable = await this.isPortAvailable(this.config.port);
       if (isAvailable) {
-        return this.config.port
+        return this.config.port;
       }
-      console.warn(
-        `Port ${this.config.port} is already in use. Will try to find another port.`,
-      )
+      console.warn(`Port ${this.config.port} is already in use. Will try to find another port.`);
     }
 
     // Find an available port in the range
-    const [minPort, maxPort] =
-      this.config.portRange ?? LocalNodeManager.DEFAULT_PORT_RANGE
-    const range = maxPort - minPort + 1
+    const [minPort, maxPort] = this.config.portRange ?? LocalNodeManager.DEFAULT_PORT_RANGE;
+    const range = maxPort - minPort + 1;
 
     // With a large range, we can simply try random ports until we find an available one
     // Try up to 20 times to find an available port (should be plenty with a large range)
-    const maxAttempts = 20
+    const maxAttempts = 20;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const randomPort = minPort + Math.floor(Math.random() * range)
-      const isAvailable = await this.isPortAvailable(randomPort)
+      const randomPort = minPort + Math.floor(Math.random() * range);
+      const isAvailable = await this.isPortAvailable(randomPort);
       if (isAvailable) {
-        return randomPort
+        return randomPort;
       }
-      console.log(`Port ${randomPort} is already in use. Trying another port.`)
+      console.log(`Port ${randomPort} is already in use. Trying another port.`);
     }
 
     throw new Error(
       `No available ports found in range ${minPort}-${maxPort} after ${maxAttempts} attempts`,
-    )
+    );
   }
 
   /**
@@ -139,74 +136,68 @@ export class LocalNodeManager {
    */
   async start(): Promise<void> {
     if (this.process) {
-      throw new Error("Node is already running")
+      throw new Error('Node is already running');
     }
 
-    let retries = 0
-    let started = false
+    let retries = 0;
+    let started = false;
 
     while (!started && retries < LocalNodeManager.MAX_PORT_ALLOCATION_RETRIES) {
       try {
         // Allocate port before starting the node
-        this.allocatedPort = await this.findAvailablePort()
+        this.allocatedPort = await this.findAvailablePort();
 
-        const args = this.buildAnvilArgs()
+        const args = this.buildAnvilArgs();
 
-        this.process = spawn("anvil", args, {
-          stdio: ["ignore", "pipe", "pipe"],
-        })
+        this.process = spawn('anvil', args, {
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
 
         // Handle process errors
-        this.process.on("error", error => {
-          console.error(`[Anvil:${this.allocatedPort}] process error:`, error)
-          this.cleanup()
-        })
+        this.process.on('error', (error) => {
+          console.error(`[Anvil:${this.allocatedPort}] process error:`, error);
+          this.cleanup();
+        });
 
         // Add debug listeners
-        this.process.stdout?.on("data", (data: Buffer) => {
-          console.log(
-            `[Anvil:${this.allocatedPort}] stdout: ${data.toString().trim()}`,
-          )
-        })
+        this.process.stdout?.on('data', (data: Buffer) => {
+          console.log(`[Anvil:${this.allocatedPort}] stdout: ${data.toString().trim()}`);
+        });
 
-        this.process.stderr?.on("data", (data: Buffer) => {
-          console.error(
-            `[Anvil:${this.allocatedPort}] stderr: ${data.toString().trim()}`,
-          )
-        })
+        this.process.stderr?.on('data', (data: Buffer) => {
+          console.error(`[Anvil:${this.allocatedPort}] stderr: ${data.toString().trim()}`);
+        });
 
         // Handle process exit
-        this.process.on("exit", code => {
+        this.process.on('exit', (code) => {
           if (code !== 0) {
-            console.error(
-              `[Anvil:${this.allocatedPort}] process exited with code ${code}`,
-            )
+            console.error(`[Anvil:${this.allocatedPort}] process exited with code ${code}`);
           }
-          this.cleanup()
-        })
+          this.cleanup();
+        });
 
         // Wait for node to be ready
-        await this.waitForNodeReady()
+        await this.waitForNodeReady();
 
         // Initialize provider
         this.provider = new ethers.providers.JsonRpcProvider(
           `http://localhost:${this.allocatedPort}`,
-        )
+        );
 
-        started = true
+        started = true;
       } catch (error) {
-        retries++
+        retries++;
         console.warn(
           `Failed to start Anvil node (attempt ${retries}/${LocalNodeManager.MAX_PORT_ALLOCATION_RETRIES}):`,
           error,
-        )
+        );
 
         // Clean up if the node process was created but failed to start properly
-        this.cleanup()
+        this.cleanup();
 
         // Wait before retrying to avoid race conditions
         if (retries < LocalNodeManager.MAX_PORT_ALLOCATION_RETRIES) {
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
     }
@@ -214,7 +205,7 @@ export class LocalNodeManager {
     if (!started) {
       throw new Error(
         `Failed to start Anvil node after ${LocalNodeManager.MAX_PORT_ALLOCATION_RETRIES} attempts`,
-      )
+      );
     }
   }
 
@@ -222,7 +213,7 @@ export class LocalNodeManager {
    * Stops the running Anvil node and cleans up resources
    */
   async stop(): Promise<void> {
-    this.cleanup()
+    this.cleanup();
   }
 
   /**
@@ -231,11 +222,11 @@ export class LocalNodeManager {
    */
   private cleanup(): void {
     if (this.process) {
-      this.process.kill()
-      this.process = null
+      this.process.kill();
+      this.process = null;
     }
-    this.provider = null
-    this.allocatedPort = null
+    this.provider = null;
+    this.allocatedPort = null;
   }
 
   /**
@@ -243,7 +234,7 @@ export class LocalNodeManager {
    * @returns Port number or null if node is not started
    */
   getPort(): number | null {
-    return this.allocatedPort
+    return this.allocatedPort;
   }
 
   /**
@@ -251,11 +242,11 @@ export class LocalNodeManager {
    * @returns The allocated port number or -1 if not started
    */
   get port(): number {
-    return this.allocatedPort ?? -1
+    return this.allocatedPort ?? -1;
   }
 
   get rpcUrl(): string {
-    return `http://localhost:${this.allocatedPort}`
+    return `http://localhost:${this.allocatedPort}`;
   }
 
   // Chain State Management
@@ -265,7 +256,7 @@ export class LocalNodeManager {
    * @returns Snapshot ID that can be used with revert()
    */
   async snapshot(): Promise<string> {
-    return this.send("anvil_snapshot", []) as Promise<string>
+    return this.send('anvil_snapshot', []) as Promise<string>;
   }
 
   /**
@@ -273,7 +264,7 @@ export class LocalNodeManager {
    * @param snapshotId - ID returned from snapshot()
    */
   async revert(snapshotId: string): Promise<void> {
-    await this.send("anvil_revert", [snapshotId])
+    await this.send('anvil_revert', [snapshotId]);
   }
 
   /**
@@ -282,11 +273,9 @@ export class LocalNodeManager {
    */
   async reset(forkBlock?: bigint): Promise<void> {
     await this.send(
-      "anvil_reset",
-      forkBlock
-        ? [{ forking: { blockNumber: `0x${forkBlock.toString(16)}` } }]
-        : [],
-    )
+      'anvil_reset',
+      forkBlock ? [{ forking: { blockNumber: `0x${forkBlock.toString(16)}` } }] : [],
+    );
   }
 
   // Block Management
@@ -296,7 +285,7 @@ export class LocalNodeManager {
    * @param blocks - Number of blocks to mine (default: 1)
    */
   async mine(blocks = 1): Promise<void> {
-    await this.send("anvil_mine", [blocks])
+    await this.send('anvil_mine', [blocks]);
   }
 
   /**
@@ -304,7 +293,7 @@ export class LocalNodeManager {
    * @param enabled - Whether to enable auto-mining
    */
   async setAutomine(enabled: boolean): Promise<void> {
-    await this.send("anvil_setAutomine", [enabled])
+    await this.send('anvil_setAutomine', [enabled]);
   }
 
   // Time Management
@@ -314,7 +303,7 @@ export class LocalNodeManager {
    * @param timestamp - Unix timestamp in seconds
    */
   async setNextBlockTimestamp(timestamp: number): Promise<void> {
-    await this.send("anvil_setNextBlockTimestamp", [timestamp])
+    await this.send('anvil_setNextBlockTimestamp', [timestamp]);
   }
 
   /**
@@ -322,7 +311,7 @@ export class LocalNodeManager {
    * @param seconds - Number of seconds to move forward
    */
   async increaseTime(seconds: number): Promise<void> {
-    await this.send("anvil_increaseTime", [seconds])
+    await this.send('anvil_increaseTime', [seconds]);
   }
 
   /**
@@ -330,7 +319,7 @@ export class LocalNodeManager {
    * @param timestamp - Unix timestamp in seconds
    */
   async setTime(timestamp: number): Promise<void> {
-    await this.send("anvil_setTime", [timestamp])
+    await this.send('anvil_setTime', [timestamp]);
   }
 
   // Account Management
@@ -340,7 +329,7 @@ export class LocalNodeManager {
    * @returns Array of account addresses
    */
   async getAccounts(): Promise<string[]> {
-    return this.send("eth_accounts", []) as Promise<string[]>
+    return this.send('eth_accounts', []) as Promise<string[]>;
   }
 
   /**
@@ -349,7 +338,7 @@ export class LocalNodeManager {
    * @param balance - New balance in wei
    */
   async setBalance(address: string, balance: bigint): Promise<void> {
-    await this.send("anvil_setBalance", [address, `0x${balance.toString(16)}`])
+    await this.send('anvil_setBalance', [address, `0x${balance.toString(16)}`]);
   }
 
   /**
@@ -358,7 +347,7 @@ export class LocalNodeManager {
    * @param nonce - New nonce value
    */
   async setNonce(address: string, nonce: number): Promise<void> {
-    await this.send("anvil_setNonce", [address, nonce])
+    await this.send('anvil_setNonce', [address, nonce]);
   }
 
   /**
@@ -367,7 +356,7 @@ export class LocalNodeManager {
    * @param code - Contract bytecode
    */
   async setCode(address: string, code: string): Promise<void> {
-    await this.send("anvil_setCode", [address, code])
+    await this.send('anvil_setCode', [address, code]);
   }
 
   // Contract State Management
@@ -378,12 +367,8 @@ export class LocalNodeManager {
    * @param slot - Storage slot
    * @param value - New value
    */
-  async setStorageAt(
-    address: string,
-    slot: string,
-    value: string,
-  ): Promise<void> {
-    await this.send("anvil_setStorageAt", [address, slot, value])
+  async setStorageAt(address: string, slot: string, value: string): Promise<void> {
+    await this.send('anvil_setStorageAt', [address, slot, value]);
   }
 
   // Fee Management
@@ -393,9 +378,7 @@ export class LocalNodeManager {
    * @param fee - Base fee in wei
    */
   async setNextBlockBaseFeePerGas(fee: bigint): Promise<void> {
-    await this.send("anvil_setNextBlockBaseFeePerGas", [
-      `0x${fee.toString(16)}`,
-    ])
+    await this.send('anvil_setNextBlockBaseFeePerGas', [`0x${fee.toString(16)}`]);
   }
 
   /**
@@ -403,7 +386,7 @@ export class LocalNodeManager {
    * @param price - Min gas price in wei
    */
   async setMinGasPrice(price: bigint): Promise<void> {
-    await this.send("anvil_setMinGasPrice", [`0x${price.toString(16)}`])
+    await this.send('anvil_setMinGasPrice', [`0x${price.toString(16)}`]);
   }
 
   // Chain Management
@@ -413,7 +396,7 @@ export class LocalNodeManager {
    * @param chainId - New chain ID
    */
   async setChainId(chainId: number): Promise<void> {
-    await this.send("anvil_setChainId", [chainId])
+    await this.send('anvil_setChainId', [chainId]);
   }
 
   // Impersonation
@@ -423,7 +406,7 @@ export class LocalNodeManager {
    * @param address - Address to impersonate
    */
   async impersonateAccount(address: string): Promise<void> {
-    await this.send("anvil_impersonateAccount", [address])
+    await this.send('anvil_impersonateAccount', [address]);
   }
 
   /**
@@ -431,7 +414,7 @@ export class LocalNodeManager {
    * @param address - Address to stop impersonating
    */
   async stopImpersonatingAccount(address: string): Promise<void> {
-    await this.send("anvil_stopImpersonatingAccount", [address])
+    await this.send('anvil_stopImpersonatingAccount', [address]);
   }
 
   /**
@@ -440,22 +423,20 @@ export class LocalNodeManager {
    * @private
    */
   private buildAnvilArgs(): string[] {
-    const args: string[] = []
+    const args: string[] = [];
 
     // Use allocated port instead of config.port
-    if (this.allocatedPort) args.push("--port", this.allocatedPort.toString())
-    if (this.config.chainId)
-      args.push("--chain-id", this.config.chainId.toString())
-    if (this.config.blockTime)
-      args.push("--block-time", this.config.blockTime.toString())
-    if (this.config.forkUrl) args.push("--fork-url", this.config.forkUrl)
+    if (this.allocatedPort) args.push('--port', this.allocatedPort.toString());
+    if (this.config.chainId) args.push('--chain-id', this.config.chainId.toString());
+    if (this.config.blockTime) args.push('--block-time', this.config.blockTime.toString());
+    if (this.config.forkUrl) args.push('--fork-url', this.config.forkUrl);
     if (this.config.forkBlockNumber)
-      args.push("--fork-block-number", this.config.forkBlockNumber.toString())
-    if (this.config.noMining) args.push("--no-mining")
-    if (this.config.hardfork) args.push("--hardfork", this.config.hardfork)
-    if (this.config.mnemonic) args.push("--mnemonic", this.config.mnemonic)
+      args.push('--fork-block-number', this.config.forkBlockNumber.toString());
+    if (this.config.noMining) args.push('--no-mining');
+    if (this.config.hardfork) args.push('--hardfork', this.config.hardfork);
+    if (this.config.mnemonic) args.push('--mnemonic', this.config.mnemonic);
 
-    return args
+    return args;
   }
 
   /**
@@ -466,29 +447,29 @@ export class LocalNodeManager {
   private async waitForNodeReady(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.process) {
-        reject(new Error("Node process not started"))
-        return
+        reject(new Error('Node process not started'));
+        return;
       }
 
       const timeout = setTimeout(() => {
-        reject(new Error("Timeout waiting for node to start"))
-      }, 30000)
+        reject(new Error('Timeout waiting for node to start'));
+      }, 30000);
 
       // We already have listeners for stdout/stderr in start(),
       // so we're only setting up a variable to track if we've seen the ready message
-      let isReady = false
+      let isReady = false;
 
       const checkReadyMessage = (data: Buffer) => {
-        if (data.toString().includes("Listening on") && !isReady) {
-          isReady = true
-          clearTimeout(timeout)
-          resolve()
+        if (data.toString().includes('Listening on') && !isReady) {
+          isReady = true;
+          clearTimeout(timeout);
+          resolve();
         }
-      }
+      };
 
       // Add one-time listener for the ready message
-      this.process.stdout?.on("data", checkReadyMessage)
-    })
+      this.process.stdout?.on('data', checkReadyMessage);
+    });
   }
 
   /**
@@ -500,10 +481,10 @@ export class LocalNodeManager {
    */
   private async send(method: string, params: unknown[]): Promise<unknown> {
     if (!this.provider) {
-      throw new Error("Node not started")
+      throw new Error('Node not started');
     }
 
     // BigInts must be converted to hex strings for Anvil's RPC methods
-    return this.provider.send(method, params)
+    return this.provider.send(method, params);
   }
 }

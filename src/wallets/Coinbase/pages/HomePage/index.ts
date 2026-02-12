@@ -1,21 +1,21 @@
-import { Page } from "@playwright/test"
-import { NetworkConfig } from "../../../types"
-import { addNetwork } from "./actions/addNetwork"
-import { addWithPrivateKey } from "./actions/addWithPrivateKey"
+import { Page } from '@playwright/test';
+import { NetworkConfig } from '../../../types';
+import { addNetwork } from './actions/addNetwork';
+import { addWithPrivateKey } from './actions/addWithPrivateKey';
 
 export class HomePage {
-  private readonly page: Page
+  private readonly page: Page;
 
   constructor(page: Page) {
-    this.page = page
+    this.page = page;
   }
 
   async addNetwork(network: NetworkConfig): Promise<void> {
-    await addNetwork(this.page, network)
+    await addNetwork(this.page, network);
   }
 
   async addWithPrivateKey(privateKey: string, password: string): Promise<void> {
-    await addWithPrivateKey(this.page, privateKey, password)
+    await addWithPrivateKey(this.page, privateKey, password);
   }
 
   async switchAccount(accountName: string): Promise<void> {
@@ -23,7 +23,7 @@ export class HomePage {
     // This should:
     // 1. Open account dropdown
     // 2. Select the account
-    console.log(`Switching to account: ${accountName}`)
+    console.log(`Switching to account: ${accountName}`);
   }
 
   async addNewAccount(accountName: string): Promise<void> {
@@ -33,6 +33,6 @@ export class HomePage {
     // 2. Click create account
     // 3. Set account name
     // 4. Save account
-    console.log(`Creating new account: ${accountName}`)
+    console.log(`Creating new account: ${accountName}`);
   }
 }
