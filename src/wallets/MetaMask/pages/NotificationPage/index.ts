@@ -20,6 +20,13 @@ export enum NotificationPageType {
 const NOTIFICATION_PAGE_PATH = "notification.html"
 const DEFAULT_VIEWPORT: ViewportSize = { width: 360, height: 580 }
 
+// Max time to wait for a notification popup before giving up.
+// waitForPage can hang forever due to a race condition: the popup opens
+// between the context.pages() check and the waitForEvent('page') listener,
+// so the event is never fired. This timeout prevents burning the entire
+// 300s test timeout on a single waitForPage call.
+const WAIT_FOR_PAGE_TIMEOUT_MS = 15_000
+
 export class NotificationPage {
   readonly page: Page
 
@@ -42,6 +49,11 @@ export class NotificationPage {
   /**
    * Helper method to wait for notification page.
    * Reuses the cached page from identifyNotificationType if still alive.
+   *
+   * Wraps waitForPage with a timeout so a hung lookup doesn't burn the
+   * entire 300s test timeout. waitForPage itself handles the TOCTOU race
+   * (event listener + polling), and action handlers now wait for page
+   * close so stale pages are no longer in context.pages().
    */
   private async getNotificationPage(extensionId: string): Promise<Page> {
     if (
@@ -58,11 +70,32 @@ export class NotificationPage {
       }
     }
 
-    return waitForPage(
-      this.page.context(),
-      this.getNotificationUrl(extensionId),
-      DEFAULT_VIEWPORT,
-    )
+    const targetUrl = this.getNotificationUrl(extensionId)
+    const context = this.page.context()
+
+    // waitForPage with a safety timeout. If waitForPage errors (e.g.
+    // "Target page closed"), swallow it and let the timeout reject instead.
+    const page = await Promise.race([
+      waitForPage(context, targetUrl, DEFAULT_VIEWPORT).catch(
+        () => new Promise<Page>(() => {}),
+      ),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                `Notification page not found after ${WAIT_FOR_PAGE_TIMEOUT_MS}ms. ` +
+                  `The MetaMask popup may not have appeared. URL: ${targetUrl}`,
+              ),
+            ),
+          WAIT_FOR_PAGE_TIMEOUT_MS,
+        ),
+      ),
+    ])
+
+    await page.waitForLoadState("domcontentloaded").catch(() => {})
+    await page.setViewportSize(DEFAULT_VIEWPORT).catch(() => {})
+    return page
   }
 
   async connectToDapp(extensionId: string) {
@@ -179,18 +212,19 @@ export class NotificationPage {
     globalTimeout = 15000,
     pollInterval = 500,
   ): Promise<NotificationPageType> {
-    // Get the notification page via a fresh waitForPage lookup (bypass cache)
+    // Get the notification page via a fresh lookup (bypass cache)
     // so we always get the latest notification popup, then cache it for the
     // action handler that runs immediately after this returns.
-    const notificationPage = await waitForPage(
-      this.page.context(),
-      this.getNotificationUrl(extensionId),
-      DEFAULT_VIEWPORT,
-    )
+    // Uses getNotificationPage which has a built-in timeout to avoid
+    // hanging on the waitForPage race condition.
+    this.cachedNotificationPage = null // clear cache to force fresh lookup
+    const notificationPage = await this.getNotificationPage(extensionId)
     this.cachedNotificationPage = notificationPage
 
-    // Give the page an extra moment to fully render and stabilize
-    await notificationPage.waitForTimeout(500)
+    // Give the page an extra moment to fully render and stabilize.
+    // Use a page-independent timeout — notificationPage.waitForTimeout()
+    // throws if the page has already closed.
+    await new Promise(r => setTimeout(r, 500))
 
     const checks = [
       { type: NotificationPageType.SpendingCap, text: "Spending cap request" },
@@ -198,18 +232,6 @@ export class NotificationPage {
       { type: NotificationPageType.Transaction, text: "Network fee" },
       { type: NotificationPageType.RemoveSpendCap, text: "Remove Permission" },
     ]
-
-    // Log the initial page content for debugging
-    try {
-      const pageContent =
-        (await notificationPage.textContent("body"))?.substring(0, 200) ?? ""
-      console.log(
-        "Page content at start of detection:",
-        pageContent.substring(0, 100),
-      )
-    } catch (error) {
-      console.error("Error capturing initial page content:", error)
-    }
 
     // Poll synchronously until a notification type is found or we time out.
     // The previous approach launched 4 concurrent fire-and-forget isVisible()
@@ -230,7 +252,6 @@ export class NotificationPage {
           const selector = notificationPage.getByText(text, { exact: false })
           const isVisible = await selector.isVisible()
           if (isVisible) {
-            console.log(`Found notification type: ${type} with text: "${text}"`)
             return type
           }
         } catch {
@@ -239,21 +260,7 @@ export class NotificationPage {
       }
 
       // Short pause before the next poll to avoid busy-waiting
-      await notificationPage.waitForTimeout(pollInterval)
-    }
-
-    // Timeout — capture debug info before throwing
-    try {
-      if (!notificationPage.isClosed()) {
-        const pageContent =
-          (await notificationPage.textContent("body"))?.substring(0, 200) ?? ""
-        console.log("Global timeout reached. Page content:", pageContent)
-        await notificationPage
-          .screenshot({ path: "notification-timeout.png" })
-          .catch(() => {})
-      }
-    } catch {
-      // Best-effort debug capture
+      await new Promise(r => setTimeout(r, pollInterval))
     }
 
     throw new Error("Timeout waiting for notification type")
