@@ -1,7 +1,7 @@
-import type { Page } from '@playwright/test';
+import type { Page } from "@playwright/test"
 
-function escapeRegex(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function _escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 /**
@@ -9,8 +9,11 @@ function escapeRegex(text: string): string {
  * @param page - The notification page
  * @param accountName - The name of the account to switch to
  */
-export async function switchAccount(page: Page, accountName: string): Promise<void> {
-  console.log('Implemented but not tested, code is commented');
+export async function switchAccount(
+  _page: Page,
+  _accountName: string,
+): Promise<void> {
+  console.log("Implemented but not tested, code is commented")
   //   await page.waitForLoadState("domcontentloaded")
   //   await page.waitForLoadState("networkidle")
 

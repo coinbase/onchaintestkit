@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page } from "@playwright/test"
 
 /**
  * Handles the connect to dapp notification in Phantom Wallet
@@ -7,9 +7,9 @@ import { Page } from '@playwright/test';
  */
 export async function connectToDapp(page: Page): Promise<void> {
   // Wait for the notification to appear
-  await page.waitForLoadState('domcontentloaded');
-  await page.waitForLoadState('networkidle');
-  await page.reload();
-  await page.waitForTimeout(1500);
-  await page.getByTestId('primary-button').click();
+  await page.waitForLoadState("domcontentloaded")
+  await page.waitForLoadState("networkidle")
+  await page.reload()
+  await page.waitForTimeout(1500)
+  await page.getByTestId("primary-button").click()
 }
