@@ -12,6 +12,9 @@ import { coinbaseWalletConfig } from "./walletConfig/coinbaseWalletConfig"
 
 const test = createOnchainTest(coinbaseWalletConfig)
 
+// TODO: Re-enable once MetaMask CI fixes are stable (OTK-47)
+test.skip()
+
 test.describe("Coinbase Wallet Setup", () => {
   test("should initialize and connect wallet", async ({ page, coinbase }) => {
     if (!coinbase) {

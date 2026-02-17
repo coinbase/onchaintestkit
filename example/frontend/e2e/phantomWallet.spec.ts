@@ -12,6 +12,9 @@ import { phantomWalletConfig } from "./walletConfig/phantomWalletConfig"
 
 const test = createOnchainTest(phantomWalletConfig)
 
+// TODO: Re-enable once MetaMask CI fixes are stable (OTK-47)
+test.skip()
+
 test.describe("Phantom Wallet Setup", () => {
   test("should initialize and connect wallet", async ({ page, phantom }) => {
     if (!phantom) {
