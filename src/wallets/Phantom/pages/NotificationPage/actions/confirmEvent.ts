@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test"
+import type { Page } from '@playwright/test';
 
 /**
  * Confirms a transaction in the Phantom Wallet notification popup
@@ -6,16 +6,16 @@ import type { Page } from "@playwright/test"
  */
 export const confirmEvent = async (page: Page): Promise<void> => {
   // Wait for the transaction confirmation page to load
-  await page.waitForLoadState("domcontentloaded")
-  await page.waitForLoadState("networkidle")
-  await page.waitForTimeout(2000)
-  await page.reload()
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(2000);
+  await page.reload();
 
   // Wait for the primary confirm button and click it
-  const confirmButton = page.getByTestId("primary-button")
-  await confirmButton.waitFor({ state: "visible", timeout: 10000 })
-  await confirmButton.click()
-}
+  const confirmButton = page.getByTestId('primary-button');
+  await confirmButton.waitFor({ state: 'visible', timeout: 10000 });
+  await confirmButton.click();
+};
 
 /**
  * Rejects a transaction in the Phantom Wallet notification popup
@@ -23,14 +23,14 @@ export const confirmEvent = async (page: Page): Promise<void> => {
  */
 export const rejectEvent = async (page: Page): Promise<void> => {
   // Wait for the transaction confirmation page to load
-  await page.waitForLoadState("domcontentloaded")
-  await page.waitForLoadState("networkidle")
-  await page.waitForTimeout(1000)
-  await page.reload()
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+  await page.reload();
 
   // Wait for the secondary reject button and click it
-  const rejectButton = page.getByTestId("secondary-button")
-  await rejectButton.waitFor({ state: "visible", timeout: 10000 })
-  await page.waitForTimeout(1000)
-  await rejectButton.click()
-}
+  const rejectButton = page.getByTestId('secondary-button');
+  await rejectButton.waitFor({ state: 'visible', timeout: 10000 });
+  await page.waitForTimeout(1000);
+  await rejectButton.click();
+};
