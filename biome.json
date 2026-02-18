@@ -62,7 +62,8 @@
       "**/*.min.js",
       "coverage",
       "build",
-      "**/.next/**"
+      "**/.next/**",
+      "**/lib/**"
     ]
   }
 }
