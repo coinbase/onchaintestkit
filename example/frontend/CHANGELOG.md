@@ -1,5 +1,12 @@
 # example-frontend
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [4795be4]
+  - @coinbase/onchaintestkit@1.2.1
+
 ## 0.1.2
 
 ### Patch Changes
