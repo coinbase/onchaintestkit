@@ -1,7 +1,6 @@
 import type { Page } from "@playwright/test"
-import { expect } from "@playwright/test"
 import type { SupportedChain } from "../../../types"
-const CHAIN_DATA_VALUES: Record<SupportedChain, string> = {
+const _CHAIN_DATA_VALUES: Record<SupportedChain, string> = {
   solana: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", // Solana mainnet
   ethereum: "eip155:1", // Ethereum mainnet
   base: "eip155:8453", // Base mainnet
@@ -17,10 +16,10 @@ const CHAIN_DATA_VALUES: Record<SupportedChain, string> = {
  * @param privateKey - The private key to import
  */
 export const addNewAccount = async (
-  page: Page,
-  name: string,
-  chain: SupportedChain,
-  privateKey: string,
+  _page: Page,
+  _name: string,
+  _chain: SupportedChain,
+  _privateKey: string,
 ): Promise<void> => {
   console.log("Implemented but not tested, code is commented")
   // Ensure UI is ready

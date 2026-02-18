@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test"
 import { NetworkConfig } from "../../../../types"
-import { closePopup, popupConfigs } from "../actions/handlePopups"
+import { closePopup, popupConfigs } from "./handlePopups"
 
 export async function addNetwork(page: Page, network: NetworkConfig) {
   const { name, rpcUrl, chainId, symbol, blockExplorerUrl } = network

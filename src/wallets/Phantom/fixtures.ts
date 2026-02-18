@@ -6,7 +6,7 @@ import { NodeConfig } from "../../node/types"
 import { createTempDir } from "../../utils/createTempDir"
 import { getExtensionId } from "../../utils/extensionManager"
 import { removeTempDir } from "../../utils/removeTempDir"
-import { PhantomConfig } from "../../wallets/types"
+import { PhantomConfig } from "../types"
 
 type PhantomFixturesType = {
   _contextPath: string

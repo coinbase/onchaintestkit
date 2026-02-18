@@ -7,7 +7,7 @@ import {
 } from "./wallets/BaseWallet"
 import { CoinbaseSpecificActionType, CoinbaseWallet } from "./wallets/Coinbase"
 import { MetaMask, MetaMaskSpecificActionType } from "./wallets/MetaMask"
-import { PhantomSpecificActionType, PhantomWallet } from "./wallets/Phantom"
+import { PhantomWallet } from "./wallets/Phantom"
 /**
  * Configuration builder for E2E testing with different wallet types.
  * Provides a fluent interface for configuring wallet behavior and setup.
@@ -127,7 +127,11 @@ abstract class BaseWalletBuilder<T extends WalletType> {
     seedPhrase,
     password,
     username,
-  }: { seedPhrase: string; password?: string; username?: string }) {
+  }: {
+    seedPhrase: string
+    password?: string
+    username?: string
+  }) {
     this.config.password = password
     this.chainSetup(async wallet => {
       await wallet.handleAction(BaseActionType.IMPORT_WALLET_FROM_SEED, {
@@ -151,7 +155,12 @@ abstract class BaseWalletBuilder<T extends WalletType> {
     password,
     chain,
     name,
-  }: { privateKey: string; password?: string; chain?: string; name?: string }) {
+  }: {
+    privateKey: string
+    password?: string
+    chain?: string
+    name?: string
+  }) {
     this.config.password = password
     this.chainSetup(async wallet => {
       await wallet.handleAction(BaseActionType.IMPORT_WALLET_FROM_PRIVATE_KEY, {
@@ -256,7 +265,7 @@ class CoinbaseConfigBuilder extends BaseWalletBuilder<CoinbaseWallet> {
 class PhantomConfigBuilder extends BaseWalletBuilder<PhantomWallet> {
   // Add Phantom-specific methods here
   withNetwork(network: NetworkConfig) {
-    this.chainSetup(async (wallet, context) => {
+    this.chainSetup(async (_wallet, context) => {
       if (context?.localNodePort) {
         // if the context has a localNodePort, use it to connect to the local node
         network.rpcUrl = `http://localhost:${context.localNodePort}`

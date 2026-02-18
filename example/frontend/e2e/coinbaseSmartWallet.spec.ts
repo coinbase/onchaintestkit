@@ -7,6 +7,9 @@ import { coinbaseWalletConfig } from "./walletConfig/coinbaseWalletConfig"
 
 const test = createOnchainTest(coinbaseWalletConfig)
 
+// TODO: Re-enable once MetaMask CI fixes are stable (OTK-47)
+test.skip()
+
 test.describe("Coinbase Smart Wallet - Passkey Registration", () => {
   test("should initialize virtual authenticator and have no credentials", async ({
     coinbase,

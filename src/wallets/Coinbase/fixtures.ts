@@ -5,7 +5,7 @@ import { NodeConfig } from "../../node/types"
 import { createTempDir } from "../../utils/createTempDir"
 import { getExtensionId } from "../../utils/extensionManager"
 import { removeTempDir } from "../../utils/removeTempDir"
-import { CoinbaseConfig } from "../../wallets/types"
+import { CoinbaseConfig } from "../types"
 
 type CoinbaseFixturesType = {
   _contextPath: string

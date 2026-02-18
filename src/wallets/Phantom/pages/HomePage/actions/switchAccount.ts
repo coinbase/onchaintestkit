@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test"
 
-function escapeRegex(text: string): string {
+function _escapeRegex(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
@@ -10,8 +10,8 @@ function escapeRegex(text: string): string {
  * @param accountName - The name of the account to switch to
  */
 export async function switchAccount(
-  page: Page,
-  accountName: string,
+  _page: Page,
+  _accountName: string,
 ): Promise<void> {
   console.log("Implemented but not tested, code is commented")
   //   await page.waitForLoadState("domcontentloaded")

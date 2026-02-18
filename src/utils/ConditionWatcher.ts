@@ -108,7 +108,19 @@ export class ConditionWatcher<T> {
           }
         }
       } catch (error) {
-        // Log error but continue trying unless it's a critical error
+        // If the page/context/browser has been closed, stop retrying immediately.
+        // Retrying on a destroyed target is futile and wastes time (especially on CI).
+        const errorMessage =
+          error instanceof Error ? error.message : String(error)
+        if (
+          errorMessage.includes(
+            "Target page, context or browser has been closed",
+          )
+        ) {
+          throw error
+        }
+
+        // Log error but continue trying for transient errors
         console.warn(
           `Condition check failed on attempt ${this.attempts}:`,
           error,

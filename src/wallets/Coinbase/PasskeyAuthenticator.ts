@@ -67,7 +67,9 @@ export class PasskeyAuthenticator {
     const finalOptions = { ...defaultOptions, ...options }
     const result = await this.cdpSession.send(
       "WebAuthn.addVirtualAuthenticator",
-      { options: finalOptions },
+      {
+        options: finalOptions,
+      },
     )
     this.authenticatorId = result.authenticatorId
     this.isInitialized = true

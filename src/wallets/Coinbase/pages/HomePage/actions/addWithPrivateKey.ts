@@ -43,7 +43,9 @@ export async function addWithPrivateKey(
   try {
     await page.waitForSelector(
       'text="Wallet imported. Balances will appear momentarily."',
-      { timeout: 5000 },
+      {
+        timeout: 5000,
+      },
     )
     console.log("Private key successfully imported")
   } catch (error) {

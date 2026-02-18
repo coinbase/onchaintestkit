@@ -91,6 +91,15 @@ export class LoadingStateDetector {
 
     // Wait for each loading indicator to disappear
     for (const element of allSelectors) {
+      // Bail out early if the page has already been closed (e.g., MetaMask closed
+      // the notification popup faster than we could finish checking selectors).
+      if (this.page.isClosed()) {
+        console.warn(
+          "Page was closed before all loading checks completed - aborting",
+        )
+        return
+      }
+
       try {
         await ConditionWatcher.waitForCondition(
           async () => {
@@ -113,6 +122,21 @@ export class LoadingStateDetector {
           `${element.description} to disappear`,
         )
       } catch (_error) {
+        // If the page/context/browser has been closed, stop the entire check loop.
+        // Continuing to check more selectors on a destroyed page wastes time.
+        const errorMessage =
+          _error instanceof Error ? _error.message : String(_error)
+        if (
+          errorMessage.includes(
+            "Target page, context or browser has been closed",
+          )
+        ) {
+          console.warn(
+            `Page was closed during loading check for "${element.description}" - aborting remaining checks`,
+          )
+          return
+        }
+
         // If we can't find the selector, that's actually good - it means no loading elements
         console.log(
           `Loading check for "${element.description}" completed (${element.selector})`,

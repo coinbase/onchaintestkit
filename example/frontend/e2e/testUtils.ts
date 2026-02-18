@@ -20,7 +20,7 @@ export async function inputTransactionDetails(page: Page) {
       await baseSpoliaButton.click()
       console.log("Switched to Base Sepolia network")
     }
-  } catch (error) {
+  } catch (_error) {
     console.log("Base Sepolia button not found or not clickable, continuing...")
   }
 
