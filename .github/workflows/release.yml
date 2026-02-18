@@ -14,6 +14,7 @@ jobs:
     permissions:
       contents: write   # required for changesets to push tags/commits
       pull-requests: write   # required for changesets to create PRs
+      id-token: write   # required for npm trusted publishing (OIDC)
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863 # v2.12.1
@@ -35,9 +36,12 @@ jobs:
 
       - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
-          node-version: 18
-          registry-url: https://registry.npmjs.org      # important!
+          node-version: 22
+          registry-url: https://registry.npmjs.org
           cache: yarn
+
+      - name: Update npm
+        run: npm install -g npm@latest
 
       # The Changesets action will either create/update a release PR or, if no changesets remain, publish to npm.
       - name: Create release PR or publish
@@ -46,4 +50,4 @@ jobs:
           publish: yarn changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} 
+          NPM_CONFIG_PROVENANCE: true
