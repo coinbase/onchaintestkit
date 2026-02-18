@@ -1,6 +1,6 @@
 {
   "name": "@coinbase/onchaintestkit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "End-to-end testing toolkit for blockchain applications, powered by Playwright",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -52,7 +52,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
     "@changesets/cli": "^2.29.5",
-    "@coinbase/onchaintestkit": "^1.2.0",
+    "@coinbase/onchaintestkit": "^1.2.1",
     "@playwright/test": "^1.34.0",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.16.0",
