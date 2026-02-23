@@ -40,6 +40,9 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: yarn
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       # The Changesets action will either create/update a release PR or, if no changesets remain, publish to npm.
       - name: Create release PR or publish
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
