@@ -2,6 +2,10 @@
   "name": "@coinbase/onchaintestkit",
   "version": "1.2.1",
   "description": "End-to-end testing toolkit for blockchain applications, powered by Playwright",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coinbase/onchaintestkit"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
