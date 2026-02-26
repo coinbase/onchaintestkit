@@ -83,6 +83,7 @@
   "resolutions": {
     "ws": "^8.17.1",
     "@babel/runtime": "^7.26.10",
-    "brace-expansion": "^2.0.2"
+    "brace-expansion": "^2.0.2",
+    "ajv": "^8.18.0"
   }
 }
