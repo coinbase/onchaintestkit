@@ -61,7 +61,7 @@ export class MetaMask extends BaseWallet {
     this.config = walletConfig
     this.onboardingPage = new OnboardingPage(page)
     this.homePage = new HomePage(page)
-    this.notificationPage = new NotificationPage(page)
+    this.notificationPage = new NotificationPage(page, walletConfig.timeout)
   }
 
   static async initialize(

@@ -182,6 +182,11 @@ abstract class BaseWalletBuilder<T extends WalletType> {
     return this
   }
 
+  withTimeout(ms: number) {
+    this.config.timeout = ms
+    return this
+  }
+
   setNodeConfig(config?: NodeConfig) {
     this.nodeConfig = config
   }

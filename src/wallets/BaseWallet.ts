@@ -39,6 +39,7 @@ export type ActionOptions = {
 export type WalletSetupContext = { localNodePort: number }
 
 export type BaseWalletConfig = {
+  timeout?: number
   type: "metamask" | "coinbase" | "phantom"
   password?: string
   walletSetup?: (

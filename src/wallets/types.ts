@@ -18,6 +18,7 @@ export type BaseWalletConfig = {
 }
 
 export type MetaMaskConfig = {
+  timeout?: number
   password: string
   walletSetup: (
     wallet: MetaMask,

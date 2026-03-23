@@ -30,13 +30,16 @@ const WAIT_FOR_PAGE_TIMEOUT_MS = 15_000
 export class NotificationPage {
   readonly page: Page
 
+  private readonly timeout: number
+
   // Cached notification page from identifyNotificationType so the
   // immediately-following action handler can reuse it instead of doing
   // a second waitForPage lookup (which risks grabbing a stale page on CI).
   private cachedNotificationPage: Page | null = null
 
-  constructor(page: Page) {
+  constructor(page: Page, timeout: number = WAIT_FOR_PAGE_TIMEOUT_MS) {
     this.page = page
+    this.timeout = timeout
   }
 
   /**
@@ -55,7 +58,10 @@ export class NotificationPage {
    * (event listener + polling), and action handlers now wait for page
    * close so stale pages are no longer in context.pages().
    */
-  private async getNotificationPage(extensionId: string): Promise<Page> {
+  private async getNotificationPage(
+    extensionId: string,
+    timeout: number = this.timeout,
+  ): Promise<Page> {
     if (
       this.cachedNotificationPage &&
       !this.cachedNotificationPage.isClosed()
@@ -84,11 +90,11 @@ export class NotificationPage {
           () =>
             reject(
               new Error(
-                `Notification page not found after ${WAIT_FOR_PAGE_TIMEOUT_MS}ms. ` +
+                `Notification page not found after ${timeout}ms. ` +
                   `The MetaMask popup may not have appeared. URL: ${targetUrl}`,
               ),
             ),
-          WAIT_FOR_PAGE_TIMEOUT_MS,
+          timeout,
         ),
       ),
     ])
